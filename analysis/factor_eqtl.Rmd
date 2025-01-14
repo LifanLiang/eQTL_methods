@@ -16,9 +16,6 @@ sim_factor <- function(alpha=0.2, beta1=0.4, beta2=0.3, eps1=0.2, eps2=0.4){
                   "beta1.x","score1.x","p1.x",
                   "beta2.x","score2.x","p2.x")
   x = rnorm(100,sd=1)
-  alpha = 0.2
-  beta1 = 0.3
-  beta2 = 0.2
   Z = alpha*x + rnorm(100,sd=eps1)
   y1 = beta1*Z + rnorm(100,sd=eps2)
   y2 = beta2*Z + rnorm(100,sd=eps2)
@@ -56,7 +53,7 @@ library(ggplot2)
 par(mfrow=c(1,3))
 ress <- do.call(rbind, lapply(1:100,sim_factor,eps1=0.05))
 plot(abs(ress[,"score1.x"]), abs(ress[,"score.Z"]), pch=20,
-     ylim=c(0,55), xlim=c(0,5),col=3,main="sigma1=0.05",
+     ylim=c(0,55), xlim=c(0,5),col=3,main="sigma0=0.05",
      ylab="t score for Z~X", xlab="t score for Y~X")
 points(abs(ress[,"score2.x"]), abs(ress[,"score.Z"]), pch=20,col=2)
 lines(x=c(-4,6),y=c(-4,6),col=1)
@@ -77,6 +74,7 @@ lines(x=c(-4,6),y=c(-4,6),col=1)
 #legend(col=c(3,2),legend = c("Y1~X","Y2~X"))
 ```
 
+
 ### Theoretical power gain
 
 In fact, we can directly derive the power gain from this simple simulation scenario. For instance, let's focus on $Y_1$, we have:
@@ -88,15 +86,16 @@ $$
 Hence, we can derive the expected t score of X:
 
 $$
-Tscore(Y_1 \sim X) = \dfrac{\alpha \beta_1}{\sigma_1^2+\beta_1^2\sigma_0^2}
+Tscore(Y_1 \sim X) ^2= \dfrac{N\alpha^2 \beta_1^2}{\sigma_1^2+\beta_1^2\sigma_0^2}
 $$
 On the other hand,  we have:
 $$
-Tscore(Z \sim X) = \dfrac{\alpha}{\sigma_0^2}
+Tscore(Z \sim X)^2 = \dfrac{N\alpha^2}{\sigma_0^2}
 $$
 So the expected ratio between the two should be:
 $$
-\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X) } = 1 + \dfrac{\sigma_1^2}{\sigma_0^2 \beta_1}
+(\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X)})^2 = 1 + (\dfrac{\sigma_1}{\sigma_0 \beta_1})^2
 $$
 
+Therefore, we will always gain power if we know the Z as ground truth. 
 
