@@ -97,5 +97,8 @@ $$
 (\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X)})^2 = 1 + (\dfrac{\sigma_1}{\sigma_0 \beta_1})^2
 $$
 
-Therefore, we will always gain power if we know the Z as ground truth. 
+Therefore, we will always gain power if we know the latent factor as ground truth. 
+
+
+
 
