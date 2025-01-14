@@ -1,5 +1,5 @@
 ---
-title: "Home"
+title: "Single cell eQTL methods development"
 site: workflowr::wflow_site
 output:
   workflowr::wflow_html:
@@ -8,4 +8,16 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+[Alternative approache to compute dynamic eQTL](dynamic_eqtl.html)
+\
+\
+[eQTL mapping to the latent factors in gene expresison](factor_eqtl.html)
+\
+\
+[Borrowing power from bulk RNAseq](deconvolution_eqtl.html)
+\
+\
+[Borrowing power from egigenetic features](epigenetic_eqtl.html)
+\
+\
+

@@ -1,0 +1,51 @@
+---
+title: "dynamic_eqtl"
+author: "Lifan Liang"
+date: "2025-01-06"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Model formulation
+
+Suppose we have expression data of $n$ samples from $D$ donors. Here a sample could be a single cell, or a meta-cell, or some pseudobulk sample (of many cells) with the same type/state. For each sample, we denote $X_i$ as the context of interest, e.g. treatment, cell state (such as differentiation pseudotime). Additionally, genotype $G_d, 1 \leq d \leq D$ may also affect expression. There is also a possible interaction effect between genotype $G_d$ and the context $X_i$. Our model of gene expression is: 
+\begin{equation}
+    y_i = \mu + \beta_X X_i + \beta_G G_d + \gamma X_i \cdot G_d + u_d + \epsilon_i,
+\end{equation}
+where $\beta_X$ and $\beta_G$ are context, and genotype effects, respectively, $\gamma$ is the interaction effect, and $u_d$ is the donor-specific random effect. For simplicity, we do not include some covariates such as sex and age of donors, and percent of mitochondrial reads of cells. 
+
+Fitting the model is computationally expensive. We can rewrite the model to remove the donor random effect. We remove from $y_i$, the average expression of all samples from the donor $d$, $\bar{y}_d$:  
+\begin{equation}
+    \Delta_i = y_i - \bar{y}_d. 
+\end{equation}
+Now we can write our model as: 
+\begin{equation}
+    \Delta_i = \beta_X X_i + \gamma X_i G_d + \epsilon_i = X_i (\beta_X + \gamma G_d) + \epsilon_i. 
+\end{equation}
+From this model, we can see that the effect of $X_i$ on gene expression depends on the genotype $G_d$, denoted as
+\begin{equation}
+    \theta_d = \beta_X + \gamma G_d
+\end{equation}
+This can be viewed as: ``genes modify the environmental effect``. 
+
+
+## Model fitting
+
+The simplest way to solve the model is a two-step linear regression. We first regress environment $X$ against $\Delta_i$ to estimate $\theta_d$ and the corresponding standard error $\sigma_d$. Then we find the MLE for:
+
+$$
+\hat{\theta}_d \sim Normal(\beta_X + \gamma G_d, \sigma_d^2)
+$$
+
+MLE was basically weighted least square. For real data analysis, we may need to add genotype PCs in the model to account for additional individual variation. Let $W$ be a $D \times D$ diagonal matrix with $[1/\sigma_1^2, 1/\sigma_2^2,...,1/\sigma_D^2]$ as the diagonal elements. And let $V$ be the covariates matrix including intercept, genotype, and genotype PCs. We have
+
+$$
+\gamma = V^TW\hat{\theta}(V^TWV)^{-1}
+\\
+VAR(\gamma) = (V^TWV)^{-1}
+$$
+
+
+## Simulation
+
