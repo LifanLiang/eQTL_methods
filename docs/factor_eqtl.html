@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef93eb4230e56f0511cecd6d6e2c46adf568de59btargetblankf93eb42a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreec84f46013e24ce2a1213936897a95bf05c4894ebtargetblankc84f460a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/f93eb4230e56f0511cecd6d6e2c46adf568de59b" target="_blank">f93eb42</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/c84f46013e24ce2a1213936897a95bf05c4894eb" target="_blank">c84f460</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef93eb4230e56f0511cecd6d6e2c46adf568de59btargetblankf93eb42a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreec84f46013e24ce2a1213936897a95bf05c4894ebtargetblankc84f460a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/f93eb4230e56f0511cecd6d6e2c46adf568de59b" target="_blank">f93eb42</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/c84f46013e24ce2a1213936897a95bf05c4894eb" target="_blank">c84f460</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -592,6 +592,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/c84f46013e24ce2a1213936897a95bf05c4894eb/analysis/factor_eqtl.Rmd" target="_blank">c84f460</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-14
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/544390631ca67690af62079c7bea8123f33dfdeb/docs/factor_eqtl.html" target="_blank">5443906</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -725,15 +759,17 @@ Y_1 = \alpha \beta_1 X + \epsilon_1 + \beta_1 \epsilon_0
 \]</span></p>
 <p>Hence, we can derive the expected t score of X:</p>
 <p><span class="math display">\[
-Tscore(Y_1 \sim X) = \dfrac{\alpha
-\beta_1}{\sigma_1^2+\beta_1^2\sigma_0^2}
+Tscore(Y_1 \sim X) ^2= \dfrac{N\alpha^2
+\beta_1^2}{\sigma_1^2+\beta_1^2\sigma_0^2}
 \]</span> On the other hand, we have: <span class="math display">\[
-Tscore(Z \sim X) = \dfrac{\alpha}{\sigma_0^2}
+Tscore(Z \sim X)^2 = \dfrac{N\alpha^2}{\sigma_0^2}
 \]</span> So the expected ratio between the two should be: <span
 class="math display">\[
-\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X) } = 1 +
-\dfrac{\sigma_1^2}{\sigma_0^2 \beta_1}
+(\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X)})^2 = 1 +
+(\dfrac{\sigma_1}{\sigma_0 \beta_1})^2
 \]</span></p>
+<p>Therefore, we will always gain power if we know the Z as ground
+truth.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
