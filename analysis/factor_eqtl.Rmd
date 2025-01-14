@@ -96,7 +96,7 @@ Tscore(Z \sim X) = \dfrac{\alpha}{\sigma_0^2}
 $$
 So the expected ratio between the two should be:
 $$
-\dfrac{Tscore(Y_1 \sim X)}{Tscore(Z \sim X) } = 1 + \dfrac{\sigma_1^2}{\sigma_0^2 \beta_1}
+\dfrac{Tscore(Z \sim X)}{Tscore(Y_1 \sim X) } = 1 + \dfrac{\sigma_1^2}{\sigma_0^2 \beta_1}
 $$
 
 
