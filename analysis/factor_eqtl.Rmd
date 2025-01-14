@@ -46,7 +46,7 @@ Y_1 = \beta_1 Z + \epsilon_1
 Y_2 = \beta_2 Z + \epsilon_1
 $$
 
-Most parameters are fixed during simulation. We set $\alpha = 0.2$, $\beta_1 = 0.3$, $\beta_2 = 0.2$, and $\sigma_1 = 0.4$. We compared the t score and P values of regressing X against Y versus X against X.
+Most parameters are fixed during simulation. We set $\alpha = 0.2$, $\beta_1 = 0.3$, $\beta_2 = 0.2$, and $\sigma_1 = 0.4$. We compared the t score and P values of regressing X against Y versus X against X. Green dots are from $Y_1 \sim X$. Red dots are from $Y_2 \sim X$.
 
 ```{r,echo=F}
 library(ggplot2)
