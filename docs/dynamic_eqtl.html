@@ -381,7 +381,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-01-14
+<strong>Last updated:</strong> 2025-01-23
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -428,13 +428,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc1a2fa7">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree704016c709a2794fdd7b0b72494f451c7f14a217targetblank704016ca">
 <span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>Repository version:</strong> c1a2fa7
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/704016c709a2794fdd7b0b72494f451c7f14a217" target="_blank">704016c</a>
 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongc1a2fa7"
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree704016c709a2794fdd7b0b72494f451c7f14a217targetblank704016ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -443,7 +445,8 @@ and connecting the code version to the results is critical for
 reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version c1a2fa7.
+The results in this page were generated with repository version
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/704016c709a2794fdd7b0b72494f451c7f14a217" target="_blank">704016c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -459,6 +462,9 @@ were generated:
 <pre><code>
 Ignored files:
     Ignored:    .DS_Store
+
+Untracked files:
+    Untracked:  test_matrixeqtl.R
 
 </code></pre>
 <p>
@@ -509,7 +515,41 @@ Message
 Rmd
 </td>
 <td>
-c1a2fa7
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/704016c709a2794fdd7b0b72494f451c7f14a217/analysis/dynamic_eqtl.Rmd" target="_blank">704016c</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-23
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fb9f866236c21db5e99d9367066f02fd0d40b647/docs/dynamic_eqtl.html" target="_blank">fb9f866</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/c1a2fa73c15fc9ec8223d438fdd2375c65375f6b/analysis/dynamic_eqtl.Rmd" target="_blank">c1a2fa7</a>
 </td>
 <td>
 Lifan Liang
@@ -576,26 +616,107 @@ class="math display">\[\begin{equation}
 <h2>Model fitting</h2>
 <p>The simplest way to solve the model is a two-step linear regression.
 We first regress environment <span class="math inline">\(X\)</span>
-against <span class="math inline">\(\Delta_i\)</span> to estimate <span
-class="math inline">\(\theta_d\)</span> and the corresponding standard
-error <span class="math inline">\(\sigma_d\)</span>. Then we find the
-MLE for:</p>
+against <span class="math inline">\(\Delta_i\)</span> to estimate the
+total effect for each donor, <span
+class="math inline">\(\theta_d\)</span>. And the corresponding standard
+error <span class="math inline">\(\sigma_d\)</span>.</p>
+<p><span class="math display">\[
+\hat{\theta_d} = (X_d^TX_d)^{-1}X_d^T \Delta_d
+\]</span></p>
+<p><span class="math display">\[
+\sigma_d^2 = var(\hat{\theta_d}) = \dfrac{var(Y_d)}{X_d^T X_d}
+\]</span></p>
+<p>where <span class="math inline">\(X_d\)</span> is the environment
+variable in the treatment effect.</p>
+<p>Then we find the MLE for :</p>
 <p><span class="math display">\[
 \hat{\theta}_d \sim Normal(\beta_X + \gamma G_d, \sigma_d^2)
 \]</span></p>
-<p>MLE was basically weighted least square. For real data analysis, we
-may need to add genotype PCs in the model to account for additional
-individual variation. Let <span class="math inline">\(W\)</span> be a
-<span class="math inline">\(D \times D\)</span> diagonal matrix with
-<span class="math inline">\([1/\sigma_1^2,
-1/\sigma_2^2,...,1/\sigma_D^2]\)</span> as the diagonal elements. And
-let <span class="math inline">\(V\)</span> be the covariates matrix
-including intercept, genotype, and genotype PCs. We have</p>
+<p>Let us denote <span class="math inline">\(1/\sigma_d^2\)</span> as
+<span class="math inline">\(W_d\)</span>, the objective function to
+optimize is:</p>
 <p><span class="math display">\[
-\gamma = V^TW\hat{\theta}(V^TWV)^{-1}
-\\
-VAR(\gamma) = (V^TWV)^{-1}
+\sum_d^D{W_d(\hat{\theta}_d - \beta_X - \gamma G)^2}
 \]</span></p>
+<p>If we centered the mean of <span
+class="math inline">\(\hat{\theta}_d\)</span> (weighted by <span
+class="math inline">\(W\)</span>) and suppose <span
+class="math inline">\(G\)</span> is standardized (mean zero in single
+cell level, equivalent to <span class="math inline">\(\bar G=0\)</span>
+in the next section), then <span
+class="math inline">\(\beta_X=0\)</span>. The estimate of <span
+class="math inline">\(\gamma\)</span> is:</p>
+<p><span class="math display">\[
+\hat{\gamma} = \dfrac{\sum W_d \theta&#39;_d G}{\sum W_d G^2}
+\\
+\theta&#39;_d = \hat \theta_d - \bar \theta
+\\
+\bar \theta = \dfrac{\sum W_d \hat{\theta_d}}{\sum W_d}
+\]</span></p>
+<p>As for the standard error of <span class="math inline">\(\hat
+\gamma\)</span>, we have</p>
+<p><span class="math display">\[
+var(\hat \gamma) = \dfrac{1}{\sum W_dG^2} = \dfrac{var(Y)}{\sum G^2
+X_i^2}
+\]</span></p>
+</div>
+<div id="equivalence-to-the-cell-level-interaction-model"
+class="section level2">
+<h2>Equivalence to the cell level interaction model</h2>
+<p>Alternative to the two-step model above, we can directly fit an
+interaction model on single-cell level:</p>
+<p><span class="math display">\[
+\Delta_i = \beta_x X + \gamma X\cdot G
+\]</span></p>
+<p>First of all, we need to show that the weighted average of <span
+class="math inline">\(\hat{\theta_d}\)</span> is the unbiased estimator
+of <span class="math inline">\(\beta_x\)</span> given that genotype has
+mean zero.</p>
+<p>Based on inverse variance weighted (IVW) meta-analysis or direct
+derivation, the weighted average of <span
+class="math inline">\(\hat{\theta}\)</span> is</p>
+<p><span class="math display">\[
+\bar \theta = \dfrac{\sum W_d \theta_d}{\sum W_d} = \dfrac{X^T
+\Delta}{X^T X}
+\]</span></p>
+<p>Similarly, the weighted average of <span
+class="math inline">\(G\)</span> is</p>
+<p><span class="math display">\[
+\bar G = \dfrac{\sum W_d G}{\sum W_d} = \dfrac{X^T G&#39; X}{X^T X} =
+\dfrac{\sum G_i X_i^2}{\sum X_i^2}
+\]</span></p>
+<p>where <span class="math inline">\(G&#39;\)</span> is a <span
+class="math inline">\(n\times n\)</span> diagonal matrix with the
+diagonal elements as the genotypes</p>
+<p>From the interaction model, we can find the estimate for <span
+class="math inline">\(\beta_x\)</span> is:</p>
+<p><span class="math display">\[
+\hat \beta_x = \dfrac{\sum\Delta_iX_i}{\sum X_i^2} - \gamma \dfrac{\sum
+G_i X_i^2}{\sum X_i^2} = \bar \theta - \gamma \bar G
+\]</span></p>
+<p>Therefore, by setting <span class="math inline">\(\bar \G =
+0\)</span>, the estimator for <span class="math inline">\(\hat
+\beta_x\)</span> is identical to that of <span
+class="math inline">\(\bar \theta\)</span>.</p>
+<p>In this case, the estimator of <span
+class="math inline">\(\gamma\)</span> is simply. Let us denote the
+interaction term <span class="math inline">\(X\cdot G\)</span> as <span
+class="math inline">\(X&#39;\)</span> for convenience.</p>
+<p><span class="math display">\[
+\hat \gamma = \dfrac{X&#39;^T \Delta}{X&#39;^TX&#39;} - \hat \beta
+\dfrac{X^TX&#39;}{X&#39;^TX&#39;}
+\]</span></p>
+<p>Recall that the estimate for <span
+class="math inline">\(\gamma\)</span> in the two step model is:</p>
+<p><span class="math display">\[
+\hat \gamma = \dfrac{\sum W_d (\hat \theta_d-\bar \theta) G}{\sum W_d
+G^2} = \dfrac{X&#39;^T \Delta}{X&#39;^TX&#39;} - \hat \beta
+\dfrac{X^TX&#39;}{X&#39;^TX&#39;}
+\]</span></p>
+<p>Therefore, <span class="math inline">\(\hat \gamma\)</span> is
+identical in the two approaches.</p>
+<p>As for the standard error of <span class="math inline">\(\hat
+\gamma\)</span>, it is obvious that they are the same.</p>
 </div>
 <div id="simulation" class="section level2">
 <h2>Simulation</h2>
