@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Simluation with a known latent factor
+## Simulation with a known latent factor
 
 ```{r,setup=T}
 sim_factor <- function(alpha=0.25, beta=0.4, eps0=1.0, eps1=0.3){

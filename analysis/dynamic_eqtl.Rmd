@@ -32,20 +32,100 @@ This can be viewed as: ``genes modify the environmental effect``.
 
 ## Model fitting
 
-The simplest way to solve the model is a two-step linear regression. We first regress environment $X$ against $\Delta_i$ to estimate $\theta_d$ and the corresponding standard error $\sigma_d$. Then we find the MLE for:
+The simplest way to solve the model is a two-step linear regression. We first regress environment $X$ against $\Delta_i$ to estimate the total effect for each donor, $\theta_d$. And the corresponding standard error $\sigma_d$. 
+
+$$
+\hat{\theta_d} = (X_d^TX_d)^{-1}X_d^T \Delta_d 
+$$
+
+$$
+\sigma_d^2 = var(\hat{\theta_d}) = \dfrac{var(Y_d)}{X_d^T X_d}
+$$
+
+where $X_d$ is the environment variable in the treatment effect.
+
+Then we find the MLE for \gamma:
 
 $$
 \hat{\theta}_d \sim Normal(\beta_X + \gamma G_d, \sigma_d^2)
 $$
 
-MLE was basically weighted least square. For real data analysis, we may need to add genotype PCs in the model to account for additional individual variation. Let $W$ be a $D \times D$ diagonal matrix with $[1/\sigma_1^2, 1/\sigma_2^2,...,1/\sigma_D^2]$ as the diagonal elements. And let $V$ be the covariates matrix including intercept, genotype, and genotype PCs. We have
+Let us denote $1/\sigma_d^2$ as $W_d$, the objective function to optimize is:
 
 $$
-\gamma = V^TW\hat{\theta}(V^TWV)^{-1}
+\sum_d^D{W_d(\hat{\theta}_d - \beta_X - \gamma G)^2}
+$$
+
+If we centered the mean of $\hat{\theta}_d$ (weighted by $W$) and suppose $G$ is standardized (mean zero in single cell level, equivalent to $\bar G=0$ in the next section), then $\beta_X=0$. The estimate of $\gamma$ is:
+
+$$
+\hat{\gamma} = \dfrac{\sum W_d \theta'_d G}{\sum W_d G^2}
 \\
-VAR(\gamma) = (V^TWV)^{-1}
+\theta'_d = \hat \theta_d - \bar \theta
+\\
+\bar \theta = \dfrac{\sum W_d \hat{\theta_d}}{\sum W_d}
 $$
 
+As for the standard error of $\hat \gamma$, we have
+
+$$
+var(\hat \gamma) = \dfrac{1}{\sum W_dG^2} = \dfrac{var(Y)}{\sum G^2 X_i^2}
+$$
+
+
+
+
+## Equivalence to the cell level interaction model
+
+Alternative to the two-step model above, we can directly fit an interaction model on single-cell level:
+
+$$
+\Delta_i = \beta_x X + \gamma X\cdot G
+$$
+
+First of all, we need to show that the weighted average of $\hat{\theta_d}$ is the unbiased estimator of $\beta_x$ given that genotype has mean zero. 
+
+Based on inverse variance weighted (IVW) meta-analysis or direct derivation, the weighted average of $\hat{\theta}$ is
+
+$$
+\bar \theta = \dfrac{\sum W_d \theta_d}{\sum W_d} = \dfrac{X^T \Delta}{X^T X}
+$$
+
+Similarly, the weighted average of $G$ is
+
+$$
+\bar G = \dfrac{\sum W_d G}{\sum W_d} = \dfrac{X^T G' X}{X^T X} = \dfrac{\sum G_i X_i^2}{\sum X_i^2}
+$$
+
+where $G'$ is a $n\times n$ diagonal matrix with the diagonal elements as the genotypes
+
+From the interaction model, we can find the estimate for $\beta_x$ is:
+
+$$
+\hat \beta_x = \dfrac{\sum\Delta_iX_i}{\sum X_i^2} - \gamma \dfrac{\sum G_i X_i^2}{\sum X_i^2} = \bar \theta - \gamma \bar G
+$$
+
+Therefore, by setting $\bar \G = 0$, the estimator for $\hat \beta_x$ is identical to that of $\bar \theta$. 
+
+In this case, the estimator of $\gamma$ is simply. Let us denote the interaction term $X\cdot G$ as $X'$ for convenience.
+
+$$
+\hat \gamma = \dfrac{X'^T \Delta}{X'^TX'} - \hat \beta \dfrac{X^TX'}{X'^TX'}
+$$
+
+Recall that the estimate for $\gamma$ in the two step model is:
+
+$$
+\hat \gamma = \dfrac{\sum W_d (\hat \theta_d-\bar \theta) G}{\sum W_d G^2} = \dfrac{X'^T \Delta}{X'^TX'} - \hat \beta \dfrac{X^TX'}{X'^TX'}
+$$
+
+Therefore, $\hat \gamma$ is identical in the two approaches.
+
+As for the standard error of $\hat \gamma$, it is obvious that they are the same.
 
 ## Simulation
+
+
+
+
 
