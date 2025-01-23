@@ -428,15 +428,15 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree704016c709a2794fdd7b0b72494f451c7f14a217targetblank704016ca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef89e61b7f3322c6017b0959485f39627f1034656targetblankf89e61ba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/704016c709a2794fdd7b0b72494f451c7f14a217" target="_blank">704016c</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/f89e61b7f3322c6017b0959485f39627f1034656" target="_blank">f89e61b</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree704016c709a2794fdd7b0b72494f451c7f14a217targetblank704016ca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef89e61b7f3322c6017b0959485f39627f1034656targetblankf89e61ba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -446,7 +446,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/704016c709a2794fdd7b0b72494f451c7f14a217" target="_blank">704016c</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/f89e61b7f3322c6017b0959485f39627f1034656" target="_blank">f89e61b</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -510,6 +510,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/f89e61b7f3322c6017b0959485f39627f1034656/analysis/dynamic_eqtl.Rmd" target="_blank">f89e61b</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-23
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/629cc3630bb3566c745104de38ee2093ac26fd28/docs/dynamic_eqtl.html" target="_blank">629cc36</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-23
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -694,13 +728,13 @@ class="math inline">\(\beta_x\)</span> is:</p>
 \hat \beta_x = \dfrac{\sum\Delta_iX_i}{\sum X_i^2} - \gamma \dfrac{\sum
 G_i X_i^2}{\sum X_i^2} = \bar \theta - \gamma \bar G
 \]</span></p>
-<p>Therefore, by setting <span class="math inline">\(\bar \G =
+<p>Therefore, by setting <span class="math inline">\(\bar G =
 0\)</span>, the estimator for <span class="math inline">\(\hat
 \beta_x\)</span> is identical to that of <span
 class="math inline">\(\bar \theta\)</span>.</p>
-<p>In this case, the estimator of <span
-class="math inline">\(\gamma\)</span> is simply. Let us denote the
-interaction term <span class="math inline">\(X\cdot G\)</span> as <span
+<p>Then, we derived the estimator of <span
+class="math inline">\(\gamma\)</span>. Let us denote the interaction
+term <span class="math inline">\(X\cdot G\)</span> as <span
 class="math inline">\(X&#39;\)</span> for convenience.</p>
 <p><span class="math display">\[
 \hat \gamma = \dfrac{X&#39;^T \Delta}{X&#39;^TX&#39;} - \hat \beta
@@ -716,7 +750,16 @@ G^2} = \dfrac{X&#39;^T \Delta}{X&#39;^TX&#39;} - \hat \beta
 <p>Therefore, <span class="math inline">\(\hat \gamma\)</span> is
 identical in the two approaches.</p>
 <p>As for the standard error of <span class="math inline">\(\hat
-\gamma\)</span>, it is obvious that they are the same.</p>
+\gamma\)</span>, it is obvious that they are the same by plugging in the
+estimate of <span class="math inline">\(W_d\)</span> in previous
+equation for <span class="math inline">\(var(\hat \gamma)\)</span>.</p>
+<p>The advantage of using a two-step model instead of the interaction
+model is that we decoupled the genetic variation and phenotypic varation
+with an intermediate “trait” that captures the sufficient statistics for
+each donor. Hence, when we need to run QTL mapping for the same
+molecular trait, we only need to repeat the second step on bulk level
+while retaining the power of single-cell level model. This would bring
+enormous speed up to the dynamic QTL mapping procedure.</p>
 </div>
 <div id="simulation" class="section level2">
 <h2>Simulation</h2>
