@@ -59,7 +59,7 @@ $$
 If we centered the mean of $\hat{\theta}_d$ (weighted by $W$) and suppose $G$ is standardized (mean zero in single cell level, equivalent to $\bar G=0$ in the next section), then $\beta_X=0$. The estimate of $\gamma$ is:
 
 $$
-\hat{\gamma} = \dfrac{\sum W_d \theta'_d G}{\sum W_d G^2}
+\hat{\gamma} = \dfrac{\sum W_d \theta'_d G_d}{\sum W_d G_d^2}
 \\
 \theta'_d = \hat \theta_d - \bar \theta
 \\
@@ -69,7 +69,7 @@ $$
 As for the standard error of $\hat \gamma$, we have
 
 $$
-var(\hat \gamma) = \dfrac{1}{\sum W_dG^2} = \dfrac{var(Y)}{\sum G^2 X_i^2}
+var(\hat \gamma) = \dfrac{1}{\sum W_dG_d^2} = \dfrac{var(Y)}{\sum G_i^2 X_i^2}
 $$
 
 
@@ -83,9 +83,13 @@ $$
 \Delta_i = \beta_x X + \gamma X\cdot G
 $$
 
-First of all, we need to show that the weighted average of $\hat{\theta_d}$ is the unbiased estimator of $\beta_x$ given that genotype has mean zero. 
+First of all, the weighted average of $\hat{\theta_d}$ is identical to MLE of $\beta_x$ given that genotype has mean zero. Intuitively, this is correct since
 
-Based on inverse variance weighted (IVW) meta-analysis or direct derivation, the weighted average of $\hat{\theta}$ is
+$$
+E(\theta) = E(\beta_x+\gamma G) = \beta_x + \gamma E(G)
+$$
+
+More formally, we first derive estimator of $\bar \theta$ and $\bar G$ on cell level. Based on inverse variance weighted (IVW) meta-analysis or direct derivation, the weighted average of $\hat{\theta}$ is
 
 $$
 \bar \theta = \dfrac{\sum W_d \theta_d}{\sum W_d} = \dfrac{X^T \Delta}{X^T X}
@@ -99,7 +103,13 @@ $$
 
 where $G'$ is a $n\times n$ diagonal matrix with the diagonal elements as the genotypes
 
-From the interaction model, we can find the estimate for $\beta_x$ is:
+Since the log Likelihood for the interaction model is:
+
+$$
+\mathcal{L}(\Delta;\beta_x,\gamma) \propto -\sum(\Delta_i-\beta_xX_i-\gamma G_i\cdot X_i)^2
+$$
+
+By setting the $\dfrac{d\mathcal{L}(\Delta;\beta_x,\gamma)}{d\beta_x}=0$ to 0, we should find the MLE for $\beta_x$ as:
 
 $$
 \hat \beta_x = \dfrac{\sum\Delta_iX_i}{\sum X_i^2} - \gamma \dfrac{\sum G_i X_i^2}{\sum X_i^2} = \bar \theta - \gamma \bar G
@@ -107,7 +117,7 @@ $$
 
 Therefore, by setting $\bar G = 0$, the estimator for $\hat \beta_x$ is identical to that of $\bar \theta$. 
 
-Then, we derived the estimator of $\gamma$. Let us denote the interaction term $X\cdot G$ as $X'$ for convenience.
+Similarly, we can derive the MLE of $\gamma$. Let us denote the interaction term $X\cdot G$ as $X'$ for convenience.
 
 $$
 \hat \gamma = \dfrac{X'^T \Delta}{X'^TX'} - \hat \beta \dfrac{X^TX'}{X'^TX'}
@@ -123,7 +133,7 @@ Therefore, $\hat \gamma$ is identical in the two approaches.
 
 As for the standard error of $\hat \gamma$, it is obvious that they are the same by plugging in the estimate of $W_d$ in previous equation for $var(\hat \gamma)$.
 
-The advantage of using a two-step model instead of the interaction model is that we decoupled the genetic variation and phenotypic varation with an intermediate "trait" that captures the sufficient statistics for each donor. Hence, when we need to run QTL mapping for the same molecular trait, we only need to repeat the second step on bulk level while retaining the power of single-cell level model. This would bring enormous speed up to the dynamic QTL mapping procedure.
+The advantage of using a two-step model instead of the interaction model is that we decoupled the genetic variation and phenotypic variation with an intermediate "trait" that captures the sufficient statistics for each donor. Hence, when we need to run QTL mapping for the same molecular trait, we only need to repeat the second step on bulk level while retaining the power of single-cell level model. This would bring enormous speed up to the dynamic QTL mapping procedure.
 
 ## Simulation
 
