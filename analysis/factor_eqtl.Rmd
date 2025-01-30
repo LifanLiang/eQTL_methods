@@ -170,6 +170,8 @@ abline(h=median(abs(factor.res[,2])),col=2,lty=2,lwd=3)
 ```
 
 
+The barplot below shows the number of times P values < 0.05.
+
 ```{r}
 dat2 <- abs(cbind(oracle.res[,3],cbind(factor.res[,3],marg$pval))) #combine p values
 colnames(dat2) <- c("Oracle Z","Z hat",paste0("trait ",1:10))
