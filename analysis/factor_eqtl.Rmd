@@ -170,7 +170,7 @@ abline(h=median(abs(factor.res[,2])),col=2,lty=2,lwd=3)
 ```
 
 
-The barplot below shows the number of times P values < 0.05.
+The barplot below shows the frequency for P values < 0.05.
 
 ```{r}
 dat2 <- abs(cbind(oracle.res[,3],cbind(factor.res[,3],marg$pval))) #combine p values
@@ -178,7 +178,7 @@ colnames(dat2) <- c("Oracle Z","Z hat",paste0("trait ",1:10))
 barplot(colMeans(dat2<0.05),las=2)
 ```
 
-### Number of times rejecting null while there is no genetic effect. (FDR)
+### Frequency of rejecting null while there is no genetic effect. (FDR)
 
 Situations where the 10 traits are still largely shared but genotype did not affect the trait $\alpha=0$. 
 
