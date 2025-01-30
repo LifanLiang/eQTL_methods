@@ -381,11 +381,11 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-01-24
+<strong>Last updated:</strong> 2025-01-30
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span> 0
 </p>
@@ -428,15 +428,99 @@ results.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeda0ab725ca23b6fb09c76f07ea2a2d6fc564f435targetblankda0ab72a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250106code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250106)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250106code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250106)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree9c2518c10f5002bf6fc56d71ebadd56aaf9c2199targetblank9c2518ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/da0ab725ca23b6fb09c76f07ea2a2d6fc564f435" target="_blank">da0ab72</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/9c2518c10f5002bf6fc56d71ebadd56aaf9c2199" target="_blank">9c2518c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeda0ab725ca23b6fb09c76f07ea2a2d6fc564f435targetblankda0ab72a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree9c2518c10f5002bf6fc56d71ebadd56aaf9c2199targetblank9c2518ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -446,7 +530,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/da0ab725ca23b6fb09c76f07ea2a2d6fc564f435" target="_blank">da0ab72</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/9c2518c10f5002bf6fc56d71ebadd56aaf9c2199" target="_blank">9c2518c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -510,6 +594,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9c2518c10f5002bf6fc56d71ebadd56aaf9c2199/analysis/dynamic_eqtl.Rmd" target="_blank">9c2518c</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-30
+</td>
+<td>
+wflow_publish(c("analysis", "data"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/9a16b08556e933d1463a958dd0f54463829200fe/docs/dynamic_eqtl.html" target="_blank">9a16b08</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-24
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -809,6 +927,112 @@ bring enormous speed up to the dynamic QTL mapping procedure.</p>
 </div>
 <div id="simulation" class="section level2">
 <h2>Simulation</h2>
+<p>For loop is required when computing <span
+class="math inline">\(\theta\)</span> for each donor. This incurs extra
+computational cost in R and python and it leads to slower speed compared
+the full interaction model. I decided to implement the two-step model in
+Julia and used the highly optimized package, <code>MixedModels</code>,
+to construct the baseline mixed effect model for a fair comparison.</p>
+<p>Data generating process follows:</p>
+<p><span class="math display">\[
+G_d \sim Multnominal()
+\\
+E_i \sim Uniform(0,1)
+\\
+U_d \sim Normal(0,\sigma_U^2)
+\\
+\epsilon \sim Normal(0,\sigma^2)
+\\
+Y_{id} = \alpha G_d + \beta E_i + \phi G\cdot E + U_d + \epsilon
+\]</span></p>
+<p>G is random selected from <span
+class="math inline">\(\{0,1,2\}\)</span> with equal chance, <span
+class="math inline">\(\alpha=0.05\)</span>, <span
+class="math inline">\(\beta=0.1\)</span>, <span
+class="math inline">\(\sigma_U^2=0.2\)</span>, <span
+class="math inline">\(\epsilon=1.0\)</span>. If we compute PVE as <span
+class="math inline">\(\dfrac{\alpha VAR(G)}{VAR(Y)}\)</span>, it would
+be around 3.5%.</p>
+<div id="effect-estimation-and-power" class="section level3">
+<h3>Effect estimation and power</h3>
+<p>We repeated the simulation 500 times for different <span
+class="math inline">\(\phi\)</span> (i.e, 0.02, 0.04, 0.05) The
+estimation of <span class="math inline">\(\phi\)</span> is quite similar
+between mixed effect and our two-step fixed effect model.</p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The power is also quite similar. Here we look into the Z score when
+<span class="math inline">\(\phi=0.05\)</span>.</p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="p-value-calibration-analysis" class="section level3">
+<h3>P value calibration analysis</h3>
+<p>We randomly generated 9999 null SNPs and 1 causal SNPs. Black dots
+represent p values with the null SNPs. The green dashed line indicates
+the p value from the causal SNPs. We can see both models have slightly
+inflated P values, which is common for dynamic eQTL. But mixed effect
+models cannot run permutation testing to calibrate P values due to the
+heavy computational cost.</p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="running-time-comparison" class="section level3">
+<h3>Running time comparison</h3>
+<p>When we only run the procedure once, mixed effect model is slightly
+more efficient because of its optimized implementation, while our
+implementation is still pretty crude.</p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>However, if we repeat the procedure with one trait and multiple SNPs,
+our method scales much better than mixed effect model.</p>
+<p><img src="figure/dynamic_eqtl.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Suppose we have 20K genes, each with 1000 candidate SNPs. Then our
+two-step method takes 5 minutes to scan all gene-snp pairs, while the
+mixed effect model will take 28 hours roughly. This advantage in
+scalability allow us to perform permutation testing to obtain calibrated
+P values and fine mapping to identify causal SNPs.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.2 (2021-11-01)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ggplot2_3.3.5   workflowr_1.7.0
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.1.1 xfun_0.29        bslib_0.3.1      purrr_0.3.4     
+ [5] colorspace_2.0-2 vctrs_0.3.8      generics_0.1.2   htmltools_0.5.2 
+ [9] yaml_2.2.2       utf8_1.2.2       rlang_1.0.0      jquerylib_0.1.4 
+[13] later_1.3.0      pillar_1.7.0     glue_1.6.1       withr_2.4.3     
+[17] DBI_1.1.2        lifecycle_1.0.1  stringr_1.4.0    munsell_0.5.0   
+[21] gtable_0.3.0     evaluate_0.14    labeling_0.4.2   knitr_1.37      
+[25] callr_3.7.0      fastmap_1.1.0    httpuv_1.6.5     ps_1.6.0        
+[29] fansi_1.0.2      highr_0.9        Rcpp_1.0.11      promises_1.2.0.1
+[33] scales_1.1.1     jsonlite_1.7.3   farver_2.1.0     fs_1.5.2        
+[37] digest_0.6.29    stringi_1.7.6    processx_3.5.2   dplyr_1.0.7     
+[41] getPass_0.2-2    rprojroot_2.0.2  grid_4.1.2       cli_3.1.1       
+[45] tools_4.1.2      magrittr_2.0.2   sass_0.4.1       tibble_3.1.6    
+[49] crayon_1.4.2     whisker_0.4      pkgconfig_2.0.3  ellipsis_0.3.2  
+[53] assertthat_0.2.1 rmarkdown_2.11   httr_1.4.2       rstudioapi_0.13 
+[57] R6_2.5.1         git2r_0.29.0     compiler_4.1.2  </code></pre>
+</div>
+</div>
 </div>
 
 
