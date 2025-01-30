@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree4b6acb635671d0a5bb484bbce346ff0b720996cctargetblank4b6acb6a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree61fbc6c2b420cdf6f6c6e2526521de6dc1cdd5b2targetblank61fbc6ca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/4b6acb635671d0a5bb484bbce346ff0b720996cc" target="_blank">4b6acb6</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/61fbc6c2b420cdf6f6c6e2526521de6dc1cdd5b2" target="_blank">61fbc6c</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree4b6acb635671d0a5bb484bbce346ff0b720996cctargetblank4b6acb6a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree61fbc6c2b420cdf6f6c6e2526521de6dc1cdd5b2targetblank61fbc6ca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/4b6acb635671d0a5bb484bbce346ff0b720996cc" target="_blank">4b6acb6</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/61fbc6c2b420cdf6f6c6e2526521de6dc1cdd5b2" target="_blank">61fbc6c</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -595,6 +595,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/61fbc6c2b420cdf6f6c6e2526521de6dc1cdd5b2/analysis/factor_eqtl.Rmd" target="_blank">61fbc6c</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-30
+</td>
+<td>
+wflow_publish(c("analysis"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/62715308c266f61cd5a6ee76996f490546b96bfe/docs/factor_eqtl.html" target="_blank">6271530</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-01-30
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1337,7 +1371,7 @@ Lifan Liang
 </table>
 </div>
 </div>
-<p>The barplot below shows the number of times P values &lt; 0.05.</p>
+<p>The barplot below shows the frequency for P values &lt; 0.05.</p>
 <pre class="r"><code>dat2 &lt;- abs(cbind(oracle.res[,3],cbind(factor.res[,3],marg$pval))) #combine p values
 colnames(dat2) &lt;- c(&quot;Oracle Z&quot;,&quot;Z hat&quot;,paste0(&quot;trait &quot;,1:10))
 barplot(colMeans(dat2&lt;0.05),las=2)</code></pre>
@@ -1381,9 +1415,9 @@ Lifan Liang
 </div>
 </div>
 <div
-id="number-of-times-rejecting-null-while-there-is-no-genetic-effect.-fdr"
+id="frequency-of-rejecting-null-while-there-is-no-genetic-effect.-fdr"
 class="section level3">
-<h3>Number of times rejecting null while there is no genetic effect.
+<h3>Frequency of rejecting null while there is no genetic effect.
 (FDR)</h3>
 <p>Situations where the 10 traits are still largely shared but genotype
 did not affect the trait <span
