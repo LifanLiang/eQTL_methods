@@ -137,7 +137,111 @@ The advantage of using a two-step model instead of the interaction model is that
 
 ## Simulation
 
+For loop is required when computing $\theta$ for each donor. This incurs extra computational cost in R and python and it leads to slower speed compared the full interaction model. I decided to implement the two-step model in Julia and used the highly optimized package, `MixedModels`, to construct the baseline mixed effect model for a fair comparison.
+
+Data generating process follows:
+
+$$
+G_d \sim Multnominal()
+\\
+E_i \sim Uniform(0,1)
+\\
+U_d \sim Normal(0,\sigma_U^2)
+\\
+\epsilon \sim Normal(0,\sigma^2)
+\\
+Y_{id} = \alpha G_d + \beta E_i + \phi G\cdot E + U_d + \epsilon
+$$
+
+G is random selected from $\{0,1,2\}$ with equal chance, $\alpha=0.05$, $\beta=0.1$, $\sigma_U^2=0.2$, $\epsilon=1.0$. If we compute PVE as $\dfrac{\alpha VAR(G)}{VAR(Y)}$, it would be around 3.5%.
+
+### Effect estimation and power
+
+We repeated the simulation 500 times for different $\phi$ (i.e, 0.02, 0.04, 0.05)
+The estimation of $\phi$ is quite similar between mixed effect and our two-step fixed effect model.
+
+```{r,echo=F}
+library(ggplot2)
+fixed_resfs <- list.files("data/",pattern="twostep",full.names = T)
+fixed_res <- lapply(fixed_resfs,read.csv)[-1]
+mixed_resfs <- list.files("data/",pattern="mixedmodel",full.names = T)
+mixed_res <- lapply(mixed_resfs,read.csv)[-1]
+
+fix.beta <- do.call(c, lapply(fixed_res,function(x){x$beta}))
+mix.beta <- do.call(c, lapply(mixed_res,function(x){x$beta}))
+dat.beta <- data.frame(beta=c(fix.beta,mix.beta),
+                       oracle=factor(rep(rep(c(0.02,0.04,0.05),each=500),2)),
+                       model=rep(c("fixed_effect","mixed_effect"),each=1500))
+ggplot(dat.beta,aes(x=oracle,y=beta,fill=model)) + geom_boxplot() + theme_bw() +
+  ylab("Estmated phi")
+```
+
+The power is also quite similar. Here we look into the Z score when $\phi=0.05$.
+
+```{r,echo=F}
+fix.z <- fixed_res[[3]]$beta / fixed_res[[3]]$se
+mix.z <- mixed_res[[3]]$beta / mixed_res[[3]]$se
+plot(fix.z, mix.z, pch=20,col=2,
+     ylab="Z score from mixed effect model",
+     xlab="Z score from fixed effect model")
+lines(c(0,9),c(0,9),col=1)
+```
 
 
+### P value calibration analysis
 
+We randomly generated 9999 null SNPs and 1 causal SNPs. Black dots represent p values with the null SNPs. The green dashed line indicates the p value from the causal SNPs. We can see both models have slightly inflated P values, which is common for dynamic eQTL. But mixed effect models cannot run permutation testing to calibrate P values due to the heavy computational cost.
+
+```{r,echo=F}
+fix_null <- read.csv("data/multiSNP_fixed_two_step_res.csv")
+fix_null$Z <- fix_null$beta / fix_null$se
+null.p <- sort(pt(fix_null$Z[-1],1e5-3,lower.tail = F))
+plot(y=-log10(null.p),
+     x=-log10(1:length(null.p)/length(null.p)),pch=20,
+     xlab="expected -log10(P)", ylab="observed -log10(P)",
+     main="P values from fixed effect model")
+lines(c(0,5),c(0,5),col=2)
+abline(h=-log10(pt(fix_null$Z[1],1e5-3,lower.tail = F)),lty=3,col=3,lwd=3)
+```
+
+
+```{r,echo=F}
+mix_null <- read.csv("data/multiSNP_mixed_res.csv")
+mix_null$Z <- mix_null$beta / mix_null$se
+null.p <- sort(pt(mix_null$Z[-1],1e5-3,lower.tail = F))
+plot(y=-log10(null.p),
+     x=-log10(2:nrow(mix_null)/nrow(mix_null)),pch=20,
+     xlab="expected -log10(P)", ylab="observed -log10(P)",
+     main="P values from mixed effect")
+lines(c(0,5),c(0,5),col=2)
+abline(h=-log10(pt(mix_null$Z[1],1e5-3,lower.tail = F)),lty=3,col=3,lwd=3)
+```
+
+### Running time comparison
+
+When we only run the procedure once, mixed effect model is slightly more efficient because of its optimized implementation, while our implementation is still pretty crude.
+
+```{r,echo=F}
+fix.time <- do.call(c, lapply(fixed_res,function(x){x$time}))
+mix.time <- do.call(c, lapply(mixed_res,function(x){x$time}))
+dat.time <- data.frame(time=c(fix.time,mix.time),
+                       oracle=factor(rep(rep(c(0.02,0.04,0.05),each=500),2)),
+                       model=rep(c("fixed_effect","mixed_effect"),each=1500))
+ggplot(dat.time,aes(x=oracle,y=time,fill=model)) + geom_boxplot() + theme_bw() +
+  ylab("Running time (unit: second)") + scale_y_log10()
+```
+
+However, if we repeat the procedure with one trait and multiple SNPs, our method scales much better than mixed effect model.
+
+```{r,echo=F}
+msnp_time = read.csv("data/scalability_snp.csv")
+msnp_time = rbind(c(median(fix.time),median(mix.time)), msnp_time)
+dat.mtime <- data.frame(time=c(msnp_time$mixed,msnp_time$two_step),
+                        Nsnp=rep(c(1,10,100,1000,10000),2),
+                        model=rep(c("mixed_effect","two_step"),each=nrow(msnp_time)))
+ggplot(dat.mtime,aes(y=time,x=Nsnp,shape=model,color=model)) + geom_line() + geom_point() + 
+  theme_bw() + scale_y_log10() + scale_x_log10() + ylab("running time (unit: second)")
+```
+
+Suppose we have 20K genes, each with 1000 candidate SNPs. Then our two-step method takes 5 minutes to scan all gene-snp pairs, while the mixed effect model will take 28 hours roughly. This advantage in scalability allow us to perform permutation testing to obtain calibrated P values and fine mapping to identify causal SNPs.
 
