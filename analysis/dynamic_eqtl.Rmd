@@ -163,15 +163,15 @@ The estimation of $\phi$ is quite similar between mixed effect and our two-step 
 ```{r,echo=F}
 library(ggplot2)
 fixed_resfs <- list.files("data/",pattern="twostep",full.names = T)
-fixed_res <- lapply(fixed_resfs,read.csv)[-1]
+fixed_res <- lapply(fixed_resfs,read.csv)
 mixed_resfs <- list.files("data/",pattern="mixedmodel",full.names = T)
-mixed_res <- lapply(mixed_resfs,read.csv)[-1]
+mixed_res <- lapply(mixed_resfs,read.csv)
 
 fix.beta <- do.call(c, lapply(fixed_res,function(x){x$beta}))
 mix.beta <- do.call(c, lapply(mixed_res,function(x){x$beta}))
 dat.beta <- data.frame(beta=c(fix.beta,mix.beta),
-                       oracle=factor(rep(rep(c(0.02,0.04,0.05),each=500),2)),
-                       model=rep(c("fixed_effect","mixed_effect"),each=1500))
+                       oracle=factor(rep(rep(c(0.02,0.03,0.04,0.05),each=500),2)),
+                       model=rep(c("fixed_effect","mixed_effect"),each=2000))
 ggplot(dat.beta,aes(x=oracle,y=beta,fill=model)) + geom_boxplot() + theme_bw() +
   ylab("Estmated phi")
 ```
@@ -219,19 +219,19 @@ abline(h=-log10(pt(mix_null$Z[1],1e5-3,lower.tail = F)),lty=3,col=3,lwd=3)
 
 ### Running time comparison
 
-When we only run the procedure once, mixed effect model is slightly more efficient because of its optimized implementation, while our implementation is still pretty crude.
+When we only run the procedure once, the two-step model took 2.5 ms in median, while the mixed model took 8.0 ms.
 
 ```{r,echo=F}
 fix.time <- do.call(c, lapply(fixed_res,function(x){x$time}))
 mix.time <- do.call(c, lapply(mixed_res,function(x){x$time}))
 dat.time <- data.frame(time=c(fix.time,mix.time),
-                       oracle=factor(rep(rep(c(0.02,0.04,0.05),each=500),2)),
-                       model=rep(c("fixed_effect","mixed_effect"),each=1500))
+                       oracle=factor(rep(rep(c(0.02,0.04,0.03, 0.05),each=500),2)),
+                       model=rep(c("fixed_effect","mixed_effect"),each=2000))
 ggplot(dat.time,aes(x=oracle,y=time,fill=model)) + geom_boxplot() + theme_bw() +
-  ylab("Running time (unit: second)") + scale_y_log10()
+  ylab("Running time (unit: second)")
 ```
 
-However, if we repeat the procedure with one trait and multiple SNPs, our method scales much better than mixed effect model.
+There would be a greater speedup if we repeat the procedure with one trait and multiple SNPs, our method scales much better than mixed effect model. At 1000 SNPs, which is the usual number of cisSNP around genes at 250Kb distance, our two-step model took 2 ms while `MixedModels` took 9 seconds.
 
 ```{r,echo=F}
 msnp_time = read.csv("data/scalability_snp.csv")
