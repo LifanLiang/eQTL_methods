@@ -213,8 +213,10 @@ barplot(colMeans(dat3<0.05),las=2)
 
 ### Simulation with two latent factors
 
+We added another factor that affects 5 traits ($Y_1,..., Y_5$). The parameters are set so that $PVE(Z\sim X)=2\%$ and $PVE(Y\sim X) \approx 1.8\%$
+
 ```{r}
-sim_10trait2 <- function(alpha1=0.15, alpha2=0.1 ,beta=0.4, eps0=0.7, eps1=0.4, N=100){
+sim_10trait2 <- function(alpha1=0.1, alpha2=0.1 ,beta=0.3, eps0=0.7, eps1=0.4, N=100){
   x = rnorm(N,sd=1)
   Z1 = alpha1*x + rnorm(N,sd=eps0)
   Z2 = alpha2*x + rnorm(N,sd=eps0)
@@ -278,8 +280,11 @@ for(i in 1:Nrep) {
     marg$pval[i,j] <- temp[4]
   }
 }
-dat1 <- abs(cbind(oracle.res[,2],cbind(factor.res[,2],marg$tstat))) # Combine T statistics
+
 ```
+
+
+### Frequency of rejecting null (nominal PV < 0.05)
 
 ```{r}
 dat2 <- do.call(cbind, list(oracle_Z1=oracle.z1[,3],oracle_Z2=oracle.z2[,3],
