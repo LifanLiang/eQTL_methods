@@ -216,38 +216,45 @@ barplot(colMeans(dat3<0.05),las=2)
 We added another factor that affects 5 traits ($Y_1,..., Y_5$). The parameters are set so that $PVE(Z\sim X)=2\%$ and $PVE(Y\sim X) \approx 1.8\%$
 
 ```{r}
-sim_10trait2 <- function(alpha1=0.1, alpha2=0.1 ,beta=0.3, eps0=0.7, eps1=0.4, N=100){
+sim_10trait2 <- function(alpha1=0.1, alpha2=0.1 ,beta1=0.3, beta2=0.4, eps0=0.7, eps1=0.4, N=100){
   x = rnorm(N,sd=1)
   Z1 = alpha1*x + rnorm(N,sd=eps0)
   Z2 = alpha2*x + rnorm(N,sd=eps0)
   y = matrix(0,nrow = N,ncol=10)
   for(i in 1: ncol(y)){
-    y[,i] <- beta*Z1 + rnorm(N,sd=eps1)
+    y[,i] <- beta1*Z1 + rnorm(N,sd=eps1)
   }
-  for(i in 1:5){ ### Add the effect of Z2
-    y[,i] <- y[,i] + beta*Z2
+  for(i in 1:3){ ### Add the effect of Z2
+    y[,i] <- y[,i] + beta2*Z2
   }
   list(x=x,Z=cbind(Z1,Z2),y=y)
 }
 ```
 
+
 ```{r}
+library(pheatmap)
 dat <- sim_10trait2()
 y1 <- scale(dat$y)
 pcs <- prcomp(y1)
+pheatmap(cor(pcs$x[,1:4], dat$Z)**2,cluster_cols = F,cluster_rows = F,
+         display_numbers=round(cor(pcs$x[,1:4], dat$Z)**2,3),
+         fontsize_number = 15, cellheight = 20, cellwidth=60)
+```
+
+```{r}
 plot(pcs$sdev^2/sum(pcs$sdev^2),ylab="PVE")
 ```
 
 PCA results have captured one factor. My conjecture is that the two factors are correlated by the genetic effect. So PCA tends to attribute all genetic effects to the first PC.
 
 ```{r}
-
 z_hat <- pcs$x[,1]
 plot(z_hat, dat$Z[,1], ylab="Oracle Z1", xlab=" Estimated Z")
 ```
 
 ```{r}
-z_hat <- pcs$x[,1]
+z_hat <- pcs$x[,2]
 plot(z_hat, dat$Z[,2], ylab="Oracle Z2", xlab=" Estimated Z")
 ```
 
@@ -294,4 +301,47 @@ colnames(dat2)[5:14] <- paste0("trait ",1:10)
 barplot(colMeans(dat2<0.05),las=2)
 ```
 
+## Simulation without genotypes
+
+In this case, the two factors are stastically independent from each other.
+
+```{r}
+### simulation without X (genotypes)
+sim_10trait3 <- function(beta1=0.3, beta2=0.4, eps0=1.0, eps1=0.4, N=100){
+  Z1 = rnorm(N,sd=eps0)
+  Z2 = rnorm(N,sd=eps0)
+  y = matrix(0,nrow = N,ncol=10)
+  for(i in 1: ncol(y)){
+    y[,i] <- beta1*Z1 + rnorm(N,sd=eps1)
+  }
+  for(i in 1:3){ ### Add the effect of Z2
+    y[,i] <- y[,i] + beta2*Z2
+  }
+  list(Z=cbind(Z1,Z2),y=y)
+}
+```
+
+PCA results correlates with the two factors better.
+
+```{r}
+dat <- sim_10trait3()
+y1 <- scale(dat$y)
+pcs <- prcomp(y1)
+pheatmap(cor(pcs$x[,1:4], dat$Z)**2, cluster_cols = F, cluster_rows = F,
+         display_numbers=round(cor(pcs$x[,1:4],dat$Z)**2,3),
+         fontsize_number = 15, cellheight = 20, cellwidth=60)
+```
+
+
+FastICA identified similar results but factors are usually more distinguished.
+
+```{r}
+library(ica)
+
+res <- icafast(dat$y,2)
+dat1 <- cor(res$S,dat$Z)**2
+pheatmap(dat1, cluster_cols = F, cluster_rows = F,
+         display_numbers=round(dat1,3),
+         fontsize_number = 15, cellheight = 20, cellwidth=60)
+```
 
