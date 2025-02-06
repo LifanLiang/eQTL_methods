@@ -345,3 +345,92 @@ pheatmap(dat1, cluster_cols = F, cluster_rows = F,
          fontsize_number = 15, cellheight = 20, cellwidth=60)
 ```
 
+## Simulation with two SNPs affecting two factors seperately
+
+```{r}
+### simulation without 2 SNPs affecting two factors
+sim_10trait4 <- function(alpha1=0.1, alpha2=0.1, beta1=0.3, beta2=0.3, eps0=1.0, eps1=0.4, N=100){
+  X1 = rnorm(N,sd=1)
+  X2 = rnorm(N,sd=1)
+  Z1 = alpha1*X1 + rnorm(N,sd=eps0)
+  Z2 = alpha2*X2 + rnorm(N,sd=eps0)
+  y = matrix(0,nrow = N,ncol=10)
+  for(i in 1: ncol(y)){
+    y[,i] <- beta1*Z1 + rnorm(N,sd=eps1)
+  }
+  for(i in 1:3){ ### Add the effect of Z2
+    y[,i] <- y[,i] + beta2*Z2
+  }
+  list(x=cbind(X1,X2),Z=cbind(Z1,Z2),y=y)
+}
+```
+
+Heatmap below shows the $R^2$ between PCs and oracle factor values. The first two PCs correlate well with the oracle factor values. 
+
+```{r}
+set.seed(20)
+dat <- sim_10trait4()
+#y1 <- scale(dat$y)
+pcs <- prcomp(dat$y,center = T,scale. = T)
+pheatmap(cor(pcs$x[,1:4], dat$Z)**2, cluster_cols = F, cluster_rows = F,
+         display_numbers=round(cor(pcs$x[,1:4],dat$Z)**2,3),
+         fontsize_number = 15, cellheight = 20, cellwidth=60)
+```
+
+We repeated the simulation 300 times and check the statical power.
+
+```{r}
+Nrep = 300
+
+factor.res1 <- matrix(nrow=Nrep,ncol=3)
+oracle.z1 <- matrix(nrow=Nrep,ncol=3)
+factor.res2 <- matrix(nrow=Nrep,ncol=3)
+oracle.z2 <- matrix(nrow=Nrep,ncol=3)
+marg1 <- list()
+marg1$beta <- matrix(nrow=Nrep,ncol=10)
+marg1$tstat <- matrix(nrow=Nrep,ncol=10)
+marg1$pval <- matrix(nrow=Nrep,ncol=10)
+marg2 <- marg1
+
+for(i in 1:Nrep) {
+  dat <- sim_10trait4(N=100)
+  pcs <- prcomp(dat$y,center = T,scale. = T)
+  z_hat <- pcs$x[,1:2]
+  factor.res1[i,] <- summary(lm(z_hat[,1]~dat$x[,1]))$coefficients[2,c(1,3,4)]
+  factor.res2[i,] <- summary(lm(z_hat[,2]~dat$x[,2]))$coefficients[2,c(1,3,4)]
+  oracle.z1[i,] <- summary(lm(dat$Z[,1]~dat$x[,1]))$coefficients[2,c(1,3,4)]
+  oracle.z2[i,] <- summary(lm(dat$Z[,2]~dat$x[,2]))$coefficients[2,c(1,3,4)]
+  #colnames(marg.res) <- c("beta","tstat","p")
+  #print(i)
+  for(j in 1:ncol(dat$y)) {
+    temp <- summary(lm(dat$y[,j]~dat$x[,1]))$coefficients[2,]
+    marg1$beta[i,j] <- temp[1]
+    marg1$tstat[i,j] <- temp[3]
+    marg1$pval[i,j] <- temp[4]
+    temp <- summary(lm(dat$y[,j]~dat$x[,2]))$coefficients[2,]
+    marg2$beta[i,j] <- temp[1]
+    marg2$tstat[i,j] <- temp[3]
+    marg2$pval[i,j] <- temp[4]
+  }
+}
+
+```
+
+```{r}
+library(ggplot2)
+dat2 <- do.call(cbind, list(oracle_Z1=oracle.z1[,3],oracle_Z2=oracle.z2[,3],
+                            Z1_hat=factor.res1[,3],Z2_hat=factor.res2[,3]))
+dat2 <- cbind(cbind(dat2, marg1$pval), marg2$pval)
+colnames(dat2)[5:24] <- paste0("trait ",1:10)
+dat3 <- data.frame(frequency=colMeans(dat2<0.05),
+                   type=rep(c("Oracle","Estimated","Marginal"),times=c(2,2,20)),
+                   names=colnames(dat2))
+dat3$names[c(1,2,5:14)] <- paste(colnames(dat2)[c(1,2,5:14)],"~","X1")
+dat3$names[c(3,4,15:24)] <- paste(colnames(dat2)[c(3,4,15:24)],"~","X2")
+
+ggplot(dat3,aes(x=names,y=frequency,fill=type)) + geom_bar(stat="identity") + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1))
+```
+
+
+
