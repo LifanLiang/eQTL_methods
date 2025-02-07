@@ -361,7 +361,7 @@ factorization</h1>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-ok text-success"
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
-</a>
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -382,13 +382,13 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-02-06
+<strong>Last updated:</strong> 2025-02-07
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 0
+aria-hidden="true"></span> 1
 </p>
 <p>
 <strong>Knit directory:</strong> <code>eQTL_methods/</code> <span
@@ -411,18 +411,21 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
-<span class="glyphicon glyphicon-ok text-success"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
-</a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguptodate"
+<div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>Great! Since the R Markdown file has been committed to the Git
-repository, you know the exact version of the code that produced these
-results.</p>
+<p>The R Markdown file has unstaged changes. To know which version of
+the R Markdown file created these results, you’ll want to first commit
+it to the Git repo. If you’re still working on the analysis, you can
+ignore this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
 </div>
 </div>
 </div>
@@ -513,15 +516,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree1fdfaa62a256c37750a15ddc2023a682f2159008targetblank1fdfaa6a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8e34ef652943cc26d3fb8986a76a3329666674f4targetblank8e34ef6a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/1fdfaa62a256c37750a15ddc2023a682f2159008" target="_blank">1fdfaa6</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/8e34ef652943cc26d3fb8986a76a3329666674f4" target="_blank">8e34ef6</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree1fdfaa62a256c37750a15ddc2023a682f2159008targetblank1fdfaa6a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8e34ef652943cc26d3fb8986a76a3329666674f4targetblank8e34ef6a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +534,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/1fdfaa62a256c37750a15ddc2023a682f2159008" target="_blank">1fdfaa6</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/8e34ef652943cc26d3fb8986a76a3329666674f4" target="_blank">8e34ef6</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -552,6 +555,7 @@ Untracked files:
     Untracked:  test_matrixeqtl.R
 
 Unstaged changes:
+    Modified:   analysis/factor_eqtl.Rmd
     Modified:   data/mixedmodel_res_phi0.02.csv
     Modified:   data/mixedmodel_res_phi0.03.csv
     Modified:   data/mixedmodel_res_phi0.04.csv
@@ -606,6 +610,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/8e34ef652943cc26d3fb8986a76a3329666674f4/docs/factor_eqtl.html" target="_blank">8e34ef6</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2102,6 +2123,43 @@ pheatmap(cor(pcs$x[,1:4], dat$Z)**2, cluster_cols = F, cluster_rows = F,
          display_numbers=round(cor(pcs$x[,1:4],dat$Z)**2,3),
          fontsize_number = 15, cellheight = 20, cellwidth=60)</code></pre>
 <p><img src="figure/factor_eqtl.Rmd/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-20-1">
+Past versions of unnamed-chunk-20-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-20-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/8e34ef652943cc26d3fb8986a76a3329666674f4/docs/figure/factor_eqtl.Rmd/unnamed-chunk-20-1.png" target="_blank">8e34ef6</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>We repeated the simulation 300 times and check the statical
 power.</p>
 <pre class="r"><code>Nrep = 300
@@ -2145,12 +2203,60 @@ colnames(dat2)[5:24] &lt;- paste0(&quot;trait &quot;,1:10)
 dat3 &lt;- data.frame(frequency=colMeans(dat2&lt;0.05),
                    type=rep(c(&quot;Oracle&quot;,&quot;Estimated&quot;,&quot;Marginal&quot;),times=c(2,2,20)),
                    names=colnames(dat2))
-dat3$names[c(1,2,5:14)] &lt;- paste(colnames(dat2)[c(1,2,5:14)],&quot;~&quot;,&quot;X1&quot;)
-dat3$names[c(3,4,15:24)] &lt;- paste(colnames(dat2)[c(3,4,15:24)],&quot;~&quot;,&quot;X2&quot;)
+dat3$names[c(1,3,5:14)] &lt;- paste(colnames(dat2)[c(1,3,5:14)],&quot;~&quot;,&quot;X1&quot;)
+dat3$names[c(2,4,15:24)] &lt;- paste(colnames(dat2)[c(2,4,15:24)],&quot;~&quot;,&quot;X2&quot;)
 
 ggplot(dat3,aes(x=names,y=frequency,fill=type)) + geom_bar(stat=&quot;identity&quot;) + 
   theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1))</code></pre>
 <p><img src="figure/factor_eqtl.Rmd/unnamed-chunk-22-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-22-1">
+Past versions of unnamed-chunk-22-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-22-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/8e34ef652943cc26d3fb8986a76a3329666674f4/docs/figure/factor_eqtl.Rmd/unnamed-chunk-22-1.png" target="_blank">8e34ef6</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-06
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="eqtl-at-different-cellular-resolution" class="section level2">
+<h2>eQTL at different cellular resolution</h2>
+<p>I run eQTL mapping with three aggregation approach: (1) Take average
+of expression across all cells per donor; (2) take average of expression
+within the excitatory cell type (npglut and nmglut); (3) take average of
+expression within inhibitory cell types (GABA). All eQTL mapping was run
+with 5 genotype PCs, 15 expression PCs, and 95 donors. Total eQTL
+identified 8072 eGenes; excitatory eQTL identified 6926 eGenes;
+inhibitory eQTL identified 5155 eGenes.</p>
+<p><img src="docs/assets/psbulk_eqtl_overlap.png" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

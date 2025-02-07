@@ -425,12 +425,17 @@ colnames(dat2)[5:24] <- paste0("trait ",1:10)
 dat3 <- data.frame(frequency=colMeans(dat2<0.05),
                    type=rep(c("Oracle","Estimated","Marginal"),times=c(2,2,20)),
                    names=colnames(dat2))
-dat3$names[c(1,2,5:14)] <- paste(colnames(dat2)[c(1,2,5:14)],"~","X1")
-dat3$names[c(3,4,15:24)] <- paste(colnames(dat2)[c(3,4,15:24)],"~","X2")
+dat3$names[c(1,3,5:14)] <- paste(colnames(dat2)[c(1,3,5:14)],"~","X1")
+dat3$names[c(2,4,15:24)] <- paste(colnames(dat2)[c(2,4,15:24)],"~","X2")
 
 ggplot(dat3,aes(x=names,y=frequency,fill=type)) + geom_bar(stat="identity") + 
   theme_bw() + theme(axis.text.x = element_text(angle = 45,hjust=1))
 ```
 
+## eQTL at different cellular resolution
 
+I run eQTL mapping with three aggregation approach: (1) Take average of expression across all cells per donor; (2) take average of expression within the excitatory cell type (npglut and nmglut); (3) take average of expression within inhibitory cell types (GABA). All eQTL mapping was run with 5 genotype PCs, 15 expression PCs, and 95 donors. Total eQTL identified 8072 eGenes; excitatory eQTL identified 6926 eGenes; inhibitory eQTL identified 5155 eGenes.
+
+
+![](assets/psbulk_eqtl_overlap.png)
 
