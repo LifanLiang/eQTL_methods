@@ -361,7 +361,7 @@ factorization</h1>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,9 +386,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>eQTL_methods/</code> <span
@@ -411,21 +411,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -516,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8e34ef652943cc26d3fb8986a76a3329666674f4targetblank8e34ef6a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreea6f5a6eaaa03120e60f3954a4026aaa8fca47a55targetblanka6f5a6ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/8e34ef652943cc26d3fb8986a76a3329666674f4" target="_blank">8e34ef6</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/a6f5a6eaaa03120e60f3954a4026aaa8fca47a55" target="_blank">a6f5a6e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8e34ef652943cc26d3fb8986a76a3329666674f4targetblank8e34ef6a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreea6f5a6eaaa03120e60f3954a4026aaa8fca47a55targetblanka6f5a6ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -534,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/8e34ef652943cc26d3fb8986a76a3329666674f4" target="_blank">8e34ef6</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/a6f5a6eaaa03120e60f3954a4026aaa8fca47a55" target="_blank">a6f5a6e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -555,7 +552,6 @@ Untracked files:
     Untracked:  test_matrixeqtl.R
 
 Unstaged changes:
-    Modified:   analysis/factor_eqtl.Rmd
     Modified:   data/mixedmodel_res_phi0.02.csv
     Modified:   data/mixedmodel_res_phi0.03.csv
     Modified:   data/mixedmodel_res_phi0.04.csv
@@ -610,6 +606,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/a6f5a6eaaa03120e60f3954a4026aaa8fca47a55/analysis/factor_eqtl.Rmd" target="_blank">a6f5a6e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-07
+</td>
+<td>
+wflow_publish(c("analysis", "docs"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a6f5a6eaaa03120e60f3954a4026aaa8fca47a55/docs/factor_eqtl.html" target="_blank">a6f5a6e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-07
+</td>
+<td>
+wflow_publish(c("analysis", "docs"))
+</td>
+</tr>
 <tr>
 <td>
 html
@@ -2233,6 +2263,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/a6f5a6eaaa03120e60f3954a4026aaa8fca47a55/docs/figure/factor_eqtl.Rmd/unnamed-chunk-22-1.png" target="_blank">a6f5a6e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-07
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/8e34ef652943cc26d3fb8986a76a3329666674f4/docs/figure/factor_eqtl.Rmd/unnamed-chunk-22-1.png" target="_blank">8e34ef6</a>
 </td>
 <td>
@@ -2256,7 +2297,7 @@ expression within inhibitory cell types (GABA). All eQTL mapping was run
 with 5 genotype PCs, 15 expression PCs, and 95 donors. Total eQTL
 identified 8072 eGenes; excitatory eQTL identified 6926 eGenes;
 inhibitory eQTL identified 5155 eGenes.</p>
-<p><img src="docs/assets/psbulk_eqtl_overlap.png" /></p>
+<p><img src="assets/psbulk_eqtl_overlap.png" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
