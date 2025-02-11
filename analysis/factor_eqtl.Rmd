@@ -439,3 +439,8 @@ I run eQTL mapping with three aggregation approach: (1) Take average of expressi
 
 ![](assets/psbulk_eqtl_overlap.png)
 
+### Comparing with eQTL within single context
+
+![](assets/gaba1_inh_total.png)
+
+![](assets/npglut1_exc_total.png)
