@@ -1,0 +1,135 @@
+---
+title: "Informative prior"
+author: "Lifan Liang"
+date: "2025-02-14"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Simulation
+
+### Data generation
+
+We selected 3365 SNPs from a random region (i.e. `chr9:2000000-3000000`) and extracted the corresponding genotype of the 100 cell lines in the neuron stimulation. All SNPs have minor allele frequency (MAF) over 1%.
+
+```{r}
+library(pheatmap)
+X <- t(readRDS("data/neuron_stim_genotype_chr9_2e6-3e6.rds")[,-1] )# Each row is a cell line
+pheatmap(cor(X))
+```
+
+
+
+The SNPs were evenly split into 5 groups (673 SNPs per group). SNPs in each group has a different prior for being causal. But the causal SNPs have the same effect size. Let $Z_j$ be the group index for the $j_{th}$ SNP, $\gamma_j$ be whether the $j_{th}$ SNP is causal, and $X_ij$ be the genotype for the $i_{th}$ individual. The genetic effect for the $j_{th}$ SNP ($\beta_j$) is generated as follow:
+
+$$
+\gamma_j \sim Bernoulli(\pi_{Z_j})
+\\
+\beta_j|\gamma_j = 1 \sim N(0,\sigma^2)
+\\
+\beta_j|\gamma_j = 0 \sim \sigma_0
+$$
+
+where $\pi_k$ is the prior of being causal for the $k_{th}$ group, $\sigma$ is the effect size when the SNP is being causal, and $\sigma_0$ is the Dirac delta function.
+
+In this simulation, we set ($\pi_k$) as $\{0.02\%, 0.04\%,0.08\%,0.16\%,0.32\%\}$. For the whole region, 0.124% ($\approx 4$) of the SNPs are expected to be causal. We set $\sigma=0.2$ and $\sigma_e=1.0$. Then we generated gene expression Y as:
+
+$$
+\epsilon \sim N(0,\sigma_e^2)
+\\
+Y_i = \sum_j X_{ij}\beta_j + \epsilon
+$$
+
+```{r}
+sigma = 0.2
+sigma.e = 1.0
+
+#pi <- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
+pi <- rep(c(2,4,8,16,32) * 1e-4, 673)
+
+sim_group_pi <- function(X, pi, sigma=0.25, sigma.e=1.0) {
+  ### Impose the constraint that there is at least one causal SNP
+  N <- 0
+  while(N==0) {
+    gamma <- rbinom(ncol(X),1,pi)
+    N <- sum(gamma)
+  }
+  beta <- rnorm(ncol(X),sd=sigma) * gamma
+  eps <- rnorm(nrow(X),sd=sigma.e)
+  Y <- X %*% beta + eps
+  list(y=Y, X=X, pi=pi, gamma=gamma, beta=beta, eps=eps)
+}
+
+```
+
+PVE varies because the genetic component of $var(Y)$ depends on the allele frequency of causal SNPs. Mostly, the total PVE was less than 10%.
+
+```{r}
+set.seed(1234)
+pve <- numeric(100L)
+#rand.cor <- numeric(100L)
+for(i in 1:length(pve)) {
+  sim.res <- sim_group_pi(X,pi)
+  pve[i] <- var(sim.res$y - sim.res$eps) / var(sim.res$y)
+  #rand.cor[i] <- max(abs(cor(sim.res$eps, sim.res$dat[,-1][,gamma!=0])))
+}
+boxplot(pve)
+```
+
+
+### Model fitting
+
+We use Susie to identify the causal SNP given $Z_j$ and $\pi$. The baseline model for comparison is Lasso.
+
+#### Lasso
+
+For lasso, setting $\lambda=0.3$ seems to be optimal.
+
+```{r, eval=F}
+library(glmnet)
+lambda <- numeric(20L)
+for(i in 1:length(lambda)){
+  sim.res <- sim_group_pi(X,pi)
+  cvfit <- cv.glmnet(sim.res$X, sim.res$y)
+  lambda[i] <- cvfit$lambda.min
+}
+boxplot(lambda)
+
+```
+
+
+```{r}
+set.seed(22)
+sim.res <- sim_group_pi(X,pi)
+plot(abs(sim.res$beta),pch=16,ylab="absolute effect size",xlab="SNP index")
+```
+
+
+```{r}
+library(glmnet)
+fit <- glmnet(sim.res$X, sim.res$y,lambda = 0.3)
+plot(abs(fit$beta), ylab="absolute beta from lasso", xlab="SNP index")
+```
+
+#### SuSIE
+
+For the same simulation dataset, SuSIE return five credible sets with very low PIP.
+
+```{r}
+library(susieR)
+
+X1 <- apply(sim.res$X,2,as.numeric)
+susie.fit <- susie(X1, sim.res$y, prior_weights = sim.res$pi,
+                   L=sum(sim.res$gamma),standardize = F, coverage = 0.95)
+susie_plot(susie.fit, y='PIP')
+```
+
+When SuSIE was run without the grouped prior, results did not change much.
+
+```{r}
+susie.fit <- susie(X1, sim.res$y, coverage = 0.95,
+                   L=sum(sim.res$gamma),standardize = F)
+susie_plot(susie.fit, y='PIP')
+```
+
