@@ -11,12 +11,12 @@ editor_options:
 
 ### Data generation
 
-We selected 3365 SNPs from a random region (i.e. `chr9:2000000-3000000`) and extracted the corresponding genotype of the 100 cell lines in the neuron stimulation. All SNPs have minor allele frequency (MAF) over 1%.
+We selected 3365 SNPs from a random region (i.e. `chr9:2000000-3000000`) and extracted the corresponding genotype of the 100 cell lines in the neuron stimulation. All SNPs have minor allele frequency (MAF) over 1%. The heatmap below shows the genotype profiles of SNP (column).
 
 ```{r}
 library(pheatmap)
 X <- t(readRDS("data/neuron_stim_genotype_chr9_2e6-3e6.rds")[,-1] )# Each row is a cell line
-pheatmap(cor(X))
+pheatmap(X,cluster_cols = F)
 ```
 
 
@@ -86,7 +86,7 @@ We use Susie to identify the causal SNP given $Z_j$ and $\pi$. The baseline mode
 
 For lasso, setting $\lambda=0.3$ seems to be optimal.
 
-```{r, eval=F}
+```{r, eval=F, echo=F}
 library(glmnet)
 lambda <- numeric(20L)
 for(i in 1:length(lambda)){
@@ -125,7 +125,7 @@ susie.fit <- susie(X1, sim.res$y, prior_weights = sim.res$pi,
 susie_plot(susie.fit, y='PIP')
 ```
 
-When SuSIE was run without the grouped prior, results did not change much.
+When SuSIE was run without the grouped prior, results change a bit for SNPs in LD of the causal one.
 
 ```{r}
 susie.fit <- susie(X1, sim.res$y, coverage = 0.95,
