@@ -42,8 +42,8 @@ Y_i = \sum_j X_{ij}\beta_j + \epsilon
 $$
 
 ```{r}
-sigma = 0.2
-sigma.e = 1.0
+sigma = 0.5
+sigma.e = 0.5
 
 #pi <- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
 pi <- rep(c(2,4,8,16,32) * 1e-4, 673)
@@ -63,7 +63,7 @@ sim_group_pi <- function(X, pi, sigma=0.25, sigma.e=1.0) {
 
 ```
 
-PVE varies because the genetic component of $var(Y)$ depends on the allele frequency of causal SNPs. Mostly, the total PVE was less than 10%.
+PVE varies because the genetic component of $var(Y)$ depends on the effect size and the allele frequency of causal SNPs. Mostly, the total PVE was less than 10%.
 
 ```{r}
 set.seed(1234)
@@ -114,7 +114,7 @@ plot(abs(fit$beta), ylab="absolute beta from lasso", xlab="SNP index")
 
 #### SuSIE
 
-For the same simulation dataset, SuSIE return five credible sets with very low PIP.
+For the same simulation dataset, SuSIE return five credible sets. Due to strong LD in the loci, PIP for individual SNP was low. 
 
 ```{r}
 library(susieR)
@@ -131,5 +131,37 @@ When SuSIE was run without the grouped prior, results change a bit for SNPs in L
 susie.fit <- susie(X1, sim.res$y, coverage = 0.95,
                    L=sum(sim.res$gamma),standardize = F)
 susie_plot(susie.fit, y='PIP')
+```
+
+### Cross validation
+
+We used 5-fold cross validation over the 100 individuals. Use mean square error in the test set as the evaluation metric. The two SuSIE models is one with priors and one without.
+
+```{r}
+inds <- sample(rep(1:5,times=20))
+sim.res$X <- apply(sim.res$X,2,as.numeric)
+dat.mse <- matrix(nrow=5,ncol=3)
+colnames(dat.mse) <- c("lasso","susie","susie.prior")
+
+for(i in 1:5) {
+  X.train <- sim.res$X[inds!=i,]
+  y.train <- sim.res$y[inds!=i]
+  X.test <- sim.res$X[inds==i,]
+  y.test <- sim.res$y[inds==i]
+  
+  lasso.fit <- glmnet(X.train, y.train,lambda = 0.3)
+  lasso.y <- predict(lasso.fit, X.test)
+  dat.mse[i,"lasso"] <- mean((y.test - lasso.y)**2)
+  
+  susie.fit <- susie(X.train, y.train, L=5, standardize = F)
+  susie.y <- predict(susie.fit, X.test)
+  dat.mse[i,"susie"] <- mean((y.test - susie.y)**2)
+  
+  susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
+  susie.y <- predict(susie.fit, X.test)
+  dat.mse[i,"susie.prior"] <- mean((y.test - susie.y)**2)
+}
+
+boxplot(dat.mse, ylab="MSE")
 ```
 
