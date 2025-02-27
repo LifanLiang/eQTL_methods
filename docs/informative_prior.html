@@ -381,7 +381,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2025-02-26
+<strong>Last updated:</strong> 2025-02-27
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -512,15 +512,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree5c8b81ee8bb822d60785a5ed647b1b62da632e02targetblank5c8b81ea">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree5befbac7dd4990009282242b1ff0817ab33516d0targetblank5befbaca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/5c8b81ee8bb822d60785a5ed647b1b62da632e02" target="_blank">5c8b81e</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/5befbac7dd4990009282242b1ff0817ab33516d0" target="_blank">5befbac</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree5c8b81ee8bb822d60785a5ed647b1b62da632e02targetblank5c8b81ea"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree5befbac7dd4990009282242b1ff0817ab33516d0targetblank5befbaca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -530,7 +530,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/5c8b81ee8bb822d60785a5ed647b1b62da632e02" target="_blank">5c8b81e</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/5befbac7dd4990009282242b1ff0817ab33516d0" target="_blank">5befbac</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -606,6 +606,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/5befbac7dd4990009282242b1ff0817ab33516d0/analysis/informative_prior.Rmd" target="_blank">5befbac</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-27
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fcd0e96ca578cac430328b890f3edc9afece3ee4/docs/informative_prior.html" target="_blank">fcd0e96</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -795,13 +829,13 @@ expression Y as:</p>
 \\
 Y_i = \sum_j X_{ij}\beta_j + \epsilon
 \]</span></p>
-<pre class="r"><code>sigma = 0.5
-sigma.e = 0.5
+<pre class="r"><code>sigma = 0.3
+sigma.e = 1.0
 
 #pi &lt;- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
 pi &lt;- rep(c(2,4,8,16,32) * 1e-4, 673)
 
-sim_group_pi &lt;- function(X, pi, sigma=0.25, sigma.e=1.0) {
+sim_group_pi &lt;- function(X, pi=pi, sigma=0.3, sigma.e=1.0) {
   ### Impose the constraint that there is at least one causal SNP
   N &lt;- 0
   while(N==0) {
@@ -816,7 +850,7 @@ sim_group_pi &lt;- function(X, pi, sigma=0.25, sigma.e=1.0) {
 <p>PVE varies because the genetic component of <span
 class="math inline">\(var(Y)\)</span> depends on the effect size and the
 allele frequency of causal SNPs. Mostly, the total PVE was less than
-10%.</p>
+20%.</p>
 <pre class="r"><code>set.seed(1234)
 pve &lt;- numeric(100L)
 #rand.cor &lt;- numeric(100L)
@@ -1008,8 +1042,8 @@ Lifan Liang
 </table>
 </div>
 </div>
-<p>When SuSIE was run without the grouped prior, results change a bit
-for SNPs in LD of the causal one.</p>
+<p>When SuSIE was run without the grouped prior, more SNPs have similar
+PIP in the same credible set.</p>
 <pre class="r"><code>susie.fit &lt;- susie(X1, sim.res$y, coverage = 0.95,
                    L=sum(sim.res$gamma),standardize = F)
 susie_plot(susie.fit, y=&#39;PIP&#39;)</code></pre>
@@ -1055,15 +1089,15 @@ Lifan Liang
 </div>
 <div id="cross-validation" class="section level3">
 <h3>Cross validation</h3>
-<p>We used 5-fold cross validation over the 100 individuals. Use mean
-square error in the test set as the evaluation metric. The two SuSIE
-models is one with priors and one without.</p>
-<pre class="r"><code>inds &lt;- sample(rep(1:5,times=20))
+<p>We used 10-fold cross validation over the 100 individuals. Evaluation
+metric in the test set is <span class="math inline">\(R^2\)</span>. The
+two SuSIE models is one with priors and one without.</p>
+<pre class="r"><code>inds &lt;- sample(rep(1:10,times=10))
 sim.res$X &lt;- apply(sim.res$X,2,as.numeric)
-dat.mse &lt;- matrix(nrow=5,ncol=3)
-colnames(dat.mse) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
+dat.r2 &lt;- matrix(nrow=10,ncol=3)
+colnames(dat.r2) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
 
-for(i in 1:5) {
+for(i in 1:10) {
   X.train &lt;- sim.res$X[inds!=i,]
   y.train &lt;- sim.res$y[inds!=i]
   X.test &lt;- sim.res$X[inds==i,]
@@ -1071,19 +1105,56 @@ for(i in 1:5) {
   
   lasso.fit &lt;- glmnet(X.train, y.train,lambda = 0.3)
   lasso.y &lt;- predict(lasso.fit, X.test)
-  dat.mse[i,&quot;lasso&quot;] &lt;- mean((y.test - lasso.y)**2)
+  dat.r2[i,&quot;lasso&quot;] &lt;- cor(y.test,lasso.y)**2
   
   susie.fit &lt;- susie(X.train, y.train, L=5, standardize = F)
   susie.y &lt;- predict(susie.fit, X.test)
-  dat.mse[i,&quot;susie&quot;] &lt;- mean((y.test - susie.y)**2)
+  dat.r2[i,&quot;susie&quot;] &lt;- cor(y.test,susie.y)**2
   
   susie.fit &lt;- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
   susie.y &lt;- predict(susie.fit, X.test)
-  dat.mse[i,&quot;susie.prior&quot;] &lt;- mean((y.test - susie.y)**2)
+  dat.r2[i,&quot;susie.prior&quot;] &lt;- cor(y.test,susie.y)**2
 }
 
-boxplot(dat.mse, ylab=&quot;MSE&quot;)</code></pre>
+boxplot(dat.r2, ylab=&quot;R2&quot;, col=2:4)</code></pre>
 <p><img src="figure/informative_prior.Rmd/unnamed-chunk-9-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-9-1">
+Past versions of unnamed-chunk-9-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-9-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/fcd0e96ca578cac430328b890f3edc9afece3ee4/docs/figure/informative_prior.Rmd/unnamed-chunk-9-1.png" target="_blank">fcd0e96</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-26
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
