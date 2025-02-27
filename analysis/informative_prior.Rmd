@@ -42,13 +42,13 @@ Y_i = \sum_j X_{ij}\beta_j + \epsilon
 $$
 
 ```{r}
-sigma = 0.5
-sigma.e = 0.5
+sigma = 0.3
+sigma.e = 1.0
 
 #pi <- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
 pi <- rep(c(2,4,8,16,32) * 1e-4, 673)
 
-sim_group_pi <- function(X, pi, sigma=0.25, sigma.e=1.0) {
+sim_group_pi <- function(X, pi=pi, sigma=0.3, sigma.e=1.0) {
   ### Impose the constraint that there is at least one causal SNP
   N <- 0
   while(N==0) {
@@ -63,7 +63,7 @@ sim_group_pi <- function(X, pi, sigma=0.25, sigma.e=1.0) {
 
 ```
 
-PVE varies because the genetic component of $var(Y)$ depends on the effect size and the allele frequency of causal SNPs. Mostly, the total PVE was less than 10%.
+PVE varies because the genetic component of $var(Y)$ depends on the effect size and the allele frequency of causal SNPs. Mostly, the total PVE was less than 20%.
 
 ```{r}
 set.seed(1234)
@@ -125,7 +125,7 @@ susie.fit <- susie(X1, sim.res$y, prior_weights = sim.res$pi,
 susie_plot(susie.fit, y='PIP')
 ```
 
-When SuSIE was run without the grouped prior, results change a bit for SNPs in LD of the causal one.
+When SuSIE was run without the grouped prior, more SNPs have similar PIP in the same credible set.
 
 ```{r}
 susie.fit <- susie(X1, sim.res$y, coverage = 0.95,
@@ -135,15 +135,15 @@ susie_plot(susie.fit, y='PIP')
 
 ### Cross validation
 
-We used 5-fold cross validation over the 100 individuals. Use mean square error in the test set as the evaluation metric. The two SuSIE models is one with priors and one without.
+We used 10-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without.
 
 ```{r}
-inds <- sample(rep(1:5,times=20))
+inds <- sample(rep(1:10,times=10))
 sim.res$X <- apply(sim.res$X,2,as.numeric)
-dat.mse <- matrix(nrow=5,ncol=3)
-colnames(dat.mse) <- c("lasso","susie","susie.prior")
+dat.r2 <- matrix(nrow=10,ncol=3)
+colnames(dat.r2) <- c("lasso","susie","susie.prior")
 
-for(i in 1:5) {
+for(i in 1:10) {
   X.train <- sim.res$X[inds!=i,]
   y.train <- sim.res$y[inds!=i]
   X.test <- sim.res$X[inds==i,]
@@ -151,17 +151,17 @@ for(i in 1:5) {
   
   lasso.fit <- glmnet(X.train, y.train,lambda = 0.3)
   lasso.y <- predict(lasso.fit, X.test)
-  dat.mse[i,"lasso"] <- mean((y.test - lasso.y)**2)
+  dat.r2[i,"lasso"] <- cor(y.test,lasso.y)**2
   
   susie.fit <- susie(X.train, y.train, L=5, standardize = F)
   susie.y <- predict(susie.fit, X.test)
-  dat.mse[i,"susie"] <- mean((y.test - susie.y)**2)
+  dat.r2[i,"susie"] <- cor(y.test,susie.y)**2
   
   susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
   susie.y <- predict(susie.fit, X.test)
-  dat.mse[i,"susie.prior"] <- mean((y.test - susie.y)**2)
+  dat.r2[i,"susie.prior"] <- cor(y.test,susie.y)**2
 }
 
-boxplot(dat.mse, ylab="MSE")
+boxplot(dat.r2, ylab="R2", col=2:4)
 ```
 
