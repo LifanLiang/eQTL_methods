@@ -42,13 +42,10 @@ Y_i = \sum_j X_{ij}\beta_j + \epsilon
 $$
 
 ```{r}
-sigma = 0.3
-sigma.e = 1.0
-
 #pi <- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
 pi <- rep(c(2,4,8,16,32) * 1e-4, 673)
 
-sim_group_pi <- function(X, pi=pi, sigma=0.3, sigma.e=1.0) {
+sim_group_pi <- function(X, pi=pi, sigma=0.25, sigma.e=1.0) {
   ### Impose the constraint that there is at least one causal SNP
   N <- 0
   while(N==0) {
@@ -135,15 +132,17 @@ susie_plot(susie.fit, y='PIP')
 
 ### Cross validation
 
-We used 10-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without.
+We used 5-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without. Note that performance varies a lot depending on the simulated data and the training-testing split.
 
 ```{r}
-inds <- sample(rep(1:10,times=10))
+set.seed(22)
+sim.res <- sim_group_pi(X, pi)
+inds <- sample(rep(1:5,times=20))
 sim.res$X <- apply(sim.res$X,2,as.numeric)
-dat.r2 <- matrix(nrow=10,ncol=3)
+dat.r2 <- matrix(nrow=5,ncol=3)
 colnames(dat.r2) <- c("lasso","susie","susie.prior")
 
-for(i in 1:10) {
+for(i in 1:5) {
   X.train <- sim.res$X[inds!=i,]
   y.train <- sim.res$y[inds!=i]
   X.test <- sim.res$X[inds==i,]
