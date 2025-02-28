@@ -68,7 +68,7 @@ pve <- numeric(100L)
 #rand.cor <- numeric(100L)
 for(i in 1:length(pve)) {
   sim.res <- sim_group_pi(X,pi)
-  pve[i] <- var(sim.res$y - sim.res$eps) / var(sim.res$y)
+  pve[i] <- 1 - sum(sim.res$eps**2) / sum((sim.res$y - mean(sim.res$y))**2)
   #rand.cor[i] <- max(abs(cor(sim.res$eps, sim.res$dat[,-1][,gamma!=0])))
 }
 boxplot(pve)
@@ -135,6 +135,12 @@ susie_plot(susie.fit, y='PIP')
 We used 5-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without. Note that performance varies a lot depending on the simulated data and the training-testing split.
 
 ```{r}
+calc.r2 <- function(y.test, y.hat, y.mean) {
+  1 - sum((y.test-y.hat)**2) / sum((y.test-y.mean)**2)
+}
+```
+
+```{r}
 set.seed(22)
 sim.res <- sim_group_pi(X, pi)
 inds <- sample(rep(1:5,times=20))
@@ -161,6 +167,32 @@ for(i in 1:5) {
   dat.r2[i,"susie.prior"] <- cor(y.test,susie.y)**2
 }
 
-boxplot(dat.r2, ylab="R2", col=2:4)
+boxplot(dat.r2, ylab="R2 (squred correlation)", col=2:4)
+```
+
+```{r}
+dat.r2 <- matrix(nrow=5,ncol=3)
+colnames(dat.r2) <- c("lasso","susie","susie.prior")
+
+for(i in 1:5) {
+  X.train <- sim.res$X[inds!=i,]
+  y.train <- sim.res$y[inds!=i]
+  X.test <- sim.res$X[inds==i,]
+  y.test <- sim.res$y[inds==i]
+  
+  lasso.fit <- glmnet(X.train, y.train,lambda = 0.3)
+  lasso.y <- predict(lasso.fit, X.test)
+  dat.r2[i,"lasso"] <- calc.r2(y.test,lasso.y,mean(y.train))
+  
+  susie.fit <- susie(X.train, y.train, L=5, standardize = F)
+  susie.y <- predict(susie.fit, X.test, "response")
+  dat.r2[i,"susie"] <- calc.r2(y.test,susie.y,mean(y.train))
+  
+  susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
+  susie.y <- predict(susie.fit, X.test, "response")
+  dat.r2[i,"susie.prior"] <- calc.r2(y.test,susie.y,mean(y.train))
+}
+
+boxplot(dat.r2, ylab="R2 (compared to intercept model)", col=2:4)
 ```
 
