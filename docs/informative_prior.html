@@ -512,15 +512,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree528a7e2b11ee2acf11f6fe1d30c37f3876037c70targetblank528a7e2a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree882e848851ebb7597fc250ef3829d5645f55fd14targetblank882e848a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/528a7e2b11ee2acf11f6fe1d30c37f3876037c70" target="_blank">528a7e2</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/882e848851ebb7597fc250ef3829d5645f55fd14" target="_blank">882e848</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree528a7e2b11ee2acf11f6fe1d30c37f3876037c70targetblank528a7e2a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree882e848851ebb7597fc250ef3829d5645f55fd14targetblank882e848a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -530,7 +530,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/528a7e2b11ee2acf11f6fe1d30c37f3876037c70" target="_blank">528a7e2</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/882e848851ebb7597fc250ef3829d5645f55fd14" target="_blank">882e848</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -548,6 +548,7 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .RData
     Ignored:    .Rhistory
+    Ignored:    analysis/figure/
 
 Untracked files:
     Untracked:  data/neuron_stim_genotype_chr9_2e6-3e6.rds
@@ -608,6 +609,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/882e848851ebb7597fc250ef3829d5645f55fd14/analysis/informative_prior.Rmd" target="_blank">882e848</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-28
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b87a57e01f9443443fc481aa83a04aadf0da54b0/docs/informative_prior.html" target="_blank">b87a57e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-02-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -945,7 +980,8 @@ sim_group_pi &lt;- function(X, pi=pi, sigma=0.25, sigma.e=1.0) {
   }
   beta &lt;- rnorm(ncol(X),sd=sigma) * gamma
   eps &lt;- rnorm(nrow(X),sd=sigma.e)
-  Y &lt;- X %*% beta + eps
+  X &lt;- scale(X, center=T, scale=T)
+  Y &lt;- drop(X %*% beta + eps)
   list(y=Y, X=X, pi=pi, gamma=gamma, beta=beta, eps=eps)
 }</code></pre>
 <p>PVE varies because the genetic component of <span
@@ -1178,9 +1214,9 @@ Lifan Liang
 to strong LD in the loci, PIP for individual SNP was low.</p>
 <pre class="r"><code>library(susieR)
 
-X1 &lt;- apply(sim.res$X,2,as.numeric)
-susie.fit &lt;- susie(X1, sim.res$y, prior_weights = sim.res$pi,
-                   L=sum(sim.res$gamma),standardize = F, coverage = 0.95)
+susie.fit &lt;- susie(sim.res$X, sim.res$y, prior_weights = sim.res$pi,
+                   L=sum(sim.res$gamma), coverage = 0.9, standardize = T,
+                   compute_univariate_zscore = T)
 susie_plot(susie.fit, y=&#39;PIP&#39;)</code></pre>
 <p><img src="figure/informative_prior.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -1244,8 +1280,7 @@ Lifan Liang
 </div>
 <p>When SuSIE was run without the grouped prior, more SNPs have similar
 PIP in the same credible set.</p>
-<pre class="r"><code>susie.fit &lt;- susie(X1, sim.res$y, coverage = 0.95,
-                   L=sum(sim.res$gamma),standardize = F)
+<pre class="r"><code>susie.fit &lt;- susie(sim.res$X, sim.res$y,L=sum(sim.res$gamma))
 susie_plot(susie.fit, y=&#39;PIP&#39;)</code></pre>
 <p><img src="figure/informative_prior.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -1326,73 +1361,22 @@ mean of <span class="math inline">\(y\)</span> in the training set.</p>
 <pre class="r"><code>calc.r2 &lt;- function(y.test, y.hat, y.mean) {
   1 - sum((y.test-y.hat)**2) / sum((y.test-y.mean)**2)
 }</code></pre>
+<pre class="r"><code>calc.mse &lt;- function(y.test, y.hat) {
+  mean((y.test - y.hat)^2)
+}</code></pre>
 <pre class="r"><code>set.seed(22)
 sim.res &lt;- sim_group_pi(X, pi)
 inds &lt;- sample(rep(1:5,times=20))
-sim.res$X &lt;- apply(sim.res$X,2,as.numeric)
+#sim.res$X &lt;- apply(sim.res$X,2,as.numeric)
+#sim.res$X &lt;- scale(sim.res$X, center=T, scale=T)
+dat.cor2 &lt;- matrix(nrow=5,ncol=3)
+colnames(dat.cor2) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
+
 dat.r2 &lt;- matrix(nrow=5,ncol=3)
 colnames(dat.r2) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
 
-for(i in 1:5) {
-  X.train &lt;- sim.res$X[inds!=i,]
-  y.train &lt;- sim.res$y[inds!=i]
-  X.test &lt;- sim.res$X[inds==i,]
-  y.test &lt;- sim.res$y[inds==i]
-  
-  lasso.fit &lt;- glmnet(X.train, y.train,lambda = 0.3)
-  lasso.y &lt;- predict(lasso.fit, X.test)
-  dat.r2[i,&quot;lasso&quot;] &lt;- cor(y.test,lasso.y)**2
-  
-  susie.fit &lt;- susie(X.train, y.train, L=5, standardize = F)
-  susie.y &lt;- predict(susie.fit, X.test)
-  dat.r2[i,&quot;susie&quot;] &lt;- cor(y.test,susie.y)**2
-  
-  susie.fit &lt;- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
-  susie.y &lt;- predict(susie.fit, X.test)
-  dat.r2[i,&quot;susie.prior&quot;] &lt;- cor(y.test,susie.y)**2
-}
-
-boxplot(dat.r2, ylab=&quot;R2 (squred correlation)&quot;, col=2:4)</code></pre>
-<p><img src="figure/informative_prior.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
-Past versions of unnamed-chunk-10-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-10-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/93100b381308a1406e3dad68d5ca60d8ede2e5be/docs/figure/informative_prior.Rmd/unnamed-chunk-10-1.png" target="_blank">93100b3</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>dat.r2 &lt;- matrix(nrow=5,ncol=3)
-colnames(dat.r2) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
+dat.mse &lt;- matrix(nrow=5,ncol=3)
+colnames(dat.mse) &lt;- c(&quot;lasso&quot;,&quot;susie&quot;,&quot;susie.prior&quot;)
 
 for(i in 1:5) {
   X.train &lt;- sim.res$X[inds!=i,]
@@ -1402,18 +1386,24 @@ for(i in 1:5) {
   
   lasso.fit &lt;- glmnet(X.train, y.train,lambda = 0.3)
   lasso.y &lt;- predict(lasso.fit, X.test)
+  dat.cor2[i,&quot;lasso&quot;] &lt;- cor(y.test,lasso.y)**2
   dat.r2[i,&quot;lasso&quot;] &lt;- calc.r2(y.test,lasso.y,mean(y.train))
+  dat.mse[i,&quot;lasso&quot;] &lt;- calc.mse(y.test,lasso.y)
   
-  susie.fit &lt;- susie(X.train, y.train, L=5, standardize = F)
-  susie.y &lt;- predict(susie.fit, X.test, &quot;response&quot;)
+  susie.fit &lt;- susie(X.train, y.train)
+  susie.y &lt;- predict(susie.fit, X.test)
+  dat.cor2[i,&quot;susie&quot;] &lt;- cor(y.test,susie.y)**2
   dat.r2[i,&quot;susie&quot;] &lt;- calc.r2(y.test,susie.y,mean(y.train))
+  dat.mse[i,&quot;susie&quot;] &lt;- calc.mse(y.test,susie.y)
   
-  susie.fit &lt;- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
-  susie.y &lt;- predict(susie.fit, X.test, &quot;response&quot;)
+  susie.fit &lt;- susie(X.train, y.train, prior_weights = sim.res$pi)
+  susie.y &lt;- predict(susie.fit, X.test)
+  dat.cor2[i,&quot;susie.prior&quot;] &lt;- cor(y.test,susie.y)**2
   dat.r2[i,&quot;susie.prior&quot;] &lt;- calc.r2(y.test,susie.y,mean(y.train))
+  dat.mse[i,&quot;susie.prior&quot;] &lt;- calc.mse(y.test,susie.y)
 }
 
-boxplot(dat.r2, ylab=&quot;R2 (compared to intercept model)&quot;, col=2:4)</code></pre>
+boxplot(dat.cor2, ylab=&quot;R2 (squred correlation)&quot;, col=2:4)</code></pre>
 <p><img src="figure/informative_prior.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
@@ -1452,6 +1442,10 @@ Lifan Liang
 </table>
 </div>
 </div>
+<pre class="r"><code>boxplot(dat.r2, ylab=&quot;R2 (compared to intercept model)&quot;, col=2:4)</code></pre>
+<p><img src="figure/informative_prior.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>boxplot(dat.mse, ylab=&quot;Mean squared error&quot;, col=2:4)</code></pre>
+<p><img src="figure/informative_prior.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
