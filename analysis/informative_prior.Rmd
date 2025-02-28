@@ -54,7 +54,8 @@ sim_group_pi <- function(X, pi=pi, sigma=0.25, sigma.e=1.0) {
   }
   beta <- rnorm(ncol(X),sd=sigma) * gamma
   eps <- rnorm(nrow(X),sd=sigma.e)
-  Y <- X %*% beta + eps
+  X <- scale(X, center=T, scale=T)
+  Y <- drop(X %*% beta + eps)
   list(y=Y, X=X, pi=pi, gamma=gamma, beta=beta, eps=eps)
 }
 
@@ -116,17 +117,16 @@ For the same simulation dataset, SuSIE return five credible sets. Due to strong 
 ```{r}
 library(susieR)
 
-X1 <- apply(sim.res$X,2,as.numeric)
-susie.fit <- susie(X1, sim.res$y, prior_weights = sim.res$pi,
-                   L=sum(sim.res$gamma),standardize = F, coverage = 0.95)
+susie.fit <- susie(sim.res$X, sim.res$y, prior_weights = sim.res$pi,
+                   L=sum(sim.res$gamma), coverage = 0.9, standardize = T,
+                   compute_univariate_zscore = T)
 susie_plot(susie.fit, y='PIP')
 ```
 
 When SuSIE was run without the grouped prior, more SNPs have similar PIP in the same credible set.
 
 ```{r}
-susie.fit <- susie(X1, sim.res$y, coverage = 0.95,
-                   L=sum(sim.res$gamma),standardize = F)
+susie.fit <- susie(sim.res$X, sim.res$y,L=sum(sim.res$gamma))
 susie_plot(susie.fit, y='PIP')
 ```
 
@@ -141,12 +141,26 @@ calc.r2 <- function(y.test, y.hat, y.mean) {
 ```
 
 ```{r}
+calc.mse <- function(y.test, y.hat) {
+  mean((y.test - y.hat)^2)
+}
+```
+
+
+```{r}
 set.seed(22)
 sim.res <- sim_group_pi(X, pi)
 inds <- sample(rep(1:5,times=20))
-sim.res$X <- apply(sim.res$X,2,as.numeric)
+#sim.res$X <- apply(sim.res$X,2,as.numeric)
+#sim.res$X <- scale(sim.res$X, center=T, scale=T)
+dat.cor2 <- matrix(nrow=5,ncol=3)
+colnames(dat.cor2) <- c("lasso","susie","susie.prior")
+
 dat.r2 <- matrix(nrow=5,ncol=3)
 colnames(dat.r2) <- c("lasso","susie","susie.prior")
+
+dat.mse <- matrix(nrow=5,ncol=3)
+colnames(dat.mse) <- c("lasso","susie","susie.prior")
 
 for(i in 1:5) {
   X.train <- sim.res$X[inds!=i,]
@@ -156,43 +170,34 @@ for(i in 1:5) {
   
   lasso.fit <- glmnet(X.train, y.train,lambda = 0.3)
   lasso.y <- predict(lasso.fit, X.test)
-  dat.r2[i,"lasso"] <- cor(y.test,lasso.y)**2
+  dat.cor2[i,"lasso"] <- cor(y.test,lasso.y)**2
+  dat.r2[i,"lasso"] <- calc.r2(y.test,lasso.y,mean(y.train))
+  dat.mse[i,"lasso"] <- calc.mse(y.test,lasso.y)
   
-  susie.fit <- susie(X.train, y.train, L=5, standardize = F)
+  susie.fit <- susie(X.train, y.train)
   susie.y <- predict(susie.fit, X.test)
-  dat.r2[i,"susie"] <- cor(y.test,susie.y)**2
+  dat.cor2[i,"susie"] <- cor(y.test,susie.y)**2
+  dat.r2[i,"susie"] <- calc.r2(y.test,susie.y,mean(y.train))
+  dat.mse[i,"susie"] <- calc.mse(y.test,susie.y)
   
-  susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
+  susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi)
   susie.y <- predict(susie.fit, X.test)
-  dat.r2[i,"susie.prior"] <- cor(y.test,susie.y)**2
+  dat.cor2[i,"susie.prior"] <- cor(y.test,susie.y)**2
+  dat.r2[i,"susie.prior"] <- calc.r2(y.test,susie.y,mean(y.train))
+  dat.mse[i,"susie.prior"] <- calc.mse(y.test,susie.y)
 }
 
-boxplot(dat.r2, ylab="R2 (squred correlation)", col=2:4)
+boxplot(dat.cor2, ylab="R2 (squred correlation)", col=2:4)
 ```
 
 ```{r}
-dat.r2 <- matrix(nrow=5,ncol=3)
-colnames(dat.r2) <- c("lasso","susie","susie.prior")
-
-for(i in 1:5) {
-  X.train <- sim.res$X[inds!=i,]
-  y.train <- sim.res$y[inds!=i]
-  X.test <- sim.res$X[inds==i,]
-  y.test <- sim.res$y[inds==i]
-  
-  lasso.fit <- glmnet(X.train, y.train,lambda = 0.3)
-  lasso.y <- predict(lasso.fit, X.test)
-  dat.r2[i,"lasso"] <- calc.r2(y.test,lasso.y,mean(y.train))
-  
-  susie.fit <- susie(X.train, y.train, L=5, standardize = F)
-  susie.y <- predict(susie.fit, X.test, "response")
-  dat.r2[i,"susie"] <- calc.r2(y.test,susie.y,mean(y.train))
-  
-  susie.fit <- susie(X.train, y.train, prior_weights = sim.res$pi, L=5, standardize = F)
-  susie.y <- predict(susie.fit, X.test, "response")
-  dat.r2[i,"susie.prior"] <- calc.r2(y.test,susie.y,mean(y.train))
-}
-
 boxplot(dat.r2, ylab="R2 (compared to intercept model)", col=2:4)
 ```
+
+
+```{r}
+boxplot(dat.mse, ylab="Mean squared error", col=2:4)
+```
+
+
 
