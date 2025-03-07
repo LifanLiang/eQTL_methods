@@ -43,7 +43,7 @@ $$
 
 ```{r}
 #pi <- rep(c(2,4,8,16,32) * 1e-4, each=ncol(X)/5)
-pi <- rep(c(2,4,8,16,32) * 1e-4, 673)
+pi <- rep(c(rep(2,9),50) * 1e-4, 400)[1:ncol(X)]
 
 sim_group_pi <- function(X, pi=pi, sigma=0.25, sigma.e=1.0) {
   ### Impose the constraint that there is at least one causal SNP
@@ -89,7 +89,7 @@ library(glmnet)
 lambda <- numeric(20L)
 for(i in 1:length(lambda)){
   sim.res <- sim_group_pi(X,pi)
-  cvfit <- cv.glmnet(sim.res$X, sim.res$y)
+  cvfit <- cv.glmnet(sim.res$X, sim.res$y,penalty.factor = 1/sqrt(sim.res$pi*(1-sim.res$pi)))
   lambda[i] <- cvfit$lambda.min
 }
 boxplot(lambda)
@@ -100,15 +100,30 @@ boxplot(lambda)
 ```{r}
 set.seed(22)
 sim.res <- sim_group_pi(X,pi)
-plot(abs(sim.res$beta),pch=16,ylab="absolute effect size",xlab="SNP index")
+plot(abs(sim.res$beta),pch=16,ylab="absolute effect size",xlab="SNP index", main="Oracle")
 ```
 
 
 ```{r}
 library(glmnet)
-fit <- glmnet(sim.res$X, sim.res$y,lambda = 0.3)
-plot(abs(fit$beta), ylab="absolute beta from lasso", xlab="SNP index")
+lasso.fit <- glmnet(sim.res$X, sim.res$y,lambda = 0.3)
+plot(abs(lasso.fit$beta), ylab="absolute effect size", xlab="SNP index", main="Lasso")
 ```
+
+
+### Lasso with prior weights
+
+Setting `penalty.factor` proportional to $\pi$. In other words, the last group of SNPs only have 4% of penalty of the other group. In this case, lambda is better set at 6.
+
+```{r}
+library(glmnet)
+net.fit <- glmnet(sim.res$X, sim.res$y, lambda=1, alpha=1,
+                  penalty.factor = 1/sqrt(sim.res$pi*(1-sim.res$pi)))
+plot(abs(net.fit$beta), ylab="absolute effect size", 
+     xlab="SNP index", main="adaptive lasso")
+```
+
+
 
 #### SuSIE
 
@@ -118,21 +133,22 @@ For the same simulation dataset, SuSIE return five credible sets. Due to strong 
 library(susieR)
 
 susie.fit <- susie(sim.res$X, sim.res$y, prior_weights = sim.res$pi,
-                   L=sum(sim.res$gamma), coverage = 0.9, standardize = T,
-                   compute_univariate_zscore = T)
-susie_plot(susie.fit, y='PIP')
+                   L=sum(sim.res$gamma), coverage = 0.95, standardize = F,
+                   intercept = T, compute_univariate_zscore = T)
+susie_plot(susie.fit, y='PIP', main="SuSIE with prior")
 ```
 
 When SuSIE was run without the grouped prior, more SNPs have similar PIP in the same credible set.
 
 ```{r}
-susie.fit <- susie(sim.res$X, sim.res$y,L=sum(sim.res$gamma))
-susie_plot(susie.fit, y='PIP')
+susie.fit <- susie(sim.res$X, sim.res$y,L=sum(sim.res$gamma), standardize = F,
+                   intercept=T, coverage=0.95)
+susie_plot(susie.fit, y='PIP',main="SuSIE without prior")
 ```
 
 ### Cross validation
 
-We used 5-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without. Note that performance varies a lot depending on the training-testing split. In this particular case, the PVE on full dataset is 17.5%. Two different definitions of $R^2$ are computed. The first one is the squared correlation between $y$ in the test set and $\hat y$. The other is $1-\dfrac{\sum(y-\hat y)^2}{\sum(y-\bar y)^2}$, where $\bar y$ is the mean of $y$ in the training set.
+We used 5-fold cross validation over the 100 individuals. Evaluation metric in the test set is $R^2$. The two SuSIE models is one with priors and one without. Note that performance varies a lot depending on the training-testing split. In this particular case, the PVE on full dataset is 3.4%. Two different definitions of $R^2$ are computed. The first one is the squared correlation between $y$ in the test set and $\hat y$. The other is $1-\dfrac{\sum(y-\hat y)^2}{\sum(y-\bar y)^2}$, where $\bar y$ is the mean of $y$ in the training set.
 
 ```{r}
 calc.r2 <- function(y.test, y.hat, y.mean) {
@@ -153,14 +169,14 @@ sim.res <- sim_group_pi(X, pi)
 inds <- sample(rep(1:5,times=20))
 #sim.res$X <- apply(sim.res$X,2,as.numeric)
 #sim.res$X <- scale(sim.res$X, center=T, scale=T)
-dat.cor2 <- matrix(nrow=5,ncol=3)
-colnames(dat.cor2) <- c("lasso","susie","susie.prior")
+dat.cor2 <- matrix(nrow=5,ncol=4)
+colnames(dat.cor2) <- c("lasso","lasso.prior","susie","susie.prior")
 
-dat.r2 <- matrix(nrow=5,ncol=3)
-colnames(dat.r2) <- c("lasso","susie","susie.prior")
+dat.r2 <- matrix(nrow=5,ncol=4)
+colnames(dat.r2) <- c("lasso","lasso.prior","susie","susie.prior")
 
-dat.mse <- matrix(nrow=5,ncol=3)
-colnames(dat.mse) <- c("lasso","susie","susie.prior")
+dat.mse <- matrix(nrow=5,ncol=4)
+colnames(dat.mse) <- c("lasso","lasso.prior","susie","susie.prior")
 
 for(i in 1:5) {
   X.train <- sim.res$X[inds!=i,]
@@ -173,6 +189,13 @@ for(i in 1:5) {
   dat.cor2[i,"lasso"] <- cor(y.test,lasso.y)**2
   dat.r2[i,"lasso"] <- calc.r2(y.test,lasso.y,mean(y.train))
   dat.mse[i,"lasso"] <- calc.mse(y.test,lasso.y)
+
+  lasso.fit <- glmnet(X.train, y.train,lambda = 1,
+                      penalty.factor = 1/sqrt(sim.res$pi*(1-sim.res$pi)))
+  lasso.y <- predict(lasso.fit, X.test)
+  dat.cor2[i,"lasso.prior"] <- cor(y.test,lasso.y)**2
+  dat.r2[i,"lasso.prior"] <- calc.r2(y.test,lasso.y,mean(y.train))
+  dat.mse[i,"lasso.prior"] <- calc.mse(y.test,lasso.y)
   
   susie.fit <- susie(X.train, y.train)
   susie.y <- predict(susie.fit, X.test)
@@ -191,12 +214,12 @@ boxplot(dat.cor2, ylab="R2 (squred correlation)", col=2:4)
 ```
 
 ```{r}
-boxplot(dat.r2, ylab="R2 (compared to intercept model)", col=2:4)
+boxplot(dat.r2, ylab="R2 (compared to intercept model)", col=2:5)
 ```
 
 
 ```{r}
-boxplot(dat.mse, ylab="Mean squared error", col=2:4)
+boxplot(dat.mse, ylab="Mean squared error", col=2:5)
 ```
 
 
