@@ -1,0 +1,57 @@
+---
+title: "More flexible estimation of GxE effect"
+author: "Lifan Liang"
+date: "2025-04-23"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+Following the  interaction effect model described at the early sections of [dynamic eQTL](dynamic_eqtl.html). We have:
+
+$$
+    \Delta_i = \alpha X_i + \gamma X_i G_d + \epsilon_i
+$$
+
+The assumption that $X$ has a linear effect on $y$ may not hold, especially when $X$ are not derived from factorization of $y$. For example, pseudo time or cell state are inferred by grouping similar cells together without linear decomposition. If the relationship between $X$ and $y$ are not captured correctly, the residual, $\sigma$ would be much larger. As a result, the standard error of $\beta$, for instance, computed as $\dfrac{\sigma}{var(G)}$, would be much larger. Therefore, statistical power would be severely compromised.
+
+## Functional form of the interaction effect model
+
+We replace the linear terms related to X with the more flexible functional form.
+
+$$
+\Delta_i = f(X_i) + G_d \cdot\tau(X_i) + \epsilon_i
+$$
+
+### Model fitting
+
+Following the [R-learner approach](https://doi.org/10.1093/biomet/asaa076) for Conditional average treatment effect (CATE), there are two stages.
+
+First, we fit the $f(x)$ on $\Delta$ with a machine learning method. Also, we fit the propensity function ($e(X)$) on $G$. Then we have:
+
+$$
+\tilde{\Delta} = \Delta - f(X)
+$$
+$$
+\tilde{G} = G - e(X)
+$$
+This step is proposed as the double machine learning (DML) approach. The model becomes:
+
+$$
+\tilde{\Delta} = \tilde{G} \cdot \tau(X) + \epsilon
+$$
+
+To learn the function $\tau(X)$, we need to minimize the square error as the objective function:
+
+$$
+{\cal L} = \sum_i[\tilde{\Delta_i} - \tilde{G_i} \cdot \tau(X_i)]^2 = \sum_i{G_i^2}[\dfrac{\tilde{\Delta_i}}{G_i} -\tau(X_i)]^2
+$$
+
+Therefore, we regress $X$ against $\dfrac{\tilde{\Delta_i}}{G_i}$ with a certain machine learning method (e.g. XGboost) with samples weights $G_i^2$. Considering the issues of overfitting, cross-fitting seems required for this procedure. HHow to scale up this method to test CATE of genetic effects would be a major concern.
+
+## Testing the heterogeneity of effect size.
+
+Aftering estimating $\tau(X)$, we can compute the variance of $\tau(X)$ across cells. Then we get null distribution by permuting the genotypes of the cells and estimate $var\tau(X)$ during each permutation. Cells with permuted genotypes are supposed to have homogeneous effects instead. Then P value would be the proportion of null values larger than the observed $var(\tau(X))$ in real data.
+

@@ -11,6 +11,12 @@ editor_options:
 [Alternative approache to compute dynamic eQTL](dynamic_eqtl.html)
 \
 \
+[eQTL mapping in the latent cellular context](context_eqtl.html)
+\
+\
+[eQTL mapping with nonlinear environmental effect](cate.html)
+\
+\
 [eQTL mapping to the latent factors in gene expresison](factor_eqtl.html)
 \
 \

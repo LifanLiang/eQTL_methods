@@ -1,0 +1,48 @@
+---
+title: "context_eqtl"
+author: "Lifan Liang"
+date: "2025-04-23"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+Following the  interaction effect model described at the start of [dynamic eQTL](dynamic_eqtl.html). We have:
+
+$$
+    y_i = \mu + \alpha X_i + \beta G_d + \gamma X_i G_d + u_d + \epsilon_i,
+$$
+
+Now we extend to the scenario of multiple contexts and multiple genes.
+
+$$
+y_{ij} = \mu + \sum_k\beta_{jk} X_{ik} + \beta G_d + \sum_k \gamma_{jk} X_{ik} G_{dl} + u_{dj} + \epsilon_{ij},
+$$
+
+where $y_{ij}$ is the gene expression at the $i$th cell and $j$th gene, $X_i^k$ is the $k$th context value at $i$th cell, $G_dl$ is the genotype for the $d$th donor and the causal SNP for the $j$th gene. For the convenience of annotation, we assume one gene only has one context-specific eQTL. But that does not restrict our model later. Similar to [dynamic eQTL](dynamic_eqtl.html), after removing $\bar_y$, we obtained 
+
+$$
+\Delta_{ij} = \sum_k\beta_{jk} X_{ik} + \sum_k \gamma_{jk} X_{ik} G_{dj} + \epsilon_{ij}
+$$
+
+If we rewrite it in matrix form, we have
+
+$$
+\Delta = X \beta + (X\gamma) \cdot G + \epsilon
+$$
+
+Let $N$ be the number of cells, $S$ be the number of genes, and $K$ be the number of contexts. Then in the model above, $\delta$ is a $N \times S$ matrix, $X$ is a $N \times K$ matrix, $\beta$ is a $K \times S$ matrix, $\gamma$ has the same shape as $\beta$, and G has the same shape as $\delta$.
+
+Similar to the model only considering one gene-SNP pair ([dynamic eQTL](dynamic_eqtl.html)), $\beta$ is the matrix representing the shared environmental effect, while $\gamma$ indicates the $G \times E$ effect. If $X$ is unknown, then the model is similar to matrix factorization problem. However, we simply applied PCA or topic models to obtain $X$, the $G \times E$ effects are ignored. Statistical power will probably be compromised. 
+
+The difficult part is $G$, with each column as the genotype of a causal SNP corresponding to a gene. We don't know which SNP is causal a priori. Also, using SNP to identify latent context incurs double dipping problem later for context-specific eQTL testing. Therefore, we use individual effect as a proxy for the aggregated G by E effect across all SNPs. Essentially, the cross product between $\gamma$ and $G$ (suppose every SNP corresponds to a $\gamma$ of the shape $K \times S$) is a $N \times S \times S \times K$ tensor. Summing up the SNP dimension, the individual G by E effects is a $N \times S \times K$ tensor, denoted as $\phi$. Since cells within the same individual have the same genotypes, $\phi$ is essentially a $D \times S \times K$ tensor. The model can be illustrated in the diagram below:
+
+![](assets/individual-level factorization.png)
+
+This is a variant of normal Matrix factorization. I suppose we can solve the model in a Bayesian way?
+
+$\phi$ is essentially a pseudobulk gene expression by latent context. We can simply run eQTL pipeline with it. eQTL obtained this way are latent context-specific eQTL.
+
+
