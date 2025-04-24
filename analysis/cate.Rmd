@@ -49,9 +49,9 @@ $$
 {\cal L} = \sum_i[\tilde{\Delta_i} - \tilde{G_i} \cdot \tau(X_i)]^2 = \sum_i{G_i^2}[\dfrac{\tilde{\Delta_i}}{G_i} -\tau(X_i)]^2
 $$
 
-Therefore, we regress $X$ against $\dfrac{\tilde{\Delta_i}}{G_i}$ with a certain machine learning method (e.g. XGboost) with samples weights $G_i^2$. Considering the issues of overfitting, cross-fitting seems required for this procedure. HHow to scale up this method to test CATE of genetic effects would be a major concern.
+Therefore, we regress $X$ against $\dfrac{\tilde{\Delta_i}}{G_i}$ with a certain machine learning method (e.g. XGboost) with samples weights $G_i^2$. Considering the issues of overfitting, cross-fitting seems required for this procedure. How to scale up this method to test CATE of genetic effects would be a major concern.
 
 ## Testing the heterogeneity of effect size.
 
-Aftering estimating $\tau(X)$, we can compute the variance of $\tau(X)$ across cells. Then we get null distribution by permuting the genotypes of the cells and estimate $var\tau(X)$ during each permutation. Cells with permuted genotypes are supposed to have homogeneous effects instead. Then P value would be the proportion of null values larger than the observed $var(\tau(X))$ in real data.
+Aftering estimating $\tau(X)$, we can compute the variance of $\tau(X)$ across cells. Then we get null distribution by permuting the genotypes of the cells and estimate $VAR\tau(X)$ during each permutation. Cells with permuted genotypes are supposed to have homogeneous effects instead. Then P value would be the proportion of null values larger than the observed $VAR(\tau(X))$ in real data.
 

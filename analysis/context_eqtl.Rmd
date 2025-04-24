@@ -1,5 +1,5 @@
 ---
-title: "context_eqtl"
+title: "eQTL mapping in latent cellular contexts"
 author: "Lifan Liang"
 date: "2025-04-23"
 output: workflowr::wflow_html
