@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Lifan Liang" />
 
+<meta name="date" content="2025-05-11" />
 
-<title>Single cell eQTL methods development</title>
+<title>dynamic_vs_psbulk</title>
 
 <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,6 +31,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -228,6 +233,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -235,6 +303,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -272,7 +350,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Single cell eQTL methods development</h1>
+<h1 class="title toc-ignore">dynamic_vs_psbulk</h1>
+<h4 class="author">Lifan Liang</h4>
+<h4 class="date">2025-05-11</h4>
 
 </div>
 
@@ -305,7 +385,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span> 0
 </p>
@@ -342,6 +422,90 @@ class="panel-collapse collapse">
 <p>Great! Since the R Markdown file has been committed to the Git
 repository, you know the exact version of the code that produced these
 results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250106code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250106)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250106code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250106)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
@@ -418,10 +582,11 @@ have uncommitted changes.
 
 <p>
 These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
-(<code>docs/index.html</code>) files. If you’ve configured a remote Git
-repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
-in the table below to view the files as they were in that past version.
+made to the R Markdown (<code>analysis/dynamic_vs_psbulk.Rmd</code>) and
+HTML (<code>docs/dynamic_vs_psbulk.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -450,7 +615,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/index.Rmd" target="_blank">b196d33</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/dynamic_vs_psbulk.Rmd" target="_blank">b196d33</a>
 </td>
 <td>
 Lifan Liang
@@ -462,142 +627,6 @@ Lifan Liang
 wflow_publish("analysis")
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b66cf934485dbf61280816b532131ea637318592/docs/index.html" target="_blank">b66cf93</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/a0f0980c85ae273282089aa243d5a48182f72b61/analysis/index.Rmd" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a0f0980c85ae273282089aa243d5a48182f72b61/docs/index.html" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/6bb4819a6e58c5ced1ce05262008a56dd5ae6e46/docs/index.html" target="_blank">6bb4819</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b62f35382521fcea5baaabdb6d860c2d668dd786/analysis/index.Rmd" target="_blank">b62f353</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fb9f866236c21db5e99d9367066f02fd0d40b647/docs/index.html" target="_blank">fb9f866</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/c1a2fa73c15fc9ec8223d438fdd2375c65375f6b/analysis/index.Rmd" target="_blank">c1a2fa7</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/e498299ee21bfc271e40450ad6af100276715a9f/analysis/index.Rmd" target="_blank">e498299</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-06
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -605,30 +634,100 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p><a href="dynamic_eqtl.html">Alternative approache to compute dynamic
-eQTL</a><br />
-<br />
-<a href="dynamic_vs_psbulk.html">Pseudo-bulk as a special case</a><br />
-<br />
-<a href="context_eqtl.html">eQTL mapping in the latent cellular
-context</a><br />
-<br />
-<a href="cate.html">eQTL mapping with nonlinear environmental
-effect</a><br />
-<br />
-<a href="factor_eqtl.html">eQTL mapping to the latent factors in gene
-expresison</a><br />
-<br />
-<a href="informative_prior.html">TWAS prediction model with informative
-prior</a><br />
-<br />
-<a href="deconvolution_eqtl.html">Borrowing power from bulk
-RNAseq</a><br />
-<br />
-<a href="epigenetic_eqtl.html">Borrowing power from egigenetic
-features</a><br />
-<br />
+<div id="pseudo-bulk-eqtl-by-cell-type-approximates-our-two-step-model"
+class="section level3">
+<h3>Pseudo-bulk eqtl by cell type approximates our two-step model</h3>
+<p>Following up on the interaction effect model in <a
+href="dynamic_eqtl.html">interaction effect model</a>.</p>
+<p><span class="math display">\[
+    y_i = \mu + \beta_X X_i + \beta_G G_d + \gamma X_i \cdot G_d + u_d +
+\epsilon_i
+\]</span></p>
+<p>Suppose that <span class="math inline">\(X\)</span> is the one-hot
+encoding vector for cell types. <span class="math inline">\(X_c\)</span>
+denotes the cell membership vector for the <span
+class="math inline">\(c\)</span>th cell type. The model simply
+becomes</p>
+<p><span class="math display">\[
+y_i = \mu + \sum_c \beta_c X_ci + \beta_G G_d + \sum_c \gamma_c X_{ci}
+\cdot G_d + u_d + \epsilon_i
+\]</span></p>
+<p>If we follow the first step of the model, we got:</p>
+<p><span class="math display">\[
+\Delta_i = \sum_c X_{ci}\theta_{cd} + \epsilon_i
+\\
+\theta_{cd} = \beta_c + \gamma_c \cdot G_d
+\]</span></p>
+<p>and then we regressed <span class="math inline">\(X_{ci}\)</span>
+against <span class="math inline">\(\Delta_i\)</span> for each donor to
+obtain <span class="math inline">\(\theta_{cd}\)</span>. Since <span
+class="math inline">\(X_{ci}\)</span> is the constant of 1 in the <span
+class="math inline">\(c\)</span>th cell type. It is clear that
+<strong>the estimated <span class="math inline">\(\theta_{cd}\)</span>
+would be the mean <span class="math inline">\(\Delta_i\)</span> for all
+cells in the the <span class="math inline">\(c\)</span>th cell type for
+the <span class="math inline">\(d\)</span>th individual.</strong>
+Therefore, eQTL testing on <span
+class="math inline">\(theta_{cd}\)</span> is very similar to pseudo-bulk
+eQTL mapping used in many single cell eQTL studies to identify cell-type
+specific eQTL.</p>
+<p>There are three differences between our two-step method and the
+standard cell type aggregation approach:</p>
+<ul>
+<li><p>individual random effects and main genetic effects are cancelled
+out in out model, while pseudo-bulk eQTL for a specific cell type
+retains both terms and cannot model individual random effect.</p></li>
+<li><p>our model applied weighted regression to address the uncertainty
+of <span class="math inline">\(theta_{cd}\)</span>, while pseudo-bulk
+eQTL treats the bulk average as a fixed number. Some studies may use the
+number of cells within each sample to approximate this
+uncertainty.</p></li>
+<li><p>cell-level covariates can be adjusted in our model, while
+pseudo-bulk eQTL may apply more stringent QC to filter the cells before
+aggregation.</p></li>
+</ul>
+<p>The first difference could reduce the power to detect
+cell-type-specific eQTLs when individual random effects are large.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
 </p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.2 (2021-11-01)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.7.0
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.11      bslib_0.3.1      compiler_4.1.2   pillar_1.7.0    
+ [5] later_1.3.0      git2r_0.29.0     jquerylib_0.1.4  tools_4.1.2     
+ [9] getPass_0.2-2    digest_0.6.29    jsonlite_1.7.3   evaluate_0.14   
+[13] tibble_3.1.6     lifecycle_1.0.4  pkgconfig_2.0.3  rlang_1.1.6     
+[17] cli_3.6.5        rstudioapi_0.13  yaml_2.2.2       xfun_0.29       
+[21] fastmap_1.1.0    httr_1.4.2       stringr_1.4.0    knitr_1.37      
+[25] sass_0.4.1       fs_1.5.2         vctrs_0.6.5      rprojroot_2.0.2 
+[29] glue_1.6.1       R6_2.5.1         processx_3.5.2   fansi_1.0.2     
+[33] rmarkdown_2.11   callr_3.7.0      magrittr_2.0.2   whisker_0.4     
+[37] ps_1.6.0         promises_1.2.0.1 htmltools_0.5.2  ellipsis_0.3.2  
+[41] httpuv_1.6.5     utf8_1.2.2       stringi_1.7.6    crayon_1.4.2    </code></pre>
+</div>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -646,6 +745,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -678,6 +779,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
