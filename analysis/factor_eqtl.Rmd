@@ -25,7 +25,7 @@ sim_factor <- function(alpha=0.25, beta=0.4, eps0=1.0, eps1=0.3){
 }
 ```
 
-We generated data with one latent factor $Z$ that affects one traits, $Y$. The generative process is as follow:
+We generated data with one latent factor $Z$ that affects one trait, $Y$. The generative process is as follow:
 
 $$
 X \sim Normal(0,1)
@@ -210,6 +210,36 @@ dat3 <- abs(cbind(oracle.res[,3],cbind(factor.res[,3],marg$pval))) #combine p va
 colnames(dat3) <- c("Oracle Z","Z hat",paste0("trait ",1:10))
 barplot(colMeans(dat3<0.05),las=2)
 ```
+
+
+### Simulation with one SNP affecting one latent factor and other SNPs with direct effects
+
+```{r}
+library(flashier)
+
+sim_5trait <- function(alpha=0.25, beta=0.4, gamma=0.05, eps0=1.0, eps1=0.3, N=100){
+  x1 = rnorm(N,sd=1)
+  x2 = matrix(rnorm(N*5,sd=1), nrow=N, ncol=5)
+  Z = alpha*x1 + rnorm(N,sd=eps0)
+  y = matrix(0,nrow = N,ncol=5)
+  for(i in 1: ncol(y)){
+    y[,i] <- beta*Z + rnorm(N,sd=eps1) + x2[,i]*gamma
+  }
+  list(x1=x1,x2=x2,Z=Z,y=y)
+}
+
+```
+
+```{r}
+dat.sim <- sim_5trait()
+for(i in 1:ncol(dat.sim$y)) {
+  
+}
+summary(lm(dat.sim$y[,2]~dat.sim$x1))
+summary(lm(dat.sim$Z~dat.sim$x1))
+
+```
+
 
 ### Simulation with two latent factors
 

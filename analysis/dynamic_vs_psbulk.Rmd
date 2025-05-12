@@ -1,0 +1,94 @@
+---
+title: "dynamic_vs_psbulk"
+author: "Lifan Liang"
+date: "2025-05-11"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+### Pseudo-bulk eqtl by cell type approximates our two-step model
+
+Following up on the interaction effect model in [interaction effect model](dynamic_eqtl.html). 
+
+$$
+    y_i = \mu + \beta_X X_i + \beta_G G_d + \gamma X_i \cdot G_d + u_d + \epsilon_i
+$$
+
+Suppose that $X$ is the one-hot encoding vector for cell types. $X_c$ denotes the cell membership vector for the $c$th cell type. The model simply becomes
+
+$$
+ y_i = \mu + \sum_c \beta_c X_ci + \beta_G G_d + \sum_c \gamma_c X_{ci} \cdot G_d + u_d + \epsilon_i
+$$
+
+If we follow the first step of the model, we got:
+
+$$
+\Delta_i = \sum_c X_{ci}\theta_{cd} + \epsilon_i
+\\
+\theta_{cd} = \beta_c + \gamma_c \cdot G_d
+$$
+
+and then we regressed $X_{ci}$ against $\Delta_i$ for each donor to obtain $\theta_{cd}$. Since $X_{ci}$ is the constant of 1 in the $c$th cell type. It is clear that **the estimated $\theta_{cd}$ would be the mean $\Delta_i$ for all cells in the the $c$th cell type for the $d$th individual.** Therefore, eQTL testing on $theta_{cd}$ is very similar to pseudo-bulk eQTL mapping used in many single cell eQTL studies to identify cell-type specific eQTL.
+
+There are three differences between our two-step method and the standard cell type aggregation approach: 
+
+* individual random effects and main genetic effects are cancelled out in out model, while pseudo-bulk eQTL for a specific cell type retains both terms and cannot model individual random effect.
+
+* our model applied weighted regression to address the uncertainty of $theta_{cd}$, while pseudo-bulk eQTL treats the bulk average as a fixed number. Some studies may use the number of cells within each sample to approximate this uncertainty.
+
+* cell-level covariates can be adjusted in our model, while pseudo-bulk eQTL may apply more stringent QC to filter the cells before aggregation.
+
+The first difference could reduce the power to detect cell-type-specific eQTLs when individual random effects are large.
+
+
+
+```{r, echo=F, eval=F}
+## Simulation comparing pseudo-bulk and our two-step method
+### 100 donors with 100 cells each. all cells are assigned to one of three cell types
+alpha <- 0.05
+beta <- c(0.1,0.15,0.2)
+phi <- c(0.02,0.04,0.05)
+N_d <- 100
+N_c <- 1000
+
+#G <- sample(0:2,N_d,replace = T)
+G <- rnorm(N_d)
+U <- rnorm(N_d,sd=sqrt(0.4))
+G1 <- rep(G, each=N_c)
+U1 <- rep(U, each=N_c)
+e <- rnorm(1e4,sd=1.0)
+X <- sample(1:3,N_d*N_c,replace=T)
+X1 <- matrix(0,ncol=3,nrow=N_d*N_c,)
+for(i in 1:3) {
+  X1[which(X==i),i] <- 1
+}
+y <- X1 %*% beta + G1*alpha + G1* X1%*%phi + U1 + e
+
+```
+
+
+
+```{r, echo=F, eval=F}
+### Pseudo-bulk teting of $\phi$
+y0 <- scale(y,scale=F)
+G0 <- scale(G,scale=F)
+y1 <- aggregate(y0, list(X,rep(1:N_d,each=N_c)),mean)
+summary(lm(y1[y1$Group.1==1,3] ~ G0))
+summary(lm(y1[y1$Group.1==2,3] ~ G0))
+summary(lm(y1[y1$Group.1==3,3] ~ G0))
+
+y2 <- aggregate(y0, list(rep(1:N_d,each=N_c)),mean)
+summary(lm(y2$V1 ~ G0))
+
+### A simpler regression
+y3 <- y0 - rep(y2$V1, each=N_c)
+y4 <- aggregate(y3, list(X,rep(1:N_d,each=N_c)),mean)
+summary(lm(y4[y4$Group.1==1,3] ~ G0))
+summary(lm(y4[y4$Group.1==2,3] ~ G0))
+summary(lm(y4[y4$Group.1==3,3] ~ G0))
+```
+
+
+
+

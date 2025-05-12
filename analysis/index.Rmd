@@ -11,6 +11,9 @@ editor_options:
 [Alternative approache to compute dynamic eQTL](dynamic_eqtl.html)
 \
 \
+[Pseudo-bulk as a special case](dynamic_vs_psbulk.html)
+\
+\
 [eQTL mapping in the latent cellular context](context_eqtl.html)
 \
 \
