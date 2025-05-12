@@ -512,15 +512,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb196d33a49bff2c830bfea0c00728f09b4820b62targetblankb196d33a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7b28058e06665ef6c15eeff358711af8c446b0adtargetblank7b28058a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/b196d33a49bff2c830bfea0c00728f09b4820b62" target="_blank">b196d33</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7b28058e06665ef6c15eeff358711af8c446b0ad" target="_blank">7b28058</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb196d33a49bff2c830bfea0c00728f09b4820b62targetblankb196d33a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7b28058e06665ef6c15eeff358711af8c446b0adtargetblank7b28058a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -530,7 +530,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/b196d33a49bff2c830bfea0c00728f09b4820b62" target="_blank">b196d33</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7b28058e06665ef6c15eeff358711af8c446b0ad" target="_blank">7b28058</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -615,6 +615,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/7b28058e06665ef6c15eeff358711af8c446b0ad/analysis/dynamic_vs_psbulk.Rmd" target="_blank">7b28058</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-05-12
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/bac1cb198551c06114d496ac395ac5cde01f15d3/docs/dynamic_vs_psbulk.html" target="_blank">bac1cb1</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2025-05-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/dynamic_vs_psbulk.Rmd" target="_blank">b196d33</a>
 </td>
 <td>
@@ -634,9 +668,11 @@ wflow_publish("analysis")
 </div>
 </div>
 </div>
-<div id="pseudo-bulk-eqtl-by-cell-type-approximates-our-two-step-model"
+<div
+id="similarity-between-pseudo-bulk-cell-type-eqtl-and-our-two-step-interaction-effect-model"
 class="section level3">
-<h3>Pseudo-bulk eqtl by cell type approximates our two-step model</h3>
+<h3>Similarity between pseudo-bulk cell type eqtl and our two-step
+interaction effect model</h3>
 <p>Following up on the interaction effect model in <a
 href="dynamic_eqtl.html">interaction effect model</a>.</p>
 <p><span class="math display">\[
@@ -668,26 +704,30 @@ would be the mean <span class="math inline">\(\Delta_i\)</span> for all
 cells in the the <span class="math inline">\(c\)</span>th cell type for
 the <span class="math inline">\(d\)</span>th individual.</strong>
 Therefore, eQTL testing on <span
-class="math inline">\(theta_{cd}\)</span> is very similar to pseudo-bulk
-eQTL mapping used in many single cell eQTL studies to identify cell-type
-specific eQTL.</p>
+class="math inline">\(\theta_{cd}\)</span> is very similar to
+pseudo-bulk eQTL mapping used in many single cell eQTL studies to
+identify cell-type specific eQTL.</p>
 <p>There are three differences between our two-step method and the
 standard cell type aggregation approach:</p>
 <ul>
 <li><p>individual random effects and main genetic effects are cancelled
-out in out model, while pseudo-bulk eQTL for a specific cell type
-retains both terms and cannot model individual random effect.</p></li>
+out in our model, while pseudo-bulk eQTL for a specific cell type
+retains both terms and cannot model individual random effect.
+<strong>Our model only captures cell-type specific effects that deviates
+from the main genetic effects</strong>, while pseudo-bulk eQTL captures
+the marginal genetic effects.</p></li>
 <li><p>our model applied weighted regression to address the uncertainty
-of <span class="math inline">\(theta_{cd}\)</span>, while pseudo-bulk
+of <span class="math inline">\(\theta_{cd}\)</span>, while pseudo-bulk
 eQTL treats the bulk average as a fixed number. Some studies may use the
 number of cells within each sample to approximate this
 uncertainty.</p></li>
 <li><p>cell-level covariates can be adjusted in our model, while
-pseudo-bulk eQTL may apply more stringent QC to filter the cells before
+pseudo-bulk eQTLs may apply more stringent QC to filter the cells before
 aggregation.</p></li>
 </ul>
 <p>The first difference could reduce the power to detect
-cell-type-specific eQTLs when individual random effects are large.</p>
+cell-type-specific eQTLs when individual random effects are
+substantial.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
