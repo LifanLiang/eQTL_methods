@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-### Pseudo-bulk eqtl by cell type approximates our two-step model
+### Similarity between pseudo-bulk cell type eqtl and our two-step interaction effect model
 
 Following up on the interaction effect model in [interaction effect model](dynamic_eqtl.html). 
 
@@ -29,17 +29,17 @@ $$
 \theta_{cd} = \beta_c + \gamma_c \cdot G_d
 $$
 
-and then we regressed $X_{ci}$ against $\Delta_i$ for each donor to obtain $\theta_{cd}$. Since $X_{ci}$ is the constant of 1 in the $c$th cell type. It is clear that **the estimated $\theta_{cd}$ would be the mean $\Delta_i$ for all cells in the the $c$th cell type for the $d$th individual.** Therefore, eQTL testing on $theta_{cd}$ is very similar to pseudo-bulk eQTL mapping used in many single cell eQTL studies to identify cell-type specific eQTL.
+and then we regressed $X_{ci}$ against $\Delta_i$ for each donor to obtain $\theta_{cd}$. Since $X_{ci}$ is the constant of 1 in the $c$th cell type. It is clear that **the estimated $\theta_{cd}$ would be the mean $\Delta_i$ for all cells in the the $c$th cell type for the $d$th individual.** Therefore, eQTL testing on $\theta_{cd}$ is very similar to pseudo-bulk eQTL mapping used in many single cell eQTL studies to identify cell-type specific eQTL.
 
 There are three differences between our two-step method and the standard cell type aggregation approach: 
 
-* individual random effects and main genetic effects are cancelled out in out model, while pseudo-bulk eQTL for a specific cell type retains both terms and cannot model individual random effect.
+* individual random effects and main genetic effects are cancelled out in our model, while pseudo-bulk eQTL for a specific cell type retains both terms and cannot model individual random effect. **Our model only captures cell-type specific effects that deviates from the main genetic effects**, while pseudo-bulk eQTL captures the marginal genetic effects.
 
-* our model applied weighted regression to address the uncertainty of $theta_{cd}$, while pseudo-bulk eQTL treats the bulk average as a fixed number. Some studies may use the number of cells within each sample to approximate this uncertainty.
+* our model applied weighted regression to address the uncertainty of $\theta_{cd}$, while pseudo-bulk eQTL treats the bulk average as a fixed number. Some studies may use the number of cells within each sample to approximate this uncertainty.
 
-* cell-level covariates can be adjusted in our model, while pseudo-bulk eQTL may apply more stringent QC to filter the cells before aggregation.
+* cell-level covariates can be adjusted in our model, while pseudo-bulk eQTLs may apply more stringent QC to filter the cells before aggregation.
 
-The first difference could reduce the power to detect cell-type-specific eQTLs when individual random effects are large.
+The first difference could reduce the power to detect cell-type-specific eQTLs when individual random effects are substantial.
 
 
 
