@@ -1,0 +1,213 @@
+---
+title: "mashR_extension"
+author: "Lifan Liang"
+date: "2026-01-20"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Simulation experiment
+
+### Data generation
+
+We generate a dataset for eQTL mapping seperately for two different contexts according to this scenario:
+
+$$
+\beta \sim MVN(0,\begin{bmatrix}
+1 & \rho_G  \\
+\rho_G & 1 
+\end{bmatrix} \cdot \sigma_G^2)
+$$
+$$
+\epsilon \sim MVN(0, \begin{bmatrix}
+1 & \rho_e  \\
+\rho_e & 1 
+\end{bmatrix} \sigma_e^2)
+$$
+$$
+Y_1 = G \beta_1 + \epsilon_1
+$$
+
+$$
+Y_2 = G \beta_2 + \epsilon_2
+$$
+
+
+We repeat the procedure above for 100 times and obtained 100 estimated genetic effects from the two contexts.
+
+```{r}
+library(MASS)
+
+sim_marker_regression <- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.0, rho_G = 0.3, rho_e=0.9) {
+  
+  # 1. Simulate Design Matrix G (n individuals x m markers)
+  G <- matrix(rnorm(n * m), nrow = n, ncol = m)
+  
+  # 2. Generate True Betas (Genetic Effects)
+  # Correlation between trait 1 and trait 2 is 0.5 as per your prompt
+  U <- matrix(c(1, rho_G, rho_G, 1), nrow = 2)
+  cov_beta <- U * sigma_G2
+  betas_true <- mvrnorm(n = m, mu = c(0, 0), Sigma = cov_beta)
+  colnames(betas_true) <- c("Beta1_True", "Beta2_True")
+  
+  # 3. Generate Residuals (Environmental Effects)
+  cov_epsilon <- matrix(c(1, rho_e, rho_e, 1), nrow = 2) * sigma_e2
+  eps_all <- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape residuals into n x m matrices
+  eps1_mat <- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat <- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # 4. Generate Phenotype Matrices Y1 and Y2 (n x m)
+  Y1 <- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 <- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # 5. Regression (OLS estimation)
+  # Using the fast matrix method: beta_hat = (G'G)^-1 G'Y
+  beta1_hat <- colSums(G * Y1) / colSums(G^2)
+  beta2_hat <- colSums(G * Y2) / colSums(G^2)
+  
+  # 6. Consolidate Results
+  results <- data.frame(
+    marker_id = 1:m,
+    beta1_true = betas_true[, 1],
+    beta1_est  = beta1_hat,
+    beta2_true = betas_true[, 2],
+    beta2_est  = beta2_hat
+  )
+  
+  return(results)
+}
+```
+
+### Impact of Residual Correlation on Estimated Genetic effect sharing.
+
+When $\rho_e$ is low, the sharing of genetic effects are dampen because of measurement error. As $\rho_e$ increased, the sharing of genetic effects were inflated. It would be more obvious with smaller sample size
+
+```{r,echo=F, warning=F}
+library(MASS)
+library(ggplot2)
+
+rho_e_values <- seq(0, 0.95, by = 0.05)
+estimated_corrs <- numeric(length(rho_e_values))
+
+for (i in seq_along(rho_e_values)) {
+  sim_res <- sim_marker_regression(
+    n = 100, 
+    m = 1000, 
+    sigma_G2 = 0.1, 
+    sigma_e2 = 1.0, 
+    rho_G = 0.3, 
+    rho_e = rho_e_values[i]
+  )
+  estimated_corrs[i] <- cor(sim_res$beta1_est, sim_res$beta2_est)
+}
+
+plot_data <- data.frame(rho_e = rho_e_values, est_corr = estimated_corrs)
+
+ggplot(plot_data, aes(x = rho_e, y = est_corr)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(color = "darkblue") +
+  geom_hline(yintercept = 0.3, linetype = "dashed", color = "red") +
+  annotate("text", x = 0.25, y = 0.31, label = "True Genetic Correlation (0.3)", color = "red") +
+  labs(
+    subtitle = "100 samples, 1000 SNPs, sigma_G2=0.1",
+    x = "Residual Correlation",
+    y = "Estimated Genetic Effect Sharing"
+  ) +
+  theme_minimal()
+```
+
+
+### LFSR estimation from simulated data
+
+We approximated LFSR with the Bayesian probability from the null model where $\beta_1$ and $\beta_2$ are independent (Z=0).
+
+
+$$
+Z \sim Bernoulli(1-\pi_0)
+$$
+
+$$
+Z=0: \begin{bmatrix}
+\beta_1 \\
+\beta_2
+\end{bmatrix} \sim MVN(0, I \cdot \sigma_G^2 + \begin{bmatrix}
+1 & \rho_e  \\
+\rho_e & 1 
+\end{bmatrix} \dfrac{\sigma_e^2}{n})
+$$
+
+$$
+Z=1: \begin{bmatrix}
+\beta_1 \\
+\beta_2
+\end{bmatrix} \sim MVN(0,  \begin{bmatrix}
+1 & \rho_G  \\
+\rho_G & 1 
+\end{bmatrix} \cdot \sigma_G^2 + \begin{bmatrix}
+1 & \rho_e  \\
+\rho_e & 1 
+\end{bmatrix} \dfrac{\sigma_e^2}{n})
+$$
+
+The posterior that $beta_1$ and $beta_2$ are indepedent can computed as:
+
+$$
+Pr(Z=0|\beta_1,\beta_2) = \dfrac{\pi_0Pr(\beta_1,\beta_2|Z=0)}{\pi_0Pr(\beta_1,\beta_2|Z=0) + (1-\pi_0)Pr(\beta_1,\beta_2|Z=1)}
+$$
+
+
+
+```{r}
+sigma_G2 <- 0.2
+sigma_e2 <- 1
+rho_e <- 0.9
+rho_G <- 0.0
+n <- 30
+pi0 <- 0.1
+
+sim.data <- sim_marker_regression(n=n, m=100, rho_e = rho_e, rho_G=rho_G, sigma_G2=sigma_G2, sigma_e2=sigma_e2)
+
+
+library(mvtnorm)
+
+get_lfsr <- function(beta1, beta2, sigma_G2, sigma_e2, rho_e, rho_G, n, pi0) {
+  null_covar <- matrix(c(sigma_e2/n+sigma_G2, 
+                       rho_e*sigma_e2/n, 
+                       rho_e*sigma_e2/n, 
+                       sigma_e2/n+sigma_G2),2,2)
+  alt_covar <- matrix(c(sigma_e2/n+sigma_G2, 
+                        rho_e*sigma_e2/n+rho_G*sigma_G2,
+                        rho_e*sigma_e2/n+rho_G*sigma_G2, 
+                        sigma_e2/n+sigma_G2),2,2)
+  null_lik <- dmvnorm(cbind(beta1, beta2), sigma=null_covar)
+  alt_lik <- dmvnorm(cbind(beta1, beta2), sigma=alt_covar)
+  
+  pi0 * null_lik / (pi0*null_lik + (1-pi0)*alt_lik)
+}
+
+lfsr.true <- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
+         sigma_G2=sigma_G2, 
+         sigma_e2=sigma_e2, 
+         rho_e=rho_e, 
+         rho_G=0.2, 
+         n=n, pi0=pi0)
+
+lfsr.false <- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
+         sigma_G2=sigma_G2, 
+         sigma_e2=sigma_e2, 
+         rho_e=0.2, 
+         rho_G=0.2, 
+         n=n, pi0=pi0)
+
+
+plot(y=lfsr.true, x=lfsr.false,pch=20,
+     xlab = "LFSR (misspecified residual correlation)",
+     ylab = "LFSR (oracle residual correlation)")
+lines(c(0,1),c(0,1),col="red")
+```
+
+In this setting of 30 samples, the two contexts have residual correlation of 0.9 and zero genetic correlation. LFSR is slightly smaller when residual correlation is set to 0.2.
+

@@ -32,4 +32,7 @@ editor_options:
 [Borrowing power from egigenetic features](epigenetic_eqtl.html)
 \
 \
+[Extension to MASH](mashR_extension.html)
+\
+\
 

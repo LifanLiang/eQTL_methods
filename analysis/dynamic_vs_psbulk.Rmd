@@ -18,7 +18,7 @@ $$
 Suppose that $X$ is the one-hot encoding vector for cell types. $X_c$ denotes the cell membership vector for the $c$th cell type. The model simply becomes
 
 $$
- y_i = \mu + \sum_c \beta_c X_ci + \beta_G G_d + \sum_c \gamma_c X_{ci} \cdot G_d + u_d + \epsilon_i
+ y_i = \mu + \sum_c \beta_c X_{ci} + \beta_G G_d + \sum_c \gamma_c X_{ci} \cdot G_d + u_d + \epsilon_i
 $$
 
 If we follow the first step of the model, we got:

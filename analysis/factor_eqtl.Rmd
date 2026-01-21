@@ -474,3 +474,44 @@ I run eQTL mapping with three aggregation approach: (1) Take average of expressi
 ![](assets/gaba1_inh_total.png)
 
 ![](assets/npglut1_exc_total.png)
+
+
+
+## A different perspective
+
+Identifying latent contexts that modulate genetic effects may introduce confounding cause by different cell context across donors. For example, if we compared CD4+ T cells in donors with GG allele with CD8+ T cells in donors with GA or AA alleles, we will detect "context-specific genetic effect" due to cell type difference. PICALO has shown that most latent contexts that affects multiple genes are correlated with technical factors.
+
+Therefore, to ensure cells were comparable across donors for the latent contexts, it is better to formulate latent contexts based on well-defined contexts, such as cell types, pseudo-time, and cell states. Suppose there is a latent context, $U$, that is a linear combination of $K$ pre-specified contexts. And $U$ modulates cis-genetic effects.
+
+The causal model:
+
+$$
+U = \sum_{k=1}^K{w_k X_k}
+\\
+\Delta = \sum X_k \alpha_k + U\alpha_U +G_d U \beta + \epsilon
+$$
+
+$$
+\Delta = \sum_k [X_k (\alpha_k + w_k \alpha_U + w_k G_d \beta)] + \epsilon
+$$
+
+In the causal model, only $\Delta$ and $X$ and observed. Following the [two-step framework] (dynamic_eqtl.html), we can simply run multiple regression with $X$ against $\Delta$ within each donor to obtain $\gamma_{kd}$.  Then the $\gamma_{kd}$ is:
+
+$$
+\gamma_{kd} = \alpha_k + w_k \alpha_U + w_k G_d \beta
+$$
+
+Suppose $G$ is standardized, then the average $\gamma_{kd}$ across donor would be
+$$
+E_d(\gamma_{kd}) = \alpha_k + w_k \alpha_U + w_k \beta E(G_d) = \alpha_k + w_k \alpha_U
+$$
+In addition, we introduce an intermediate variable, $Z$, to represent genotypes and their effects size altogether ($Z_d=G_d \beta$). $Z$ can be interpreted as the genetic component of gene expression specific to the context $U$. Combined with what we previously have:
+
+$$
+\gamma_{kd}' = \gamma_{kd} - E_d(\gamma_{kd}) = w_k Z_d
+$$
+
+
+
+
+
