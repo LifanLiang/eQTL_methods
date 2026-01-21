@@ -11,9 +11,9 @@
 
 <meta name="author" content="Lifan Liang" />
 
-<meta name="date" content="2025-05-11" />
+<meta name="date" content="2026-01-20" />
 
-<title>dynamic_vs_psbulk</title>
+<title>mashR_extension</title>
 
 <script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -351,9 +351,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">dynamic_vs_psbulk</h1>
+<h1 class="title toc-ignore">mashR_extension</h1>
 <h4 class="author">Lifan Liang</h4>
-<h4 class="date">2025-05-11</h4>
+<h4 class="date">2026-01-20</h4>
 
 </div>
 
@@ -583,8 +583,8 @@ have uncommitted changes.
 
 <p>
 These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/dynamic_vs_psbulk.Rmd</code>) and
-HTML (<code>docs/dynamic_vs_psbulk.html</code>) files. If you’ve
+made to the R Markdown (<code>analysis/mashR_extension.Rmd</code>) and
+HTML (<code>docs/mashR_extension.html</code>) files. If you’ve
 configured a remote Git repository (see <code>?wflow_git_remote</code>),
 click on the hyperlinks in the table below to view the files as they
 were in that past version.
@@ -616,81 +616,13 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/03517e0ba31a215595f83999605ab7f0408df75c/analysis/dynamic_vs_psbulk.Rmd" target="_blank">03517e0</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/03517e0ba31a215595f83999605ab7f0408df75c/analysis/mashR_extension.Rmd" target="_blank">03517e0</a>
 </td>
 <td>
 Lifan Liang
 </td>
 <td>
 2026-01-21
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/d0a3cac6e187219087fadc1737b69845ed7c3e01/docs/dynamic_vs_psbulk.html" target="_blank">d0a3cac</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/7b28058e06665ef6c15eeff358711af8c446b0ad/analysis/dynamic_vs_psbulk.Rmd" target="_blank">7b28058</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/bac1cb198551c06114d496ac395ac5cde01f15d3/docs/dynamic_vs_psbulk.html" target="_blank">bac1cb1</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/dynamic_vs_psbulk.Rmd" target="_blank">b196d33</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
 </td>
 <td>
 wflow_publish("analysis")
@@ -703,66 +635,172 @@ wflow_publish("analysis")
 </div>
 </div>
 </div>
+<div id="simulation-experiment" class="section level2">
+<h2>Simulation experiment</h2>
+<div id="data-generation" class="section level3">
+<h3>Data generation</h3>
+<p>We generate a dataset for eQTL mapping seperately for two different
+contexts according to this scenario:</p>
+<p><span class="math display">\[
+\beta \sim MVN(0,\begin{bmatrix}
+1 &amp; \rho_G  \\
+\rho_G &amp; 1
+\end{bmatrix} \cdot \sigma_G^2)
+\]</span> <span class="math display">\[
+\epsilon \sim MVN(0, \begin{bmatrix}
+1 &amp; \rho_e  \\
+\rho_e &amp; 1
+\end{bmatrix} \sigma_e^2)
+\]</span> <span class="math display">\[
+Y_1 = G \beta_1 + \epsilon_1
+\]</span></p>
+<p><span class="math display">\[
+Y_2 = G \beta_2 + \epsilon_2
+\]</span></p>
+<p>We repeat the procedure above for 100 times and obtained 100
+estimated genetic effects from the two contexts.</p>
+<pre class="r"><code>library(MASS)
+
+sim_marker_regression &lt;- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.0, rho_G = 0.3, rho_e=0.9) {
+  
+  # 1. Simulate Design Matrix G (n individuals x m markers)
+  G &lt;- matrix(rnorm(n * m), nrow = n, ncol = m)
+  
+  # 2. Generate True Betas (Genetic Effects)
+  # Correlation between trait 1 and trait 2 is 0.5 as per your prompt
+  U &lt;- matrix(c(1, rho_G, rho_G, 1), nrow = 2)
+  cov_beta &lt;- U * sigma_G2
+  betas_true &lt;- mvrnorm(n = m, mu = c(0, 0), Sigma = cov_beta)
+  colnames(betas_true) &lt;- c(&quot;Beta1_True&quot;, &quot;Beta2_True&quot;)
+  
+  # 3. Generate Residuals (Environmental Effects)
+  cov_epsilon &lt;- matrix(c(1, rho_e, rho_e, 1), nrow = 2) * sigma_e2
+  eps_all &lt;- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape residuals into n x m matrices
+  eps1_mat &lt;- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat &lt;- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # 4. Generate Phenotype Matrices Y1 and Y2 (n x m)
+  Y1 &lt;- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 &lt;- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # 5. Regression (OLS estimation)
+  # Using the fast matrix method: beta_hat = (G&#39;G)^-1 G&#39;Y
+  beta1_hat &lt;- colSums(G * Y1) / colSums(G^2)
+  beta2_hat &lt;- colSums(G * Y2) / colSums(G^2)
+  
+  # 6. Consolidate Results
+  results &lt;- data.frame(
+    marker_id = 1:m,
+    beta1_true = betas_true[, 1],
+    beta1_est  = beta1_hat,
+    beta2_true = betas_true[, 2],
+    beta2_est  = beta2_hat
+  )
+  
+  return(results)
+}</code></pre>
+</div>
 <div
-id="similarity-between-pseudo-bulk-cell-type-eqtl-and-our-two-step-interaction-effect-model"
+id="impact-of-residual-correlation-on-estimated-genetic-effect-sharing."
 class="section level3">
-<h3>Similarity between pseudo-bulk cell type eqtl and our two-step
-interaction effect model</h3>
-<p>Following up on the interaction effect model in <a
-href="dynamic_eqtl.html">interaction effect model</a>.</p>
+<h3>Impact of Residual Correlation on Estimated Genetic effect
+sharing.</h3>
+<p>When <span class="math inline">\(\rho_e\)</span> is low, the sharing
+of genetic effects are dampen because of measurement error. As <span
+class="math inline">\(\rho_e\)</span> increased, the sharing of genetic
+effects were inflated. It would be more obvious with smaller sample
+size</p>
+<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="lfsr-estimation-from-simulated-data" class="section level3">
+<h3>LFSR estimation from simulated data</h3>
+<p>We approximated LFSR with the Bayesian probability from the null
+model where <span class="math inline">\(\beta_1\)</span> and <span
+class="math inline">\(\beta_2\)</span> are independent (Z=0).</p>
 <p><span class="math display">\[
-    y_i = \mu + \beta_X X_i + \beta_G G_d + \gamma X_i \cdot G_d + u_d +
-\epsilon_i
+Z \sim Bernoulli(1-\pi_0)
 \]</span></p>
-<p>Suppose that <span class="math inline">\(X\)</span> is the one-hot
-encoding vector for cell types. <span class="math inline">\(X_c\)</span>
-denotes the cell membership vector for the <span
-class="math inline">\(c\)</span>th cell type. The model simply
-becomes</p>
 <p><span class="math display">\[
-y_i = \mu + \sum_c \beta_c X_{ci} + \beta_G G_d + \sum_c \gamma_c X_{ci}
-\cdot G_d + u_d + \epsilon_i
+Z=0: \begin{bmatrix}
+\beta_1 \\
+\beta_2
+\end{bmatrix} \sim MVN(0, I \cdot \sigma_G^2 + \begin{bmatrix}
+1 &amp; \rho_e  \\
+\rho_e &amp; 1
+\end{bmatrix} \dfrac{\sigma_e^2}{n})
 \]</span></p>
-<p>If we follow the first step of the model, we got:</p>
 <p><span class="math display">\[
-\Delta_i = \sum_c X_{ci}\theta_{cd} + \epsilon_i
-\\
-\theta_{cd} = \beta_c + \gamma_c \cdot G_d
+Z=1: \begin{bmatrix}
+\beta_1 \\
+\beta_2
+\end{bmatrix} \sim MVN(0,  \begin{bmatrix}
+1 &amp; \rho_G  \\
+\rho_G &amp; 1
+\end{bmatrix} \cdot \sigma_G^2 + \begin{bmatrix}
+1 &amp; \rho_e  \\
+\rho_e &amp; 1
+\end{bmatrix} \dfrac{\sigma_e^2}{n})
 \]</span></p>
-<p>and then we regressed <span class="math inline">\(X_{ci}\)</span>
-against <span class="math inline">\(\Delta_i\)</span> for each donor to
-obtain <span class="math inline">\(\theta_{cd}\)</span>. Since <span
-class="math inline">\(X_{ci}\)</span> is the constant of 1 in the <span
-class="math inline">\(c\)</span>th cell type. It is clear that
-<strong>the estimated <span class="math inline">\(\theta_{cd}\)</span>
-would be the mean <span class="math inline">\(\Delta_i\)</span> for all
-cells in the the <span class="math inline">\(c\)</span>th cell type for
-the <span class="math inline">\(d\)</span>th individual.</strong>
-Therefore, eQTL testing on <span
-class="math inline">\(\theta_{cd}\)</span> is very similar to
-pseudo-bulk eQTL mapping used in many single cell eQTL studies to
-identify cell-type specific eQTL.</p>
-<p>There are three differences between our two-step method and the
-standard cell type aggregation approach:</p>
-<ul>
-<li><p>individual random effects and main genetic effects are cancelled
-out in our model, while pseudo-bulk eQTL for a specific cell type
-retains both terms and cannot model individual random effect.
-<strong>Our model only captures cell-type specific effects that deviates
-from the main genetic effects</strong>, while pseudo-bulk eQTL captures
-the marginal genetic effects.</p></li>
-<li><p>our model applied weighted regression to address the uncertainty
-of <span class="math inline">\(\theta_{cd}\)</span>, while pseudo-bulk
-eQTL treats the bulk average as a fixed number. Some studies may use the
-number of cells within each sample to approximate this
-uncertainty.</p></li>
-<li><p>cell-level covariates can be adjusted in our model, while
-pseudo-bulk eQTLs may apply more stringent QC to filter the cells before
-aggregation.</p></li>
-</ul>
-<p>The first difference could reduce the power to detect
-cell-type-specific eQTLs when individual random effects are
-substantial.</p>
+<p>The posterior that <span class="math inline">\(beta_1\)</span> and
+<span class="math inline">\(beta_2\)</span> are indepedent can computed
+as:</p>
+<p><span class="math display">\[
+Pr(Z=0|\beta_1,\beta_2) =
+\dfrac{\pi_0Pr(\beta_1,\beta_2|Z=0)}{\pi_0Pr(\beta_1,\beta_2|Z=0) +
+(1-\pi_0)Pr(\beta_1,\beta_2|Z=1)}
+\]</span></p>
+<pre class="r"><code>sigma_G2 &lt;- 0.2
+sigma_e2 &lt;- 1
+rho_e &lt;- 0.9
+rho_G &lt;- 0.0
+n &lt;- 30
+pi0 &lt;- 0.1
+
+sim.data &lt;- sim_marker_regression(n=n, m=100, rho_e = rho_e, rho_G=rho_G, sigma_G2=sigma_G2, sigma_e2=sigma_e2)
+
+
+library(mvtnorm)
+
+get_lfsr &lt;- function(beta1, beta2, sigma_G2, sigma_e2, rho_e, rho_G, n, pi0) {
+  null_covar &lt;- matrix(c(sigma_e2/n+sigma_G2, 
+                       rho_e*sigma_e2/n, 
+                       rho_e*sigma_e2/n, 
+                       sigma_e2/n+sigma_G2),2,2)
+  alt_covar &lt;- matrix(c(sigma_e2/n+sigma_G2, 
+                        rho_e*sigma_e2/n+rho_G*sigma_G2,
+                        rho_e*sigma_e2/n+rho_G*sigma_G2, 
+                        sigma_e2/n+sigma_G2),2,2)
+  null_lik &lt;- dmvnorm(cbind(beta1, beta2), sigma=null_covar)
+  alt_lik &lt;- dmvnorm(cbind(beta1, beta2), sigma=alt_covar)
+  
+  pi0 * null_lik / (pi0*null_lik + (1-pi0)*alt_lik)
+}
+
+lfsr.true &lt;- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
+         sigma_G2=sigma_G2, 
+         sigma_e2=sigma_e2, 
+         rho_e=rho_e, 
+         rho_G=0.2, 
+         n=n, pi0=pi0)
+
+lfsr.false &lt;- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
+         sigma_G2=sigma_G2, 
+         sigma_e2=sigma_e2, 
+         rho_e=0.2, 
+         rho_G=0.2, 
+         n=n, pi0=pi0)
+
+
+plot(y=lfsr.true, x=lfsr.false,pch=20,
+     xlab = &quot;LFSR (misspecified residual correlation)&quot;,
+     ylab = &quot;LFSR (oracle residual correlation)&quot;)
+lines(c(0,1),c(0,1),col=&quot;red&quot;)</code></pre>
+<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>In this setting of 30 samples, the two contexts have residual
+correlation of 0.9 and zero genetic correlation. LFSR is slightly
+smaller when residual correlation is set to 0.2.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -787,20 +825,24 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] workflowr_1.7.2
+[1] mvtnorm_1.1-3   ggplot2_4.0.1   MASS_7.3-54     workflowr_1.7.2
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.10       compiler_4.1.2    pillar_1.11.1     bslib_0.3.1      
- [5] later_1.3.1       git2r_0.32.0      jquerylib_0.1.4   tools_4.1.2      
- [9] getPass_0.2-4     digest_0.6.31     jsonlite_2.0.0    evaluate_1.0.5   
-[13] lifecycle_1.0.4   tibble_3.3.0      pkgconfig_2.0.3   rlang_1.1.6      
-[17] cli_3.6.5         rstudioapi_0.17.1 yaml_2.3.11       xfun_0.54        
-[21] fastmap_1.1.1     httr_1.4.7        stringr_1.6.0     knitr_1.50       
-[25] fs_1.6.2          vctrs_0.6.5       sass_0.4.6        rprojroot_2.1.1  
-[29] glue_1.8.0        R6_2.6.1          processx_3.8.6    otel_0.2.0       
-[33] rmarkdown_2.30    callr_3.7.6       magrittr_2.0.4    whisker_0.4.1    
-[37] ps_1.9.1          promises_1.5.0    htmltools_0.5.9   httpuv_1.6.10    
-[41] stringi_1.7.12   </code></pre>
+ [1] Rcpp_1.0.10        RColorBrewer_1.1-3 compiler_4.1.2     pillar_1.11.1     
+ [5] bslib_0.3.1        later_1.3.1        git2r_0.32.0       jquerylib_0.1.4   
+ [9] tools_4.1.2        getPass_0.2-4      digest_0.6.31      gtable_0.3.6      
+[13] jsonlite_2.0.0     evaluate_1.0.5     lifecycle_1.0.4    tibble_3.3.0      
+[17] pkgconfig_2.0.3    rlang_1.1.6        cli_3.6.5          rstudioapi_0.17.1 
+[21] yaml_2.3.11        xfun_0.54          fastmap_1.1.1      withr_3.0.2       
+[25] dplyr_1.1.2        httr_1.4.7         stringr_1.6.0      knitr_1.50        
+[29] generics_0.1.4     fs_1.6.2           vctrs_0.6.5        sass_0.4.6        
+[33] tidyselect_1.2.1   grid_4.1.2         rprojroot_2.1.1    glue_1.8.0        
+[37] R6_2.6.1           processx_3.8.6     otel_0.2.0         rmarkdown_2.30    
+[41] farver_2.1.1       callr_3.7.6        magrittr_2.0.4     whisker_0.4.1     
+[45] scales_1.4.0       ps_1.9.1           promises_1.5.0     htmltools_0.5.9   
+[49] dichromat_2.0-0.1  httpuv_1.6.10      labeling_0.4.3     S7_0.2.1          
+[53] stringi_1.7.12    </code></pre>
+</div>
 </div>
 </div>
 
