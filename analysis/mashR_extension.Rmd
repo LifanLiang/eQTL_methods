@@ -7,11 +7,53 @@ editor_options:
   chunk_output_type: console
 ---
 
+<style>
+.scroll-300 {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+</style>
+
 ## Simulation experiment
 
-### Data generation
+### Generative process for eQTL in two contexts
 
-We generate a dataset for eQTL mapping seperately for two different contexts according to this scenario:
+* $\pi_0$: the probability that genetic effects sharing is zero ($\rho_G=0$)
+
+* Z: the intermediate binary variable indicating whether the genetic effects are independent or not.
+
+* $G$: a one-dimensional vector of genotypes sampled from standard Normal. The two contexts shared the same set of donors, therefore the same set of genotype vector.
+
+* $\beta$: a vector for genetic effects sampled from a multivariate Normal (MVN). $\beta_1$ is the genetic effect in the first context, and $\beta_2$ is the genetic for the second context.
+
+* $\sigma_G$: the standard deviation of genetic effects. Can be called the effect size. The two contexts have the same magnitude of effect size.
+
+* $\rho_G$: the correlation of genetic effects between the two contexts.
+
+* $\sigma_e$: the standard deviation of environmental effects (include measure noise/error?). The two contexts have the same magnitude of environmental effect size.
+
+* $\rho_e$: the correlation of environmenta effects between the two contexts.
+
+* $Y$: a vector of gene expression 
+
+
+
+$$
+Z \sim Bernoulli(1-\pi_0)
+$$
+
+$$
+Z = \begin{cases}
+1 & \rho_G>0 \\
+0 & \rho_G=0
+\end{cases}
+$$
+
+$$
+G \sim Normal(0,1)
+$$
+
 
 $$
 \beta \sim MVN(0,\begin{bmatrix}
@@ -19,39 +61,57 @@ $$
 \rho_G & 1 
 \end{bmatrix} \cdot \sigma_G^2)
 $$
+
 $$
 \epsilon \sim MVN(0, \begin{bmatrix}
 1 & \rho_e  \\
 \rho_e & 1 
 \end{bmatrix} \sigma_e^2)
 $$
+
 $$
 Y_1 = G \beta_1 + \epsilon_1
 $$
+
 
 $$
 Y_2 = G \beta_2 + \epsilon_2
 $$
 
+The estimate of genetic effects are generated from ordinary least square (OLS):
 
-We repeat the procedure above for 100 times and obtained 100 estimated genetic effects from the two contexts.
+$$
+\hat\beta_1 = (G^T G)^{-1}G^T Y_1
+$$
 
-```{r}
+$$
+\hat\beta_2 = (G^T G)^{-1}G^T Y_2
+$$
+
+We repeat the procedure above for 100 times, each time with $n$ donors (by default $n=100$). And we obtained 100 estimated genetic effects from the two contexts.
+
+```{r, class.source="scroll-300"}
 library(MASS)
 
-sim_marker_regression <- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.0, rho_G = 0.3, rho_e=0.9) {
+n <- 50
+m <- 10000
+sigma_G2 <- 0.1
+sigma_e2 <- 1 - sigma_G2
+rho_G <- 0.2
+
+G <- matrix(rep(rnorm(n),m), nrow = n, ncol = m)
+
+
+sim_marker_regression <- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.0, rho_G = 0.3, rho_e=0.9, G=G) {
   
-  # 1. Simulate Design Matrix G (n individuals x m markers)
-  G <- matrix(rnorm(n * m), nrow = n, ncol = m)
-  
-  # 2. Generate True Betas (Genetic Effects)
+  # 1. Generate True Betas (Genetic Effects)
   # Correlation between trait 1 and trait 2 is 0.5 as per your prompt
   U <- matrix(c(1, rho_G, rho_G, 1), nrow = 2)
   cov_beta <- U * sigma_G2
   betas_true <- mvrnorm(n = m, mu = c(0, 0), Sigma = cov_beta)
   colnames(betas_true) <- c("Beta1_True", "Beta2_True")
   
-  # 3. Generate Residuals (Environmental Effects)
+  # 2. Generate Residuals (Environmental Effects)
   cov_epsilon <- matrix(c(1, rho_e, rho_e, 1), nrow = 2) * sigma_e2
   eps_all <- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
   
@@ -59,16 +119,16 @@ sim_marker_regression <- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.
   eps1_mat <- matrix(eps_all[, 1], nrow = n, ncol = m)
   eps2_mat <- matrix(eps_all[, 2], nrow = n, ncol = m)
   
-  # 4. Generate Phenotype Matrices Y1 and Y2 (n x m)
+  # 3. Generate Phenotype Matrices Y1 and Y2 (n x m)
   Y1 <- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
   Y2 <- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
   
-  # 5. Regression (OLS estimation)
+  # 4. Regression (OLS estimation)
   # Using the fast matrix method: beta_hat = (G'G)^-1 G'Y
   beta1_hat <- colSums(G * Y1) / colSums(G^2)
   beta2_hat <- colSums(G * Y2) / colSums(G^2)
   
-  # 6. Consolidate Results
+  # 5. Consolidate Results
   results <- data.frame(
     marker_id = 1:m,
     beta1_true = betas_true[, 1],
@@ -81,133 +141,515 @@ sim_marker_regression <- function(n = 100, m = 10, sigma_G2 = 0.1, sigma_e2 = 1.
 }
 ```
 
-### Impact of Residual Correlation on Estimated Genetic effect sharing.
+### How environmental effect sharing leaks into genetic effect sharing.
 
-When $\rho_e$ is low, the sharing of genetic effects are dampen because of measurement error. As $\rho_e$ increased, the sharing of genetic effects were inflated. It would be more obvious with smaller sample size
+When samples are completely overlapped, the sharing of environmental effects (residual correlation) will leak into the estimate of sharing of genetic effects.
 
-```{r,echo=F, warning=F}
+$$
+cov(\hat\beta_1, \hat\beta_2) = \rho_G \sigma_G^2 + \dfrac{\rho_e \sigma_e^2}{G^T G}
+$$
+
+As derived above, $\rho_G \sigma_G^2$ represents the true genetic effect sharing. $\dfrac{\rho_e \sigma_e^2}{G^T G}$ is the proportion of residual correlation added into the estimated sharing of genetic effects. Since is $G$ is from standard Normal in our case and usually normalized in practice, we can simply approximate the environmental proportion as $\dfrac{\rho_e \sigma_e^2}{n}$.
+
+
+Please note that the derivation assumes $G$ is not a random variable. Hence, all the repeated simulations uses the same $G$.
+
+As shown in the figure below, blue dots is observed covariance of genetic effect along with different residual correlation. The green line indicates the theoretical trend (similar to linear regression: $\hat\rho_G=\rho_G \sigma_G^2 + \dfrac{\sigma_e^2}{\sum G_i^2}\cdot \rho_e$. And the red line is the true genetic covariance along)
+
+```{r, class.source="scroll-300"}
+set.seed(1234)
+
 library(MASS)
 library(ggplot2)
+
+n <- 50
+m <- 10000
+sigma_G2 <- 0.1
+sigma_e2 <- 1 - sigma_G2
+rho_G <- 0.2
 
 rho_e_values <- seq(0, 0.95, by = 0.05)
 estimated_corrs <- numeric(length(rho_e_values))
 
+G <- matrix(rep(rnorm(n),m), nrow = n, ncol = m) # Replicate G for M times for vectorized computation
+#G <- matrix(rnorm(n*m), nrow = n, ncol = m)
+
 for (i in seq_along(rho_e_values)) {
   sim_res <- sim_marker_regression(
-    n = 100, 
-    m = 1000, 
-    sigma_G2 = 0.1, 
-    sigma_e2 = 1.0, 
-    rho_G = 0.3, 
-    rho_e = rho_e_values[i]
+    n = n, 
+    m = m, 
+    sigma_G2 = sigma_G2, 
+    sigma_e2 = sigma_e2, 
+    rho_G = rho_G, 
+    rho_e = rho_e_values[i],
+    G = G
   )
-  estimated_corrs[i] <- cor(sim_res$beta1_est, sim_res$beta2_est)
+  estimated_corrs[i] <- cov(sim_res$beta1_est, sim_res$beta2_est)
 }
 
 plot_data <- data.frame(rho_e = rho_e_values, est_corr = estimated_corrs)
 
+g_sum_sq <- sum(G[,1]^2) 
+
+theoretical_intercept <- rho_G * sigma_G2
+theoretical_slope     <- sigma_e2 / g_sum_sq
+
 ggplot(plot_data, aes(x = rho_e, y = est_corr)) +
+  ylim(c(0,0.042)) + 
   geom_line(color = "steelblue", size = 1) +
   geom_point(color = "darkblue") +
-  geom_hline(yintercept = 0.3, linetype = "dashed", color = "red") +
-  annotate("text", x = 0.25, y = 0.31, label = "True Genetic Correlation (0.3)", color = "red") +
+  geom_hline(yintercept = rho_G*sigma_G2, linetype = "dashed", color = "red") +
+  geom_abline(
+    intercept = theoretical_intercept, 
+    slope = theoretical_slope, 
+    color = "green", 
+    linetype = "dashed", 
+    size = 1
+  ) +
+  annotate("text", x = 0.25, y = rho_G*sigma_G2-2e-3, label = paste0("True Genetic covariance",rho_G*sigma_G2), color = "red") +
   labs(
-    subtitle = "100 samples, 1000 SNPs, sigma_G2=0.1",
+    subtitle = paste0(n, " samples, ",m, " repeats, sigma_G2=", sigma_G2, ", rho_G=", rho_G),
     x = "Residual Correlation",
-    y = "Estimated Genetic Effect Sharing"
+    y = "Covariance of estimated genetic effects between two contexts"
   ) +
   theme_minimal()
 ```
 
 
-### LFSR estimation from simulated data
+### Posterior of genetic effects overly corrects the confounding of residual correlation
 
-We approximated LFSR with the Bayesian probability from the null model where $\beta_1$ and $\beta_2$ are independent (Z=0).
+Given the prior distribution of true genetic effects and the estimated genetic effects, we recovered the posterior of genetic effects between two contexts and compared how LFSR changes according to the specified residual correlation when the true residual correlation is high (0.9).
 
-
-$$
-Z \sim Bernoulli(1-\pi_0)
-$$
+Following the MASH paper, the posterior of true genetic effect ($\tilde\beta$) can be derived from the estimated genetic effect ($\hat\beta$), prior covariance matrix ($U=\begin{bmatrix} 1 & \rho_G  \\ \rho_G & 1 \end{bmatrix} \cdot \sigma_G^2$), and the residual correlation ($V=\begin{bmatrix} 1 & \rho_e  \\ \rho_e & 1 \end{bmatrix} \cdot \dfrac{\sigma_e^2}{n}$). 
 
 $$
-Z=0: \begin{bmatrix}
-\beta_1 \\
-\beta_2
-\end{bmatrix} \sim MVN(0, I \cdot \sigma_G^2 + \begin{bmatrix}
-1 & \rho_e  \\
-\rho_e & 1 
-\end{bmatrix} \dfrac{\sigma_e^2}{n})
+\Sigma_{post} = (U^{-1} + V^{-1})^{-1}
 $$
 
 $$
-Z=1: \begin{bmatrix}
-\beta_1 \\
-\beta_2
-\end{bmatrix} \sim MVN(0,  \begin{bmatrix}
-1 & \rho_G  \\
-\rho_G & 1 
-\end{bmatrix} \cdot \sigma_G^2 + \begin{bmatrix}
-1 & \rho_e  \\
-\rho_e & 1 
-\end{bmatrix} \dfrac{\sigma_e^2}{n})
+E(\tilde\beta|\hat\beta) = \Sigma_{post} V^{-1} \hat{\beta}
 $$
 
-The posterior that $beta_1$ and $beta_2$ are indepedent can computed as:
-
-$$
-Pr(Z=0|\beta_1,\beta_2) = \dfrac{\pi_0Pr(\beta_1,\beta_2|Z=0)}{\pi_0Pr(\beta_1,\beta_2|Z=0) + (1-\pi_0)Pr(\beta_1,\beta_2|Z=1)}
-$$
-
-
+As a sanity check, we compared the accuracy (correlation with ground truth) of OLS estimator and the posterior mean. As $\rho_e$ increased, posterior mean have large accuracy gain.
 
 ```{r}
-sigma_G2 <- 0.2
-sigma_e2 <- 1
-rho_e <- 0.9
-rho_G <- 0.0
-n <- 30
-pi0 <- 0.1
+library(MASS)
 
-sim.data <- sim_marker_regression(n=n, m=100, rho_e = rho_e, rho_G=rho_G, sigma_G2=sigma_G2, sigma_e2=sigma_e2)
+compute_posterior <- function(U, V, beta_hat) {
+  Total_Variance <- V + U
+  W <- U %*% solve(Total_Variance)
 
-
-library(mvtnorm)
-
-get_lfsr <- function(beta1, beta2, sigma_G2, sigma_e2, rho_e, rho_G, n, pi0) {
-  null_covar <- matrix(c(sigma_e2/n+sigma_G2, 
-                       rho_e*sigma_e2/n, 
-                       rho_e*sigma_e2/n, 
-                       sigma_e2/n+sigma_G2),2,2)
-  alt_covar <- matrix(c(sigma_e2/n+sigma_G2, 
-                        rho_e*sigma_e2/n+rho_G*sigma_G2,
-                        rho_e*sigma_e2/n+rho_G*sigma_G2, 
-                        sigma_e2/n+sigma_G2),2,2)
-  null_lik <- dmvnorm(cbind(beta1, beta2), sigma=null_covar)
-  alt_lik <- dmvnorm(cbind(beta1, beta2), sigma=alt_covar)
+  mu_post <- W %*% beta_hat
+  Sigma_post <- U - (W %*% U)
   
-  pi0 * null_lik / (pi0*null_lik + (1-pi0)*alt_lik)
+  return(list(mu_post = mu_post, Sigma_post = Sigma_post))
 }
-
-lfsr.true <- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
-         sigma_G2=sigma_G2, 
-         sigma_e2=sigma_e2, 
-         rho_e=rho_e, 
-         rho_G=0.2, 
-         n=n, pi0=pi0)
-
-lfsr.false <- get_lfsr(sim.data$beta1_est, sim.data$beta2_est, 
-         sigma_G2=sigma_G2, 
-         sigma_e2=sigma_e2, 
-         rho_e=0.2, 
-         rho_G=0.2, 
-         n=n, pi0=pi0)
-
-
-plot(y=lfsr.true, x=lfsr.false,pch=20,
-     xlab = "LFSR (misspecified residual correlation)",
-     ylab = "LFSR (oracle residual correlation)")
-lines(c(0,1),c(0,1),col="red")
 ```
 
-In this setting of 30 samples, the two contexts have residual correlation of 0.9 and zero genetic correlation. LFSR is slightly smaller when residual correlation is set to 0.2.
+```{r, class.source="scroll-300"}
+set.seed(1234)
+n <- 50
+m <- 10000
+sigma_G2 <- 0.1
+sigma_e2 <- 1 - sigma_G2  # Assuming total variance is 1
+rho_G <- 0.2
+
+rho_e_values <- seq(0, 0.95, by = 0.05)
+
+ols_corrs <- numeric(length(rho_e_values))
+post_corrs <- numeric(length(rho_e_values))
+
+G <- matrix(rep(rnorm(n), m), nrow = n, ncol = m)
+g_sum_sq <- sum(G[,1]^2) # The scaling factor for error variance
+
+# Vectors to store accuracy correlations
+acc_ols <- numeric(length(rho_e_values))
+acc_post <- numeric(length(rho_e_values))
+
+for (i in seq_along(rho_e_values)) {
+  rho_e_current <- rho_e_values[i]
+
+  sim_res <- sim_marker_regression(
+    n = n, m = m, sigma_G2 = sigma_G2, sigma_e2 = sigma_e2, 
+    rho_G = rho_G, rho_e = rho_e_current, G = G
+  )
+  ols_corrs[i] <- cov(sim_res$beta1_est, sim_res$beta2_est)
+  
+  U <- matrix(c(sigma_G2, rho_G*sigma_G2, rho_G*sigma_G2, sigma_G2), 2, 2)
+  
+  scaling <- 1 / g_sum_sq
+  V <- matrix(c(sigma_e2, rho_e_current*sigma_e2, 
+                rho_e_current*sigma_e2, sigma_e2), 2, 2) * scaling
+
+  beta_hat_matrix <- rbind(sim_res$beta1_est, sim_res$beta2_est)
+
+  post_res <- compute_posterior(U, V, beta_hat_matrix)
+  
+  post_corrs[i] <- cov(post_res$mu_post[1, ], post_res$mu_post[2, ])
+
+  acc_ols[i] <- cor(sim_res$beta1_est, sim_res$beta1_true)
+
+  acc_post[i] <- cor(post_res$mu_post[1, ], sim_res$beta1_true)
+}
+
+plot_data <- data.frame(
+  rho_e = rho_e_values,
+  OLS_Accuracy = acc_ols,
+  Posterior_Accuracy = acc_post
+)
+
+ggplot(plot_data, aes(x = rho_e)) +
+  geom_line(aes(y = OLS_Accuracy, color = "OLS Estimate (beta_hat)"), size = 1) +
+  geom_point(aes(y = OLS_Accuracy, color = "OLS Estimate (beta_hat)")) +
+  geom_line(aes(y = Posterior_Accuracy, color = "Posterior Mean"), size = 1) +
+  geom_point(aes(y = Posterior_Accuracy, color = "Posterior Mean")) +
+  scale_color_manual(values = c("steelblue", "orange")) +
+  labs(
+    title = "Estimation Accuracy: OLS vs Posterior",
+    y = "Correlation with Ground Truth (True Beta)",
+    x = "Environmental Correlation (rho_e)"
+  ) +
+  theme_minimal()
+```
+
+
+However, the covariance of posterior mean will overcorrect the residual correlation as $\rho_e$ increased. This is due to the law of total variance:
+
+$$
+cov(\beta) = E[Var(\beta|\hat\beta)] + Var[E(\beta|\hat\beta)] 
+$$
+
+which can be rewritten as:
+
+$$
+\rho_G \sigma_G^2= \Sigma_{post} + cov(\tilde\beta)
+$$
+
+$\Sigma_{post}$ will get larger as $\rho_e$ increased. Since the prior covariance of genetic effects is constant, the increase of $\Sigma_post$ leads to the decrease of $cov(\tilde\beta)$.
+
+```{r, class.source="scroll-300"}
+plot_data <- data.frame(
+  rho_e = rho_e_values, 
+  OLS_Cov = ols_corrs,
+  Post_Cov = post_corrs
+)
+
+theoretical_intercept <- rho_G * sigma_G2
+theoretical_slope     <- sigma_e2 / g_sum_sq
+
+ggplot(plot_data, aes(x = rho_e)) +
+  # OLS Lines
+  geom_line(aes(y = OLS_Cov, color = "OLS Estimate"), size = 1) +
+  geom_point(aes(y = OLS_Cov, color = "OLS Estimate")) +
+  
+  # Posterior Lines
+  geom_line(aes(y = Post_Cov, color = "Posterior Mean"), size = 1, linetype="solid") +
+  geom_point(aes(y = Post_Cov, color = "Posterior Mean")) +
+  
+  # Theoretical OLS Slope (Green Dashed)
+  geom_abline(intercept = theoretical_intercept, slope = theoretical_slope, 
+              color = "green", linetype = "dashed", size = 0.8) +
+  
+  # True Genetic Covariance (Red Dashed)
+  geom_hline(yintercept = rho_G*sigma_G2, linetype = "dashed", color = "red") +
+  
+  annotate("text", x = 0.25, y = rho_G*sigma_G2 - 0.002, 
+           label = paste0("True Genetic Cov (", rho_G*sigma_G2, ")"), color = "red") +
+  
+  scale_color_manual(name = "Method", 
+                     values = c("OLS Estimate" = "steelblue", "Posterior Mean" = "orange")) +
+  
+  labs(
+    subtitle = paste0(n, " samples, ", m, " repeats."),
+    x = "Residual Correlation (rho_e)",
+    y = "Covariance of Effects Between Two Contexts"
+  ) +
+  theme_minimal()
+```
+
+### LFSR inference overestimates the genetic effect sharing
+
+To determine how LFSR was inflated, the parameters between data generation and posterior inference are very different.
+
+During the data generation, we set $\rho_G=0$ and $sigma_G^2=0$. The true $\rho_e$ go through a range of values from 0 to 0.95 to generate 20 different datasets.
+
+During posterior inference, $\rho_e$ was always set. $\sigma_G^2=1$ will cause inflation to an extent. But it also reduce the posterior weights on the prior. Hence $\sigma_G^2$ does not affect the results too much. The key setting is the prior covariance of genetic effect ($\rho_G$). Before introducing a mixture of two settings of $\rho_G$, we need to validate the impact of $\rho_e$ in the scenario that $\rho_G=0$ and $\rho_G>0$ seperately.
+
+We use LFSR<5% as significant and computed the empirical False discovery rates for each value of true $\rho_e$.
+
+#### $\rho_G=0$
+
+```{r}
+# Simply marginal posterior to compute LFSR
+get_lfsr <- function(post_res) {
+  prob_less_0_1 <- pnorm(0, mean = post_res$mu_post[1,], sd = sqrt(post_res$Sigma_post[1,1]))
+  lfsr1 <- pmin(prob_less_0_1, 1 - prob_less_0_1)
+  
+  prob_less_0_2 <- pnorm(0, mean = post_res$mu_post[2,], sd = sqrt(post_res$Sigma_post[2,2]))
+  lfsr2 <- pmin(prob_less_0_2, 1 - prob_less_0_2)
+  
+  cbind(lfsr1, lfsr2)
+}
+```
+
+
+```{r, class.source="scroll-300"}
+
+rho_e_hat_fixed <- 0 # The model will ALWAYS assume independence (Naive)
+rho_e_true_values <- seq(0, 0.95, by = 0.05) # The data gets progressively more correlated
+
+marginal_fpr <- numeric(length(rho_e_true_values))
+joint_fpr    <- numeric(length(rho_e_true_values))
+
+for (i in seq_along(rho_e_true_values)) {
+  rho_current <- rho_e_true_values[i]
+
+  sim_res <- sim_marker_regression(
+    n = n, m = m, sigma_G2 = 0, sigma_e2 = 1, 
+    rho_G = 0, rho_e = rho_current, G = G
+  )
+  
+  U_naive <- diag(1, 2)  # Causes inflation but also reduce the weight of the prior
+  
+  scaling <- 1 / g_sum_sq
+  V_naive <- diag(sigma_e2, 2) * scaling
+  
+  beta_hat_matrix <- rbind(sim_res$beta1_est, sim_res$beta2_est)
+
+  post_res <- compute_posterior(U_naive, V_naive, beta_hat_matrix)
+  lfsr <- get_lfsr(post_res)
+
+  marginal_fpr[i] <- mean(lfsr[,1] < 0.05)
+
+  joint_fpr[i] <- mean(lfsr[,1] < 0.05 & lfsr[,2] < 0.05)
+}
+```
+
+Given that $\rho_G=0$, the marginal FPR was inflated because of positive covariance in the prior. The marignal LFSR was not affected by $\rho_e$. However, the proportion of LFSR being significant in the two contexts together will grow as $rho_e$ increased.
+
+```{r, echo=F}
+# --- 4. Plotting ---
+plot_data <- data.frame(
+  rho_e = rho_e_true_values,
+  Marginal = marginal_fpr,
+  Joint = joint_fpr
+)
+
+ggplot(plot_data, aes(x = rho_e)) +
+  # Marginal Line (Trait 1)
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)")) +
+  
+  # Joint Line (Trait 1 & 2)
+  geom_line(aes(y = Joint, color = "Joint FPR (Both Significant)"), size = 1) +
+  geom_point(aes(y = Joint, color = "Joint FPR (Both Significant)")) +
+  
+  # Theoretical Baseline for Joint (Marginal^2)
+  geom_hline(yintercept = mean(marginal_fpr)^2, linetype="dashed", color="gray") +
+  annotate("text", x=0.1, y=mean(marginal_fpr)^2 - 0.005, label="Expected Joint FPR (Independent)", color="gray40") +
+  
+  scale_color_manual(values = c("Marginal FPR (Trait 1 Only)" = "steelblue", 
+                                "Joint FPR (Both Significant)" = "red")) +
+  labs(
+    x = "True Environmental Correlation (rho_e)",
+    y = "False Positive Rate (FPR)"
+  ) +
+  ylim(0, 0.15) + # Set limits to visualize the scale clearly
+  theme_minimal() +
+  theme(legend.position = "top")
+
+```
+
+
+#### $\rho_G=0.9$
+
+```{r, class.source="scroll-300"}
+
+rho_e_hat_fixed <- 0 # The model will ALWAYS assume independence (Naive)
+rho_e_true_values <- seq(0, 0.95, by = 0.05) # The data gets progressively more correlated
+
+marginal_fpr <- numeric(length(rho_e_true_values))
+joint_fpr    <- numeric(length(rho_e_true_values))
+
+for (i in seq_along(rho_e_true_values)) {
+  rho_current <- rho_e_true_values[i]
+
+  sim_res <- sim_marker_regression(
+    n = n, m = m, sigma_G2 = 0, sigma_e2 = 1, 
+    rho_G = 0, rho_e = rho_current, G = G
+  )
+  
+  U_naive <- matrix(c(1,0.9,0.9,1),2,2)  # Causes inflation but also reduce the weight of the prior
+  
+  scaling <- 1 / g_sum_sq
+  V_naive <- diag(sigma_e2, 2) * scaling
+  
+  beta_hat_matrix <- rbind(sim_res$beta1_est, sim_res$beta2_est)
+
+  post_res <- compute_posterior(U_naive, V_naive, beta_hat_matrix)
+  lfsr <- get_lfsr(post_res)
+
+  marginal_fpr[i] <- mean(lfsr[,1] < 0.05)
+
+  joint_fpr[i] <- mean(lfsr[,1] < 0.05 & lfsr[,2] < 0.05)
+}
+```
+
+Even when prior correlation was set to 0.9. Marginal LFSR only slightly increased as $\rho_e$ increased. But the phenomenon of joint false positive becomes more obvious in this scenario.
+
+```{r, echo=F}
+# --- 4. Plotting ---
+plot_data <- data.frame(
+  rho_e = rho_e_true_values,
+  Marginal = marginal_fpr,
+  Joint = joint_fpr
+)
+
+ggplot(plot_data, aes(x = rho_e)) +
+  # Marginal Line (Trait 1)
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)")) +
+  
+  # Joint Line (Trait 1 & 2)
+  geom_line(aes(y = Joint, color = "Joint FPR (Both Significant)"), size = 1) +
+  geom_point(aes(y = Joint, color = "Joint FPR (Both Significant)")) +
+  
+  # Theoretical Baseline for Joint (Marginal^2)
+  geom_hline(yintercept = mean(marginal_fpr)^2, linetype="dashed", color="gray") +
+  annotate("text", x=0.1, y=mean(marginal_fpr)^2 - 0.005, label="Expected Joint FPR (Independent)", color="gray40") +
+  
+  scale_color_manual(values = c("Marginal FPR (Trait 1 Only)" = "steelblue", 
+                                "Joint FPR (Both Significant)" = "red")) +
+  labs(
+    x = "True Environmental Correlation (rho_e)",
+    y = "False Positive Rate (FPR)"
+  ) +
+  ylim(0, 0.15) + # Set limits to visualize the scale clearly
+  theme_minimal() +
+  theme(legend.position = "top")
+
+```
+
+
+#### A mixture of $\rho_G=0$ and $\rho_G=0.9$
+
+Combining the two scenarios above, we estimate the posterior with a mixture of two scenarios: (1) genetic effects are independent between contexts ($\pi_0=0.1, \rho_G=0$); (2) genetic effects are highly shared between the two contexts ($\pi_0=0.9, \rho_G=0.9$)
+
+With the increase of $\rho_e$, the marginal FPR slightly increased, and the proportion of joint FPR (simultaneous false postives in the two contexts) increased substantially.
+
+```{r, class.source="scroll-300"}
+library(MASS)
+library(ggplot2)
+library(mvtnorm) 
+
+compute_mixture_lfsr <- function(beta_hat_matrix, V_naive, pi_weights, U_list) {
+  # beta_hat_matrix: 2 x m
+  # V_naive: 2 x 2 (Likelihood Error)
+  # pi_weights: Vector of prior weights (e.g., c(0.1, 0.9))
+  # U_list: List of Prior Covariance Matrices
+  
+  m <- ncol(beta_hat_matrix)
+  K <- length(U_list)
+  
+  # Storage for component-wise stats
+  log_lik_matrix <- matrix(0, nrow = m, ncol = K)
+  comp_prob_less_0_trait1 <- matrix(0, nrow = m, ncol = K)
+  comp_prob_less_0_trait2 <- matrix(0, nrow = m, ncol = K)
+  
+  # Loop through Mixture Components
+  for (k in 1:K) {
+    U_k <- U_list[[k]]
+
+    Sigma_D <- U_k + V_naive
+    
+    log_lik_matrix[, k] <- dmvnorm(t(beta_hat_matrix), mean = c(0,0), sigma = Sigma_D, log = TRUE)
+    
+    W_k <- U_k %*% solve(Sigma_D)
+    mu_post_k <- W_k %*% beta_hat_matrix # 2 x m
+    Sigma_post_k <- U_k - (W_k %*% U_k)
+
+    sd_post_k <- sqrt(diag(Sigma_post_k))
+
+    comp_prob_less_0_trait1[, k] <- pnorm(0, mean = mu_post_k[1,], sd = sd_post_k[1])
+    comp_prob_less_0_trait2[, k] <- pnorm(0, mean = mu_post_k[2,], sd = sd_post_k[2])
+  }
+  
+  # exp(log_lik + log_prior - max_log_lik) trick for numerical stability
+  log_weighted_lik <- log_lik_matrix + matrix(log(pi_weights), nrow=m, ncol=K, byrow=TRUE)
+  row_max <- apply(log_weighted_lik, 1, max)
+  exp_term <- exp(log_weighted_lik - row_max)
+  gammas <- exp_term / rowSums(exp_term) # m x K matrix of posterior weights
+
+  mix_prob_less_0_t1 <- rowSums(gammas * comp_prob_less_0_trait1)
+  mix_prob_less_0_t2 <- rowSums(gammas * comp_prob_less_0_trait2)
+  
+  lfsr1 <- pmin(mix_prob_less_0_t1, 1 - mix_prob_less_0_t1)
+  lfsr2 <- pmin(mix_prob_less_0_t2, 1 - mix_prob_less_0_t2)
+  
+  return(cbind(lfsr1, lfsr2))
+}
+
+set.seed(42)
+n <- 50
+m <- 2000 # Number of markers
+sigma_e2 <- 1
+rho_e_true_values <- seq(0, 0.95, by = 0.05)
+
+G <- matrix(rep(rnorm(n), m), nrow = n, ncol = m)
+g_sum_sq <- sum(G[,1]^2)
+scaling <- 1 / g_sum_sq
+
+U_ind <- diag(1, 2)
+U_shared <- matrix(c(1, 0.9, 0.9, 1), 2, 2)
+
+U_list <- list(U_ind, U_shared)
+pi_weights <- c(0.1, 0.9) # 90% belief in shared effects
+
+# Storage
+res_marginal <- numeric(length(rho_e_true_values))
+res_joint <- numeric(length(rho_e_true_values))
+
+for (i in seq_along(rho_e_true_values)) {
+  rho_current <- rho_e_true_values[i]
+  
+  # A. Simulate Null Data with True Correlation
+  cov_e <- matrix(c(1, rho_current, rho_current, 1), 2, 2)
+  eps <- mvrnorm(n*m, c(0,0), cov_e)
+  Y1 <- matrix(eps[,1], n, m); Y2 <- matrix(eps[,2], n, m)
+  denom <- colSums(G^2)
+  beta_hat <- rbind(colSums(G*Y1)/denom, colSums(G*Y2)/denom)
+  
+  # B. Naive Likelihood (ignorant of residual correlation)
+  V_naive <- diag(1, 2) * scaling
+  
+  # C. Run Mixture Inference
+  lfsr_mix <- compute_mixture_lfsr(beta_hat, V_naive, pi_weights, U_list)
+  
+  # D. Calculate FPRs (Threshold 0.05)
+  res_marginal[i] <- mean(lfsr_mix[,1] < 0.05)
+  res_joint[i]    <- mean(lfsr_mix[,1] < 0.05 & lfsr_mix[,2] < 0.05)
+}
+
+# --- 4. Plotting ---
+plot_data <- data.frame(
+  rho_e = rho_e_true_values,
+  Marginal = res_marginal,
+  Joint = res_joint
+)
+
+ggplot(plot_data, aes(x = rho_e)) +
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1)")) +
+  
+  geom_line(aes(y = Joint, color = "Joint FPR (Both)"), size = 1) +
+  geom_point(aes(y = Joint, color = "Joint FPR (Both)")) +
+  
+  scale_color_manual(values = c("red", "steelblue")) +
+  labs(
+    x = "True Environmental Correlation (rho_e)",
+    y = "False Positive Rate (FPR)"
+  ) +
+  theme_minimal()+
+  theme(legend.position = "top")
+```
 
