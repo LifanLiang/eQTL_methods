@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreee39e8f38624cb61368171493cf77790715da501atargetblanke39e8f3a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedba05cc7f9310043fb70140be9606225fee6233atargetblankdba05cca">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/e39e8f38624cb61368171493cf77790715da501a" target="_blank">e39e8f3</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/dba05cc7f9310043fb70140be9606225fee6233a" target="_blank">dba05cc</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreee39e8f38624cb61368171493cf77790715da501atargetblanke39e8f3a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedba05cc7f9310043fb70140be9606225fee6233atargetblankdba05cca"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/e39e8f38624cb61368171493cf77790715da501a" target="_blank">e39e8f3</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/dba05cc7f9310043fb70140be9606225fee6233a" target="_blank">dba05cc</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -611,6 +611,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/dba05cc7f9310043fb70140be9606225fee6233a/analysis/mashR_extension.Rmd" target="_blank">dba05cc</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-01-26
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/53f8fcdddb3dabcb613ff225475f321caf2879c9/docs/mashR_extension.html" target="_blank">53f8fcd</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-01-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -861,7 +895,7 @@ class="math inline">\(G\)</span>.</p>
 <p>As shown in the figure below, blue dots is observed covariance of
 genetic effect along with different residual correlation. The green line
 indicates the theoretical trend (similar to linear regression: <span
-class="math inline">\(\hat\rho_G=\rho_G \sigma_G^2 +
+class="math inline">\(cov(\hat\beta_1, \hat\beta_2)=\rho_G \sigma_G^2 +
 \dfrac{\sigma_e^2}{\sum G_i^2}\cdot \rho_e\)</span>. And the red line is
 the true genetic covariance along)</p>
 <pre class="r scroll-300"><code>set.seed(1234)
@@ -1218,7 +1252,7 @@ class="math inline">\(sigma_G^2=0\)</span>. The true <span
 class="math inline">\(\rho_e\)</span> go through a range of values from
 0 to 0.95 to generate 20 different datasets.</p>
 <p>During posterior inference, <span
-class="math inline">\(\rho_e\)</span> was always set. <span
+class="math inline">\(\rho_e\)</span> was always fixed as zero. <span
 class="math inline">\(\sigma_G^2=1\)</span> will cause inflation to an
 extent. But it also reduce the posterior weights on the prior. Hence
 <span class="math inline">\(\sigma_G^2\)</span> does not affect the
@@ -1397,7 +1431,7 @@ class="math inline">\(\rho_G=0.9\)</span></h4>
 mixture of two scenarios: (1) genetic effects are independent between
 contexts (<span class="math inline">\(\pi_0=0.1, \rho_G=0\)</span>); (2)
 genetic effects are highly shared between the two contexts (<span
-class="math inline">\(\pi_0=0.9, \rho_G=0.9\)</span>)</p>
+class="math inline">\(\pi_1=0.9, \rho_G=0.9\)</span>)</p>
 <p>With the increase of <span class="math inline">\(\rho_e\)</span>, the
 marginal FPR slightly increased, and the proportion of joint FPR
 (simultaneous false postives in the two contexts) increased
