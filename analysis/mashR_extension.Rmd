@@ -154,7 +154,7 @@ As derived above, $\rho_G \sigma_G^2$ represents the true genetic effect sharing
 
 Please note that the derivation assumes $G$ is not a random variable. Hence, all the repeated simulations uses the same $G$.
 
-As shown in the figure below, blue dots is observed covariance of genetic effect along with different residual correlation. The green line indicates the theoretical trend (similar to linear regression: $\hat\rho_G=\rho_G \sigma_G^2 + \dfrac{\sigma_e^2}{\sum G_i^2}\cdot \rho_e$. And the red line is the true genetic covariance along)
+As shown in the figure below, blue dots is observed covariance of genetic effect along with different residual correlation. The green line indicates the theoretical trend (similar to linear regression: $cov(\hat\beta_1, \hat\beta_2)=\rho_G \sigma_G^2 + \dfrac{\sigma_e^2}{\sum G_i^2}\cdot \rho_e$. And the red line is the true genetic covariance along)
 
 ```{r, class.source="scroll-300"}
 set.seed(1234)
@@ -373,7 +373,7 @@ To determine how LFSR was inflated, the parameters between data generation and p
 
 During the data generation, we set $\rho_G=0$ and $sigma_G^2=0$. The true $\rho_e$ go through a range of values from 0 to 0.95 to generate 20 different datasets.
 
-During posterior inference, $\rho_e$ was always set. $\sigma_G^2=1$ will cause inflation to an extent. But it also reduce the posterior weights on the prior. Hence $\sigma_G^2$ does not affect the results too much. The key setting is the prior covariance of genetic effect ($\rho_G$). Before introducing a mixture of two settings of $\rho_G$, we need to validate the impact of $\rho_e$ in the scenario that $\rho_G=0$ and $\rho_G>0$ separately.
+During posterior inference, $\rho_e$ was always fixed as zero. $\sigma_G^2=1$ will cause inflation to an extent. But it also reduce the posterior weights on the prior. Hence $\sigma_G^2$ does not affect the results too much. The key setting is the prior covariance of genetic effect ($\rho_G$). Before introducing a mixture of two settings of $\rho_G$, we need to validate the impact of $\rho_e$ in the scenario that $\rho_G=0$ and $\rho_G>0$ separately.
 
 We use LFSR<5% as significant and computed the empirical False discovery rates for each value of true $\rho_e$.
 
@@ -533,7 +533,7 @@ ggplot(plot_data, aes(x = rho_e)) +
 
 #### A mixture of $\rho_G=0$ and $\rho_G=0.9$
 
-Combining the two scenarios above, we estimate the posterior with a mixture of two scenarios: (1) genetic effects are independent between contexts ($\pi_0=0.1, \rho_G=0$); (2) genetic effects are highly shared between the two contexts ($\pi_0=0.9, \rho_G=0.9$)
+Combining the two scenarios above, we estimate the posterior with a mixture of two scenarios: (1) genetic effects are independent between contexts ($\pi_0=0.1, \rho_G=0$); (2) genetic effects are highly shared between the two contexts ($\pi_1=0.9, \rho_G=0.9$)
 
 With the increase of $\rho_e$, the marginal FPR slightly increased, and the proportion of joint FPR (simultaneous false postives in the two contexts) increased substantially.
 
