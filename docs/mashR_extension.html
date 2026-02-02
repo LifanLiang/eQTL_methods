@@ -382,7 +382,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-01-26
+<strong>Last updated:</strong> 2026-02-02
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedba05cc7f9310043fb70140be9606225fee6233atargetblankdba05cca">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb874aeee4830565f45c72acb972551d868273692targetblankb874aeea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/dba05cc7f9310043fb70140be9606225fee6233a" target="_blank">dba05cc</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/b874aeee4830565f45c72acb972551d868273692" target="_blank">b874aee</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedba05cc7f9310043fb70140be9606225fee6233atargetblankdba05cca"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb874aeee4830565f45c72acb972551d868273692targetblankb874aeea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/dba05cc7f9310043fb70140be9606225fee6233a" target="_blank">dba05cc</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/b874aeee4830565f45c72acb972551d868273692" target="_blank">b874aee</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -611,6 +611,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b874aeee4830565f45c72acb972551d868273692/analysis/mashR_extension.Rmd" target="_blank">b874aee</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-02
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/3fa9b0401e8462014f4ef81dd3c2a0cb4f2c6c66/docs/mashR_extension.html" target="_blank">3fa9b04</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-01-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -791,8 +825,8 @@ G \sim Normal(0,1)
 \]</span></p>
 <p><span class="math display">\[
 \beta \sim MVN(0,\begin{bmatrix}
-1 &amp; \rho_G  \\
-\rho_G &amp; 1
+1 &amp; Z\cdot\rho_G  \\
+Z\cdot\rho_G &amp; 1
 \end{bmatrix} \cdot \sigma_G^2)
 \]</span></p>
 <p><span class="math display">\[
@@ -1028,6 +1062,8 @@ class="math inline">\(\hat\beta\)</span>), prior covariance matrix
 correlation (<span class="math inline">\(V=\begin{bmatrix} 1 &amp;
 \rho_e \\ \rho_e &amp; 1 \end{bmatrix} \cdot
 \dfrac{\sigma_e^2}{n}\)</span>).</p>
+<p>Please note that we only consider the simple scenario that <span
+class="math inline">\(\Z=1\)</span> for all the repeats.</p>
 <p><span class="math display">\[
 \Sigma_{post} = (U^{-1} + V^{-1})^{-1}
 \]</span></p>
@@ -1242,8 +1278,9 @@ Lifan Liang
 </div>
 </div>
 <div id="lfsr-inference-overestimates-the-genetic-effect-sharing"
-class="section level3">
-<h3>LFSR inference overestimates the genetic effect sharing</h3>
+class="section level3 hidden unlisted unnumbered">
+<h3 class="hidden unlisted unnumbered">LFSR inference overestimates the
+genetic effect sharing</h3>
 <p>To determine how LFSR was inflated, the parameters between data
 generation and posterior inference are very different.</p>
 <p>During the data generation, we set <span
@@ -1266,8 +1303,9 @@ class="math inline">\(\rho_G&gt;0\)</span> separately.</p>
 <p>We use LFSR&lt;5% as significant and computed the empirical False
 discovery rates for each value of true <span
 class="math inline">\(\rho_e\)</span>.</p>
-<div id="rho_g0" class="section level4">
-<h4><span class="math inline">\(\rho_G=0\)</span></h4>
+<div id="rho_g0-for-posterior-inference" class="section level4">
+<h4><span class="math inline">\(\rho_G=0\)</span> for posterior
+inference</h4>
 <pre class="r"><code># Simply marginal posterior to compute LFSR
 get_lfsr &lt;- function(post_res) {
   prob_less_0_1 &lt;- pnorm(0, mean = post_res$mu_post[1,], sd = sqrt(post_res$Sigma_post[1,1]))
@@ -1312,47 +1350,10 @@ The marignal LFSR was not affected by <span
 class="math inline">\(\rho_e\)</span>. However, the proportion of LFSR
 being significant in the two contexts together will grow as <span
 class="math inline">\(rho_e\)</span> increased.</p>
-<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
-Past versions of unnamed-chunk-8-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-8-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/5941a187d5a63fe6faa2dbdec307485bb2067e3a/docs/figure/mashR_extension.Rmd/unnamed-chunk-8-1.png" target="_blank">5941a18</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-26
-</td>
-</tr>
-</tbody>
-</table>
 </div>
-</div>
-</div>
-<div id="rho_g0.9" class="section level4">
-<h4><span class="math inline">\(\rho_G=0.9\)</span></h4>
+<div id="rho_g0.9-for-posterior-inference" class="section level4">
+<h4><span class="math inline">\(\rho_G=0.9\)</span> for posterior
+inference</h4>
 <pre class="r scroll-300"><code>rho_e_hat_fixed &lt;- 0 # The model will ALWAYS assume independence (Naive)
 rho_e_true_values &lt;- seq(0, 0.95, by = 0.05) # The data gets progressively more correlated
 
@@ -1385,44 +1386,6 @@ for (i in seq_along(rho_e_true_values)) {
 slightly increased as <span class="math inline">\(\rho_e\)</span>
 increased. But the phenomenon of joint false positive becomes more
 obvious in this scenario.</p>
-<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
-Past versions of unnamed-chunk-10-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-10-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/5941a187d5a63fe6faa2dbdec307485bb2067e3a/docs/figure/mashR_extension.Rmd/unnamed-chunk-10-1.png" target="_blank">5941a18</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-26
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
 </div>
 <div id="a-mixture-of-rho_g0-and-rho_g0.9" class="section level4">
 <h4>A mixture of <span class="math inline">\(\rho_G=0\)</span> and <span
@@ -1536,8 +1499,8 @@ plot_data &lt;- data.frame(
 )
 
 ggplot(plot_data, aes(x = rho_e)) +
-  geom_line(aes(y = Marginal, color = &quot;Marginal FPR (Trait 1)&quot;), size = 1) +
-  geom_point(aes(y = Marginal, color = &quot;Marginal FPR (Trait 1)&quot;)) +
+  geom_line(aes(y = Marginal, color = &quot;Marginal FPR (Context 1)&quot;), size = 1) +
+  geom_point(aes(y = Marginal, color = &quot;Marginal FPR (Context 1)&quot;)) +
   
   geom_line(aes(y = Joint, color = &quot;Joint FPR (Both)&quot;), size = 1) +
   geom_point(aes(y = Joint, color = &quot;Joint FPR (Both)&quot;)) +
@@ -1549,44 +1512,488 @@ ggplot(plot_data, aes(x = rho_e)) +
   ) +
   theme_minimal()+
   theme(legend.position = &quot;top&quot;)</code></pre>
-<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
-Past versions of unnamed-chunk-11-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-11-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/5941a187d5a63fe6faa2dbdec307485bb2067e3a/docs/figure/mashR_extension.Rmd/unnamed-chunk-11-1.png" target="_blank">5941a18</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-26
-</td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
+<div id="two-component-mixture-model" class="section level3">
+<h3>Two-component mixture model</h3>
+<p>The mixture model assumes the same generative process described in
+the first section.But a different set of parameters may be used in the
+mixture model. Hence the parameters deployed in the mixture model will
+be marked with <span class="math inline">\(*\)</span>. Here we examined
+the how mis-specified <span class="math inline">\(\rho_e\)</span> may
+affect the estimation of mixture proportion <span
+class="math inline">\(\pi_0\)</span>.</p>
+<p>Following the MASH paper, <span class="math inline">\(\pi_0\)</span>
+was estimated using maximum likelihood estimate (MLE). Posterior of
+genetic effect for each component was the same as the second section.
+But now it was weighted by the mixture proportion.</p>
+<p><span class="math display">\[
+\Sigma_{ind} = \begin{bmatrix}
+1 &amp; 0  \\
+0 &amp; 1
+\end{bmatrix}\cdot \sigma_G^*2 + \begin{bmatrix}
+1 &amp; \rho_e^*  \\
+\rho_e^* &amp; 1
+\end{bmatrix}\cdot \dfrac{\sigma_e^*2}{n} = \begin{bmatrix}
+D^* &amp; C_0^*  \\
+C_0^* &amp; C^*
+\end{bmatrix}
+\]</span></p>
+$$ _{shared} =
+<span class="math display">\[\begin{bmatrix}
+1 &amp; \rho_G^*  \\
+\rho_G^* &amp; 1
+\end{bmatrix}\]</span>
+_G^*2 +
+<span class="math display">\[\begin{bmatrix}
+1 &amp; \rho_e^*  \\
+\rho_e^* &amp; 1
+\end{bmatrix}\]</span>
+=
+<span class="math display">\[\begin{bmatrix}
+D^* &amp; C_1^*  \\
+C_1^* &amp; D^*
+\end{bmatrix}\]</span>
+<p>$$</p>
+<div id="how-mis-specified-rho_e-affects-the-estimation-of-pi"
+class="section level4">
+<h4>How mis-specified <span class="math inline">\(rho_e\)</span> affects
+the estimation of <span class="math inline">\(\pi\)</span></h4>
+<p>For simplicity, we assume that <span class="math inline">\(\rho_e
+-\rho_e^*&gt;0\)</span> and <span
+class="math inline">\(\rho_G=0\)</span>. Marginal variance is the same
+between ground truth and the mixture model. In that case, method of
+moment provides an intuitive explanation. We simply match the covariance
+of the mixture model to the ground truth:</p>
+<p><span class="math display">\[
+\rho_e \sigma_e^2 = \pi_1(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) +
+(1-\pi_1)\rho_e^* \sigma_e^2
+\]</span></p>
+<p>it can rewritten as:</p>
+<p><span class="math display">\[
+\pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^*
+\sigma_G^2}
+\]</span></p>
+<p>Therefore, if <span class="math inline">\(\rho_e\)</span> is much
+larger than <span class="math inline">\(\rho_e^*\)</span>, the mixture
+model will prefer the shared effect component even though <span
+class="math inline">\(\rho_G=0\)</span> in ground truth.’</p>
+<p>However, if we strictly follow the the approach in MASH. The
+derivation is much more nuanced. And the conclusion is unclear. First of
+all the likelihood of <span class="math inline">\(\hat\beta\)</span>
+when genetic effects are shared can be written as:</p>
+<p><span class="math display">\[
+\begin{align}
+P(\hat\beta|Z=1,\Sigma_{shared}) &amp;\propto
+\dfrac{exp[-\dfrac{1}{2}(\hat\beta^T \Sigma^{-1}
+\hat\beta)]}{\sqrt{D^{*2} - C_1^{*2}}}\\
+&amp;=  \dfrac{1}{\sqrt{D^{*2} - C_1^{*2}}}
+exp[-\dfrac{(D^*(\hat\beta_1^2+\hat\beta_2^2) - 2C_1^{*}\hat\beta_1
+\hat\beta_1)}{2(D^{*2} - C_1^{*2})}]
+\end{align}
+\]</span></p>
+<p>Given that we know how <span class="math inline">\(\hat\beta\)</span>
+was generated, we have:</p>
+<p><span class="math display">\[
+E(\hat\beta_1^2+\hat\beta_2^2) = 2D
+\]</span> <span class="math display">\[
+E(\hat\beta_1 \hat\beta_2) = C
+\]</span></p>
+<p>We can see that the likelihood of <span
+class="math inline">\(\hat\beta\)</span> is:</p>
+<p><span class="math display">\[
+P(\hat\beta|Z=1,\Sigma_{shared}) \propto  \dfrac{1}{\sqrt{D^{*2} -
+C_1^{*2}}} exp[-(\dfrac{ D^*D-C_1^{*}C}{D^{*2} - C_1^{*2}})]
+\]</span></p>
+<p>Similarly, the likelihood of <span
+class="math inline">\(\hat\beta\)</span> when <span
+class="math inline">\(Z=0\)</span> is:</p>
+<p><span class="math display">\[
+P(\hat\beta|Z=0,\Sigma_{ind}) \propto  \dfrac{1}{\sqrt{D^{*2} -
+C_0^{*2}}} exp[-(\dfrac{ D^*D-C_0^{*}C}{D^{*2} - C_0^{*2}})]
+\]</span></p>
+<p>Then we proceed to compute the posterior mixture proportion of <span
+class="math inline">\(Z\)</span>:</p>
+<p><span class="math display">\[
+\begin{align}
+P(Z=1|\hat\beta,\Sigma) &amp;= \dfrac{\pi_1
+P(\hat\beta|Z=1,\Sigma_{shared})}{\pi_1 P(\hat\beta|Z=1,\Sigma_{shared})
++ \pi_0 P(\hat\beta|Z=0,\Sigma_{ind})} \\
+&amp;=\dfrac{1}{1+\dfrac{\pi_0}{\pi_1} \cdot
+\dfrac{P(\hat\beta|Z=0,\Sigma_{ind})}{P(\hat\beta|Z=1,\Sigma_{shared})}}
+\\
+&amp;= \dfrac{1}{1+e^{-[LLR(Z)+log(\dfrac{\pi_1}{\pi_0})]}} \\
+&amp;= sigmoid\biggl[LLR(Z)+log(\dfrac{\pi_1}{\pi_0})\biggr]
+\end{align}
+\]</span> where <span class="math inline">\(LLR(Z)\)</span> is the log
+likelihood ratio for <span class="math inline">\(\hat\beta\)</span> when
+<span class="math inline">\(Z=1\)</span> and <span
+class="math inline">\(Z=0\)</span>:</p>
+<p><span class="math display">\[
+\begin{align}
+LLR(Z) &amp;=
+log\dfrac{P(\hat\beta|Z=1,\Sigma_{shared})}{P(\hat\beta|Z=0,\Sigma_{shared})}\\
+&amp;=
+-\dfrac{1}{2}log(\dfrac{D^{*2}-C_1^{*2}}{D^{*2}-C_0^{*2}})-(\dfrac{
+D^*D-C_1^{*}C}{D^{*2} - C_1^{*2}}) + (\dfrac{ D^*D-C_0^{*}C}{D^{*2} -
+C_0^{*2}})
+\end{align}
+\]</span></p>
+<p>For simplicity, we assumed that marginal variance is the same (<span
+class="math inline">\(D^* = D\)</span>), the environmental component
+difference is also the same (<span class="math inline">\(\Delta_e = C -
+C^*_{1e} = C - C^*_{0e}\)</span>), the genetic component is (<span
+class="math inline">\(\Delta_{G1} = C - C^*_{1e}=\rho_G^*
+\sigma_G^2\)</span>).</p>
+<p><span class="math display">\[
+LLR(Z) \propto -\dfrac{1}{2}\bigg[\dfrac{(D^2+C_1^*
+C_2^*)\Delta_{G1}}{(D^{2}-C_0^{*2})(D^{2}-C_1^{*2})}\bigg]\Delta_e
+\]</span></p>
+<p>In these two approaches, <span class="math inline">\(\rho_e\)</span>
+in ground truth can bias the mixture model towards the shared effect
+component. But the role of <span class="math inline">\(\rho_G^*\)</span>
+seems different in these two estimation.</p>
+<pre class="r scroll-300"><code>library(MASS)
+
+sim_mixture_regression &lt;- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0) {
+  # pi0: Probability of Z=0 (Independent component)
+  # 1-pi0: Probability of Z=1 (Shared component)
+  
+  # --- 1. Generate Z (Component Assignment) ---
+  # vector of TRUE/FALSE where TRUE means &quot;Shared Component&quot; (Z=1)
+  G_raw &lt;- matrix(rnorm(n * m), nrow = n, ncol = m)
+  G &lt;- scale(G_raw) 
+  
+  is_shared &lt;- rbinom(m, size = 1, prob = (1 - pi0)) == 1
+  n_shared &lt;- sum(is_shared)
+  n_indep  &lt;- m - n_shared
+  
+  # --- 2. Generate True Betas (Mixture) ---
+  betas_true &lt;- matrix(0, nrow = m, ncol = 2)
+  
+  # A. Generate Shared Effects (Z=1)
+  if (n_shared &gt; 0) {
+    cov_shared &lt;- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                           rho_G*sigma_G2, sigma_G2), 2, 2)
+    betas_true[is_shared, ] &lt;- mvrnorm(n = n_shared, mu = c(0, 0), Sigma = cov_shared)
+  }
+  
+  # B. Generate Independent Effects (Z=0)
+  if (n_indep &gt; 0) {
+    # Off-diagonal is 0
+    cov_indep &lt;- matrix(c(sigma_G2, 0, 
+                          0, sigma_G2), 2, 2)
+    betas_true[!is_shared, ] &lt;- mvrnorm(n = n_indep, mu = c(0, 0), Sigma = cov_indep)
+  }
+  
+  # --- 3. Generate Residuals (Environmental Effects) ---
+  # These are always correlated by rho_e
+  cov_epsilon &lt;- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                          rho_e*sigma_e2, sigma_e2), 2, 2)
+  eps_all &lt;- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape to n x m
+  eps1_mat &lt;- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat &lt;- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # --- 4. Generate Phenotypes ---
+  Y1 &lt;- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 &lt;- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # --- 5. OLS Estimation ---
+  denom &lt;- colSums(G^2)
+  beta1_hat &lt;- colSums(G * Y1) / denom
+  beta2_hat &lt;- colSums(G * Y2) / denom
+  
+  return(data.frame(
+    beta1_est = beta1_hat, 
+    beta2_est = beta2_hat,
+    beta1_true = betas_true[, 1],
+    beta2_true = betas_true[, 2],
+    Z = as.numeric(is_shared) # Return Z so we can color-code plots later
+  ))
+}</code></pre>
+<pre class="r scroll-300"><code>library(mvtnorm)
+
+compute_mixture_posterior &lt;- function(beta_hat_matrix, n, pi0, 
+                                      sigma_G2, sigma_e2, rho_G, rho_e) {
+  # beta_hat_matrix: 2 x m matrix of effect estimates
+  # n: Sample size (used for scaling error variance)
+  # pi0: Prior probability of Independent component (Z=0)
+  
+  m &lt;- ncol(beta_hat_matrix)
+  scaling &lt;- 1/n 
+  
+  # --- 1. Define Matrices ---
+  
+  # Likelihood Error (V) - Depends on rho_e
+  V &lt;- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                rho_e*sigma_e2, sigma_e2), 2, 2) * scaling
+  
+  # Prior U (Independent Z=0)
+  U_0 &lt;- matrix(c(sigma_G2, 0, 
+                  0, sigma_G2), 2, 2)
+  
+  # Prior U (Shared Z=1) - Depends on rho_G
+  U_1 &lt;- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                  rho_G*sigma_G2, sigma_G2), 2, 2)
+  
+  # Total Variance (Sigma = U + V)
+  Sigma_0 &lt;- U_0 + V
+  Sigma_1 &lt;- U_1 + V
+  
+  # --- 2. Compute Posterior Membership (Gamma) ---
+  
+  # Log-Likelihoods (more numerically stable)
+  ll_0 &lt;- dmvnorm(t(beta_hat_matrix), mean=c(0,0), sigma=Sigma_0, log=TRUE)
+  ll_1 &lt;- dmvnorm(t(beta_hat_matrix), mean=c(0,0), sigma=Sigma_1, log=TRUE)
+  
+  # Bayes Rule in Log Space to avoid underflow
+  # log(P(Z=1|Data)) = log(P(D|Z=1)) + log(P(Z=1)) - log(P(D))
+  log_prior_0 &lt;- log(pi0)
+  log_prior_1 &lt;- log(1 - pi0)
+  
+  # Unnormalized posteriors
+  log_post_0 &lt;- ll_0 + log_prior_0
+  log_post_1 &lt;- ll_1 + log_prior_1
+  
+  # Max trick for stable normalization
+  log_max &lt;- pmax(log_post_0, log_post_1)
+  post_0_unnorm &lt;- exp(log_post_0 - log_max)
+  post_1_unnorm &lt;- exp(log_post_1 - log_max)
+  
+  # Gamma: Posterior Probability of SHARED (Z=1)
+  gamma_shared &lt;- post_1_unnorm / (post_0_unnorm + post_1_unnorm)
+  
+  # --- 3. Compute Posterior Statistics for Each Component ---
+  
+  # Pre-calculate Shrinkage Matrices (W) and Component Covariances
+  # W = U * (U+V)^-1
+  W_0 &lt;- U_0 %*% solve(Sigma_0)
+  Cov_post_0 &lt;- U_0 - W_0 %*% U_0
+  
+  W_1 &lt;- U_1 %*% solve(Sigma_1)
+  Cov_post_1 &lt;- U_1 - W_1 %*% U_1
+  
+  # Storage
+  mu_post_mix &lt;- matrix(0, 2, m)
+  cov_post_mix &lt;- array(0, dim=c(2, 2, m))
+  
+  for(i in 1:m) {
+    beta_i &lt;- beta_hat_matrix[,i]
+    gam &lt;- gamma_shared[i]
+    
+    # A. Component Means
+    mu_0 &lt;- W_0 %*% beta_i
+    mu_1 &lt;- W_1 %*% beta_i
+    
+    # B. Model Averaged Mean (Linear combination)
+    # E[beta] = (1-gam)*mu_0 + gam*mu_1
+    mu_mix &lt;- (1 - gam) * mu_0 + gam * mu_1
+    mu_post_mix[,i] &lt;- mu_mix
+    
+    # C. Model Averaged Covariance (Law of Total Variance)
+    # Var(beta) = E[Var(beta|Z)] + Var(E[beta|Z])
+    
+    # Term 1: Average of covariances
+    avg_cov &lt;- (1 - gam) * Cov_post_0 + gam * Cov_post_1
+    
+    # Term 2: Variance of means (Spread between the two component hypotheses)
+    # (1-gam)*gamma * (diff)(diff)^T
+    diff_mu &lt;- mu_1 - mu_0
+    spread_cov &lt;- (1 - gam) * gam * (diff_mu %*% t(diff_mu))
+    
+    cov_post_mix[,,i] &lt;- avg_cov + spread_cov
+  }
+  
+  return(list(
+    prob_shared = gamma_shared,
+    post_mean = mu_post_mix,
+    post_cov = cov_post_mix,
+    # Optional: Return component parts for debugging
+    mu_0 = W_0 %*% beta_hat_matrix,
+    mu_1 = W_1 %*% beta_hat_matrix
+  ))
+}</code></pre>
+<pre class="r"><code>n &lt;- 50
+m &lt;- 10000
+sigma_G2 &lt;- 0.02
+sigma_e2 &lt;- 1 - sigma_G2
+rho_G &lt;- 0.2
+pi0 &lt;- 0.5
+rho_e &lt;- 0.9
+
+#true_pi0_values &lt;- seq(0.1, 0.9, by = 0.1)
+#estimated_pi0s &lt;- numeric(length(true_pi0_values))
+
+sim_res &lt;- sim_mixture_regression(
+    n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=pi0)
+beta_hat &lt;- rbind(sim_res$beta1_est, sim_res$beta2_est)
+post_res &lt;- compute_mixture_posterior(beta_hat, n, pi0, sigma_G2, sigma_e2, rho_G, rho_e=0.1)
+hist(post_res$prob_shared)</code></pre>
+<p><img src="figure/mashR_extension.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div
+id="low-rho_g-in-ground-truth-make-the-components-less-distinguishable."
+class="section level4 hidden unlisted unnumbered">
+<h4 class="hidden unlisted unnumbered">Low <span
+class="math inline">\(\rho_G\)</span> in ground truth make the
+components less distinguishable.</h4>
+<p><span class="math display">\[
+L(\pi_0) = \prod_j [\pi_0 MVN(0,\Sigma_{ind}) +
+\pi_1MVN(0,\Sigma_{shared})]
+\]</span></p>
+<p>In the MASH model, <span class="math inline">\(\pi_0\)</span> is the
+prior of</p>
+<p><span class="math display">\[
+Pr(\tilde\beta|\beta,\pi_0) = \pi_0Pr(\tilde\beta|\beta,\Sigma_{ind}) +
+\pi_1 Pr(\tilde\beta|\beta,\Sigma_{shared})
+\]</span></p>
+<p>However, such estimation assumes that each <span
+class="math inline">\(\hat\beta\)</span> was independent. So we need to
+sample <span class="math inline">\(G\)</span> for each SNP (indexed by
+<span class="math inline">\(j\)</span>).</p>
+<pre class="r"><code>library(MASS)
+
+sim_mixture_regression &lt;- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0) {
+  # pi0: Probability of Z=0 (Independent component)
+  # 1-pi0: Probability of Z=1 (Shared component)
+  
+  # --- 1. Generate Z (Component Assignment) ---
+  # vector of TRUE/FALSE where TRUE means &quot;Shared Component&quot; (Z=1)
+  G_raw &lt;- matrix(rnorm(n * m), nrow = n, ncol = m)
+  G &lt;- scale(G_raw) 
+  
+  is_shared &lt;- rbinom(m, size = 1, prob = (1 - pi0)) == 1
+  n_shared &lt;- sum(is_shared)
+  n_indep  &lt;- m - n_shared
+  
+  # --- 2. Generate True Betas (Mixture) ---
+  betas_true &lt;- matrix(0, nrow = m, ncol = 2)
+  
+  # A. Generate Shared Effects (Z=1)
+  if (n_shared &gt; 0) {
+    cov_shared &lt;- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                           rho_G*sigma_G2, sigma_G2), 2, 2)
+    betas_true[is_shared, ] &lt;- mvrnorm(n = n_shared, mu = c(0, 0), Sigma = cov_shared)
+  }
+  
+  # B. Generate Independent Effects (Z=0)
+  if (n_indep &gt; 0) {
+    # Off-diagonal is 0
+    cov_indep &lt;- matrix(c(sigma_G2, 0, 
+                          0, sigma_G2), 2, 2)
+    betas_true[!is_shared, ] &lt;- mvrnorm(n = n_indep, mu = c(0, 0), Sigma = cov_indep)
+  }
+  
+  # --- 3. Generate Residuals (Environmental Effects) ---
+  # These are always correlated by rho_e
+  cov_epsilon &lt;- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                          rho_e*sigma_e2, sigma_e2), 2, 2)
+  eps_all &lt;- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape to n x m
+  eps1_mat &lt;- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat &lt;- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # --- 4. Generate Phenotypes ---
+  Y1 &lt;- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 &lt;- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # --- 5. OLS Estimation ---
+  denom &lt;- colSums(G^2)
+  beta1_hat &lt;- colSums(G * Y1) / denom
+  beta2_hat &lt;- colSums(G * Y2) / denom
+  
+  return(data.frame(
+    beta1_est = beta1_hat, 
+    beta2_est = beta2_hat,
+    beta1_true = betas_true[, 1],
+    beta2_true = betas_true[, 2],
+    Z = as.numeric(is_shared) # Return Z so we can color-code plots later
+  ))
+}</code></pre>
+<pre class="r"><code>estimate_pi0_mle_approx &lt;- function(beta_hat_matrix, n, sigma_G2, sigma_e2, rho_G, rho_e) {
+  # beta_hat_matrix: 2 x m
+  # n: sample size (used to approximate g_sum_sq)
+  
+  # A. Approximation: scaling = 1/n
+  # This assumes genotypes were standardized (var=1)
+  scaling &lt;- 1 / n
+  
+  # Error Matrix (V)
+  V &lt;- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                rho_e*sigma_e2, sigma_e2), 2, 2) * scaling
+  
+  # Prior Matrix: Independent (rho_G = 0)
+  U_ind &lt;- matrix(c(sigma_G2, 0, 
+                    0, sigma_G2), 2, 2)
+  
+  # Prior Matrix: Shared (rho_G from input)
+  U_shared &lt;- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                       rho_G*sigma_G2, sigma_G2), 2, 2)
+  
+  # Total Variance Matrices
+  Sigma_0 &lt;- U_ind + V    # Covariance if Z=0
+  Sigma_1 &lt;- U_shared + V # Covariance if Z=1
+  
+  # B. Pre-calculate Densities
+  d0 &lt;- dmvnorm(t(beta_hat_matrix), mean = c(0,0), sigma = Sigma_0)
+  d1 &lt;- dmvnorm(t(beta_hat_matrix), mean = c(0,0), sigma = Sigma_1)
+  
+  # C. Minimize Negative Log Likelihood
+  neg_log_lik &lt;- function(pi0) {
+    if(pi0 &lt; 0 || pi0 &gt; 1) return(Inf)
+    lik &lt;- pi0 * d0 + (1 - pi0) * d1
+    lik[lik &lt; 1e-300] &lt;- 1e-300 # Prevent log(0)
+    return(-sum(log(lik)))
+  }
+  opt_result &lt;- optimize(neg_log_lik, interval = c(0, 1))
+  return(opt_result$minimum)
+}</code></pre>
+<pre class="r"><code>### Estimate the accuracy of Pi0 estimate (not needed for the moment)
+
+n &lt;- 50
+m &lt;- 10000
+sigma_G2 &lt;- 0.05
+sigma_e2 &lt;- 1 - sigma_G2
+rho_G &lt;- 0.2
+pi0 &lt;- 0.2
+rho_e &lt;- 0.8
+
+# IMPORTANT: Standardize G so sum(g^2) approx n
+# If G is not standardized, 1/n will be the wrong scaling factor
+G_raw &lt;- matrix(rnorm(n * m), nrow = n, ncol = m)
+G &lt;- scale(G_raw) 
+
+true_pi0_values &lt;- seq(0.1, 0.9, by = 0.1)
+estimated_pi0s &lt;- numeric(length(true_pi0_values))
+
+for (i in seq_along(true_pi0_values)) {
+  sim_res &lt;- sim_mixture_regression(
+    n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=true_pi0_values[i])
+  beta_hat &lt;- rbind(sim_res$beta1_est, sim_res$beta2_est)
+  
+  # Estimate using ONLY n (no G matrix input)
+  estimated_pi0s[i] &lt;- estimate_pi0_mle_approx(
+    beta_hat, n, sigma_G2, sigma_e2, rho_G_model, rho_e
+  )
+}
+
+# --- 4. Plot ---
+results_df &lt;- data.frame(True_Pi0 = true_pi0_values, Est_Pi0 = estimated_pi0s)
+
+ggplot(results_df, aes(x = True_Pi0, y = Est_Pi0)) +
+  geom_abline(intercept = 0, slope = 1, linetype = &quot;dashed&quot;, color = &quot;gray&quot;) +
+  geom_point(color = &quot;darkgreen&quot;, size = 3) +
+  geom_line(color = &quot;forestgreen&quot;) +
+  labs(
+    title = &quot;Pi0 MLE Performance (matched rho_e)&quot;,
+    subtitle = &quot;rho_G=0.8, PVE=5%&quot;,
+    x = &quot;True pi0&quot;,
+    y = &quot;Estimated pi0&quot;
+  ) +
+  theme_minimal()</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
