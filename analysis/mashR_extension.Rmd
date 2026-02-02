@@ -57,8 +57,8 @@ $$
 
 $$
 \beta \sim MVN(0,\begin{bmatrix}
-1 & \rho_G  \\
-\rho_G & 1 
+1 & Z\cdot\rho_G  \\
+Z\cdot\rho_G & 1 
 \end{bmatrix} \cdot \sigma_G^2)
 $$
 
@@ -222,6 +222,8 @@ Given the prior distribution of true genetic effects and the estimated genetic e
 
 Following the MASH paper, the posterior of true genetic effect ($\tilde\beta$) can be derived from the estimated genetic effect ($\hat\beta$), prior covariance matrix ($U=\begin{bmatrix} 1 & \rho_G  \\ \rho_G & 1 \end{bmatrix} \cdot \sigma_G^2$), and the residual correlation ($V=\begin{bmatrix} 1 & \rho_e  \\ \rho_e & 1 \end{bmatrix} \cdot \dfrac{\sigma_e^2}{n}$). 
 
+Please note that we only consider the simple scenario that $\Z=1$ for all the repeats.
+
 $$
 \Sigma_{post} = (U^{-1} + V^{-1})^{-1}
 $$
@@ -367,7 +369,7 @@ ggplot(plot_data, aes(x = rho_e)) +
   theme_minimal()
 ```
 
-### LFSR inference overestimates the genetic effect sharing
+### LFSR inference overestimates the genetic effect sharing {.hidden .unlisted .unnumbered}
 
 To determine how LFSR was inflated, the parameters between data generation and posterior inference are very different.
 
@@ -377,9 +379,9 @@ During posterior inference, $\rho_e$ was always fixed as zero. $\sigma_G^2=1$ wi
 
 We use LFSR<5% as significant and computed the empirical False discovery rates for each value of true $\rho_e$.
 
-#### $\rho_G=0$
+#### $\rho_G=0$ for posterior inference
 
-```{r}
+```{r, eval=F}
 # Simply marginal posterior to compute LFSR
 get_lfsr <- function(post_res) {
   prob_less_0_1 <- pnorm(0, mean = post_res$mu_post[1,], sd = sqrt(post_res$Sigma_post[1,1]))
@@ -393,7 +395,7 @@ get_lfsr <- function(post_res) {
 ```
 
 
-```{r, class.source="scroll-300"}
+```{r, eval=F, class.source="scroll-300"}
 
 rho_e_hat_fixed <- 0 # The model will ALWAYS assume independence (Naive)
 rho_e_true_values <- seq(0, 0.95, by = 0.05) # The data gets progressively more correlated
@@ -427,7 +429,7 @@ for (i in seq_along(rho_e_true_values)) {
 
 Given that $\rho_G=0$, the marginal FPR was inflated because of positive covariance in the prior. The marignal LFSR was not affected by $\rho_e$. However, the proportion of LFSR being significant in the two contexts together will grow as $rho_e$ increased.
 
-```{r, echo=F}
+```{r, eval=F, echo=F}
 # --- 4. Plotting ---
 plot_data <- data.frame(
   rho_e = rho_e_true_values,
@@ -437,8 +439,8 @@ plot_data <- data.frame(
 
 ggplot(plot_data, aes(x = rho_e)) +
   # Marginal Line (Trait 1)
-  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)"), size = 1) +
-  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)")) +
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Context 1)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Context 1)")) +
   
   # Joint Line (Trait 1 & 2)
   geom_line(aes(y = Joint, color = "Joint FPR (Both Significant)"), size = 1) +
@@ -448,7 +450,7 @@ ggplot(plot_data, aes(x = rho_e)) +
   geom_hline(yintercept = mean(marginal_fpr)^2, linetype="dashed", color="gray") +
   annotate("text", x=0.1, y=mean(marginal_fpr)^2 - 0.005, label="Expected Joint FPR (Independent)", color="gray40") +
   
-  scale_color_manual(values = c("Marginal FPR (Trait 1 Only)" = "steelblue", 
+  scale_color_manual(values = c("Marginal FPR (Context 1)" = "steelblue", 
                                 "Joint FPR (Both Significant)" = "red")) +
   labs(
     x = "True Environmental Correlation (rho_e)",
@@ -461,9 +463,9 @@ ggplot(plot_data, aes(x = rho_e)) +
 ```
 
 
-#### $\rho_G=0.9$
+#### $\rho_G=0.9$ for posterior inference
 
-```{r, class.source="scroll-300"}
+```{r, eval=F, class.source="scroll-300"}
 
 rho_e_hat_fixed <- 0 # The model will ALWAYS assume independence (Naive)
 rho_e_true_values <- seq(0, 0.95, by = 0.05) # The data gets progressively more correlated
@@ -497,7 +499,7 @@ for (i in seq_along(rho_e_true_values)) {
 
 Even when prior correlation was set to 0.9. Marginal LFSR only slightly increased as $\rho_e$ increased. But the phenomenon of joint false positive becomes more obvious in this scenario.
 
-```{r, echo=F}
+```{r, eval=F, echo=F}
 # --- 4. Plotting ---
 plot_data <- data.frame(
   rho_e = rho_e_true_values,
@@ -507,8 +509,8 @@ plot_data <- data.frame(
 
 ggplot(plot_data, aes(x = rho_e)) +
   # Marginal Line (Trait 1)
-  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)"), size = 1) +
-  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1 Only)")) +
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Context 1)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Context 1)")) +
   
   # Joint Line (Trait 1 & 2)
   geom_line(aes(y = Joint, color = "Joint FPR (Both Significant)"), size = 1) +
@@ -518,7 +520,7 @@ ggplot(plot_data, aes(x = rho_e)) +
   geom_hline(yintercept = mean(marginal_fpr)^2, linetype="dashed", color="gray") +
   annotate("text", x=0.1, y=mean(marginal_fpr)^2 - 0.005, label="Expected Joint FPR (Independent)", color="gray40") +
   
-  scale_color_manual(values = c("Marginal FPR (Trait 1 Only)" = "steelblue", 
+  scale_color_manual(values = c("Marginal FPR (Context 1)" = "steelblue", 
                                 "Joint FPR (Both Significant)" = "red")) +
   labs(
     x = "True Environmental Correlation (rho_e)",
@@ -537,7 +539,7 @@ Combining the two scenarios above, we estimate the posterior with a mixture of t
 
 With the increase of $\rho_e$, the marginal FPR slightly increased, and the proportion of joint FPR (simultaneous false postives in the two contexts) increased substantially.
 
-```{r, class.source="scroll-300"}
+```{r, eval=F, class.source="scroll-300"}
 library(MASS)
 library(ggplot2)
 library(mvtnorm) 
@@ -638,8 +640,8 @@ plot_data <- data.frame(
 )
 
 ggplot(plot_data, aes(x = rho_e)) +
-  geom_line(aes(y = Marginal, color = "Marginal FPR (Trait 1)"), size = 1) +
-  geom_point(aes(y = Marginal, color = "Marginal FPR (Trait 1)")) +
+  geom_line(aes(y = Marginal, color = "Marginal FPR (Context 1)"), size = 1) +
+  geom_point(aes(y = Marginal, color = "Marginal FPR (Context 1)")) +
   
   geom_line(aes(y = Joint, color = "Joint FPR (Both)"), size = 1) +
   geom_point(aes(y = Joint, color = "Joint FPR (Both)")) +
@@ -652,4 +654,479 @@ ggplot(plot_data, aes(x = rho_e)) +
   theme_minimal()+
   theme(legend.position = "top")
 ```
+
+### Two-component mixture model
+
+The mixture model assumes the same generative process described in the first section.But a different set of parameters may be used in the mixture model. Hence the parameters deployed in the mixture model will be marked with $*$. Here we examined the how mis-specified $\rho_e$ may affect the estimation of mixture proportion $\pi_0$.
+
+Following the MASH paper, $\pi_0$ was estimated using maximum likelihood estimate (MLE). Posterior of genetic effect for each component was the same as the second section. But now it was weighted by the mixture proportion.
+
+
+$$
+\Sigma_{ind} = \begin{bmatrix}
+1 & 0  \\
+0 & 1 
+\end{bmatrix}\cdot \sigma_G^*2 + \begin{bmatrix}
+1 & \rho_e^*  \\
+\rho_e^* & 1 
+\end{bmatrix}\cdot \dfrac{\sigma_e^*2}{n} = \begin{bmatrix}
+D^* & C_0^*  \\
+C_0^* & C^*
+\end{bmatrix}
+$$
+
+$$
+\Sigma_{shared} = \begin{bmatrix}
+1 & \rho_G^*  \\
+\rho_G^* & 1 
+\end{bmatrix}\cdot \sigma_G^*2 + \begin{bmatrix}
+1 & \rho_e^*  \\
+\rho_e^* & 1 
+\end{bmatrix}\cdot \dfrac{\sigma_e^2}{n} = \begin{bmatrix}
+D^* & C_1^*  \\
+C_1^* & D^* 
+\end{bmatrix}
+
+$$
+
+#### How mis-specified $rho_e$ affects the estimation of $\pi$
+
+For simplicity, we assume that $\rho_e -\rho_e^*>0$ and $\rho_G=0$. Marginal variance is the same between ground truth and the mixture model. In that case, method of moment provides an intuitive explanation. We simply match the covariance of the mixture model to the ground truth:
+
+$$
+\rho_e \sigma_e^2 = \pi_1(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) + (1-\pi_1)\rho_e^* \sigma_e^2
+$$
+
+it can rewritten as:
+
+$$
+\pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^* \sigma_G^2}
+$$
+
+Therefore, if $\rho_e$ is much larger than $\rho_e^*$, the mixture model will prefer the shared effect component even though $\rho_G=0$ in ground truth.'
+
+However, if we strictly follow the the approach in MASH. The derivation is much more nuanced. And the conclusion is unclear. First of all the likelihood of $\hat\beta$ when genetic effects are shared can be written as:
+
+$$
+\begin{align}
+P(\hat\beta|Z=1,\Sigma_{shared}) &\propto \dfrac{exp[-\dfrac{1}{2}(\hat\beta^T \Sigma^{-1} \hat\beta)]}{\sqrt{D^{*2} - C_1^{*2}}}\\ 
+&=  \dfrac{1}{\sqrt{D^{*2} - C_1^{*2}}} exp[-\dfrac{(D^*(\hat\beta_1^2+\hat\beta_2^2) - 2C_1^{*}\hat\beta_1 \hat\beta_1)}{2(D^{*2} - C_1^{*2})}]
+\end{align}
+$$
+
+Given that we know how $\hat\beta$ was generated, we have:
+
+$$
+E(\hat\beta_1^2+\hat\beta_2^2) = 2D
+$$
+$$
+E(\hat\beta_1 \hat\beta_2) = C
+$$
+
+We can see that the likelihood of $\hat\beta$ is:
+
+$$
+P(\hat\beta|Z=1,\Sigma_{shared}) \propto  \dfrac{1}{\sqrt{D^{*2} - C_1^{*2}}} exp[-(\dfrac{ D^*D-C_1^{*}C}{D^{*2} - C_1^{*2}})]
+$$
+
+Similarly, the likelihood of $\hat\beta$ when $Z=0$ is:
+
+$$
+P(\hat\beta|Z=0,\Sigma_{ind}) \propto  \dfrac{1}{\sqrt{D^{*2} - C_0^{*2}}} exp[-(\dfrac{ D^*D-C_0^{*}C}{D^{*2} - C_0^{*2}})]
+$$
+
+Then we proceed to compute the posterior mixture proportion of $Z$:
+
+$$
+\begin{align}
+P(Z=1|\hat\beta,\Sigma) &= \dfrac{\pi_1 P(\hat\beta|Z=1,\Sigma_{shared})}{\pi_1 P(\hat\beta|Z=1,\Sigma_{shared}) + \pi_0 P(\hat\beta|Z=0,\Sigma_{ind})} \\
+&=\dfrac{1}{1+\dfrac{\pi_0}{\pi_1} \cdot \dfrac{P(\hat\beta|Z=0,\Sigma_{ind})}{P(\hat\beta|Z=1,\Sigma_{shared})}} \\
+&= \dfrac{1}{1+e^{-[LLR(Z)+log(\dfrac{\pi_1}{\pi_0})]}} \\
+&= sigmoid\biggl[LLR(Z)+log(\dfrac{\pi_1}{\pi_0})\biggr]
+\end{align}
+$$
+where $LLR(Z)$ is the log likelihood ratio for $\hat\beta$ when $Z=1$ and $Z=0$:
+
+$$
+\begin{align}
+LLR(Z) &= log\dfrac{P(\hat\beta|Z=1,\Sigma_{shared})}{P(\hat\beta|Z=0,\Sigma_{shared})}\\
+&= -\dfrac{1}{2}log(\dfrac{D^{*2}-C_1^{*2}}{D^{*2}-C_0^{*2}})-(\dfrac{ D^*D-C_1^{*}C}{D^{*2} - C_1^{*2}}) + (\dfrac{ D^*D-C_0^{*}C}{D^{*2} - C_0^{*2}})
+\end{align}
+$$
+
+For simplicity, we assumed that marginal variance is the same ($D^* = D$), the environmental component difference is also the same ($\Delta_e = C - C^*_{1e} = C - C^*_{0e}$), the genetic component is ($\Delta_{G1} = C - C^*_{1e}=\rho_G^* \sigma_G^2$).
+
+
+$$
+LLR(Z) \propto -\dfrac{1}{2}\bigg[\dfrac{(D^2+C_1^* C_2^*)\Delta_{G1}}{(D^{2}-C_0^{*2})(D^{2}-C_1^{*2})}\bigg]\Delta_e
+$$
+
+In these two approaches, $\rho_e$ in ground truth can bias the mixture model towards the shared effect component. But the role of $\rho_G^*$ seems different in these two estimation.
+
+
+
+
+```{r,class.source="scroll-300"}
+library(MASS)
+
+sim_mixture_regression <- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0) {
+  # pi0: Probability of Z=0 (Independent component)
+  # 1-pi0: Probability of Z=1 (Shared component)
+  
+  # --- 1. Generate Z (Component Assignment) ---
+  # vector of TRUE/FALSE where TRUE means "Shared Component" (Z=1)
+  G_raw <- matrix(rnorm(n * m), nrow = n, ncol = m)
+  G <- scale(G_raw) 
+  
+  is_shared <- rbinom(m, size = 1, prob = (1 - pi0)) == 1
+  n_shared <- sum(is_shared)
+  n_indep  <- m - n_shared
+  
+  # --- 2. Generate True Betas (Mixture) ---
+  betas_true <- matrix(0, nrow = m, ncol = 2)
+  
+  # A. Generate Shared Effects (Z=1)
+  if (n_shared > 0) {
+    cov_shared <- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                           rho_G*sigma_G2, sigma_G2), 2, 2)
+    betas_true[is_shared, ] <- mvrnorm(n = n_shared, mu = c(0, 0), Sigma = cov_shared)
+  }
+  
+  # B. Generate Independent Effects (Z=0)
+  if (n_indep > 0) {
+    # Off-diagonal is 0
+    cov_indep <- matrix(c(sigma_G2, 0, 
+                          0, sigma_G2), 2, 2)
+    betas_true[!is_shared, ] <- mvrnorm(n = n_indep, mu = c(0, 0), Sigma = cov_indep)
+  }
+  
+  # --- 3. Generate Residuals (Environmental Effects) ---
+  # These are always correlated by rho_e
+  cov_epsilon <- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                          rho_e*sigma_e2, sigma_e2), 2, 2)
+  eps_all <- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape to n x m
+  eps1_mat <- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat <- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # --- 4. Generate Phenotypes ---
+  Y1 <- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 <- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # --- 5. OLS Estimation ---
+  denom <- colSums(G^2)
+  beta1_hat <- colSums(G * Y1) / denom
+  beta2_hat <- colSums(G * Y2) / denom
+  
+  return(data.frame(
+    beta1_est = beta1_hat, 
+    beta2_est = beta2_hat,
+    beta1_true = betas_true[, 1],
+    beta2_true = betas_true[, 2],
+    Z = as.numeric(is_shared) # Return Z so we can color-code plots later
+  ))
+}
+```
+
+```{r,class.source="scroll-300"}
+library(mvtnorm)
+
+compute_mixture_posterior <- function(beta_hat_matrix, n, pi0, 
+                                      sigma_G2, sigma_e2, rho_G, rho_e) {
+  # beta_hat_matrix: 2 x m matrix of effect estimates
+  # n: Sample size (used for scaling error variance)
+  # pi0: Prior probability of Independent component (Z=0)
+  
+  m <- ncol(beta_hat_matrix)
+  scaling <- 1/n 
+  
+  # --- 1. Define Matrices ---
+  
+  # Likelihood Error (V) - Depends on rho_e
+  V <- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                rho_e*sigma_e2, sigma_e2), 2, 2) * scaling
+  
+  # Prior U (Independent Z=0)
+  U_0 <- matrix(c(sigma_G2, 0, 
+                  0, sigma_G2), 2, 2)
+  
+  # Prior U (Shared Z=1) - Depends on rho_G
+  U_1 <- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                  rho_G*sigma_G2, sigma_G2), 2, 2)
+  
+  # Total Variance (Sigma = U + V)
+  Sigma_0 <- U_0 + V
+  Sigma_1 <- U_1 + V
+  
+  # --- 2. Compute Posterior Membership (Gamma) ---
+  
+  # Log-Likelihoods (more numerically stable)
+  ll_0 <- dmvnorm(t(beta_hat_matrix), mean=c(0,0), sigma=Sigma_0, log=TRUE)
+  ll_1 <- dmvnorm(t(beta_hat_matrix), mean=c(0,0), sigma=Sigma_1, log=TRUE)
+  
+  # Bayes Rule in Log Space to avoid underflow
+  # log(P(Z=1|Data)) = log(P(D|Z=1)) + log(P(Z=1)) - log(P(D))
+  log_prior_0 <- log(pi0)
+  log_prior_1 <- log(1 - pi0)
+  
+  # Unnormalized posteriors
+  log_post_0 <- ll_0 + log_prior_0
+  log_post_1 <- ll_1 + log_prior_1
+  
+  # Max trick for stable normalization
+  log_max <- pmax(log_post_0, log_post_1)
+  post_0_unnorm <- exp(log_post_0 - log_max)
+  post_1_unnorm <- exp(log_post_1 - log_max)
+  
+  # Gamma: Posterior Probability of SHARED (Z=1)
+  gamma_shared <- post_1_unnorm / (post_0_unnorm + post_1_unnorm)
+  
+  # --- 3. Compute Posterior Statistics for Each Component ---
+  
+  # Pre-calculate Shrinkage Matrices (W) and Component Covariances
+  # W = U * (U+V)^-1
+  W_0 <- U_0 %*% solve(Sigma_0)
+  Cov_post_0 <- U_0 - W_0 %*% U_0
+  
+  W_1 <- U_1 %*% solve(Sigma_1)
+  Cov_post_1 <- U_1 - W_1 %*% U_1
+  
+  # Storage
+  mu_post_mix <- matrix(0, 2, m)
+  cov_post_mix <- array(0, dim=c(2, 2, m))
+  
+  for(i in 1:m) {
+    beta_i <- beta_hat_matrix[,i]
+    gam <- gamma_shared[i]
+    
+    # A. Component Means
+    mu_0 <- W_0 %*% beta_i
+    mu_1 <- W_1 %*% beta_i
+    
+    # B. Model Averaged Mean (Linear combination)
+    # E[beta] = (1-gam)*mu_0 + gam*mu_1
+    mu_mix <- (1 - gam) * mu_0 + gam * mu_1
+    mu_post_mix[,i] <- mu_mix
+    
+    # C. Model Averaged Covariance (Law of Total Variance)
+    # Var(beta) = E[Var(beta|Z)] + Var(E[beta|Z])
+    
+    # Term 1: Average of covariances
+    avg_cov <- (1 - gam) * Cov_post_0 + gam * Cov_post_1
+    
+    # Term 2: Variance of means (Spread between the two component hypotheses)
+    # (1-gam)*gamma * (diff)(diff)^T
+    diff_mu <- mu_1 - mu_0
+    spread_cov <- (1 - gam) * gam * (diff_mu %*% t(diff_mu))
+    
+    cov_post_mix[,,i] <- avg_cov + spread_cov
+  }
+  
+  return(list(
+    prob_shared = gamma_shared,
+    post_mean = mu_post_mix,
+    post_cov = cov_post_mix,
+    # Optional: Return component parts for debugging
+    mu_0 = W_0 %*% beta_hat_matrix,
+    mu_1 = W_1 %*% beta_hat_matrix
+  ))
+}
+```
+
+
+```{r}
+n <- 50
+m <- 10000
+sigma_G2 <- 0.02
+sigma_e2 <- 1 - sigma_G2
+rho_G <- 0.2
+pi0 <- 0.5
+rho_e <- 0.9
+
+#true_pi0_values <- seq(0.1, 0.9, by = 0.1)
+#estimated_pi0s <- numeric(length(true_pi0_values))
+
+sim_res <- sim_mixture_regression(
+    n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=pi0)
+beta_hat <- rbind(sim_res$beta1_est, sim_res$beta2_est)
+post_res <- compute_mixture_posterior(beta_hat, n, pi0, sigma_G2, sigma_e2, rho_G, rho_e=0.1)
+hist(post_res$prob_shared)
+```
+
+
+
+#### Low $\rho_G$ in ground truth make the components less distinguishable. {.hidden .unlisted .unnumbered}
+
+$$
+L(\pi_0) = \prod_j [\pi_0 MVN(0,\Sigma_{ind}) + \pi_1MVN(0,\Sigma_{shared})]
+$$
+
+In the MASH model, $\pi_0$ is the prior of 
+
+
+$$
+Pr(\tilde\beta|\beta,\pi_0) = \pi_0Pr(\tilde\beta|\beta,\Sigma_{ind}) + \pi_1 Pr(\tilde\beta|\beta,\Sigma_{shared}) 
+$$
+
+
+However, such estimation assumes that each $\hat\beta$ was independent. So we need to sample $G$ for each SNP (indexed by $j$).
+
+```{r}
+library(MASS)
+
+sim_mixture_regression <- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0) {
+  # pi0: Probability of Z=0 (Independent component)
+  # 1-pi0: Probability of Z=1 (Shared component)
+  
+  # --- 1. Generate Z (Component Assignment) ---
+  # vector of TRUE/FALSE where TRUE means "Shared Component" (Z=1)
+  G_raw <- matrix(rnorm(n * m), nrow = n, ncol = m)
+  G <- scale(G_raw) 
+  
+  is_shared <- rbinom(m, size = 1, prob = (1 - pi0)) == 1
+  n_shared <- sum(is_shared)
+  n_indep  <- m - n_shared
+  
+  # --- 2. Generate True Betas (Mixture) ---
+  betas_true <- matrix(0, nrow = m, ncol = 2)
+  
+  # A. Generate Shared Effects (Z=1)
+  if (n_shared > 0) {
+    cov_shared <- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                           rho_G*sigma_G2, sigma_G2), 2, 2)
+    betas_true[is_shared, ] <- mvrnorm(n = n_shared, mu = c(0, 0), Sigma = cov_shared)
+  }
+  
+  # B. Generate Independent Effects (Z=0)
+  if (n_indep > 0) {
+    # Off-diagonal is 0
+    cov_indep <- matrix(c(sigma_G2, 0, 
+                          0, sigma_G2), 2, 2)
+    betas_true[!is_shared, ] <- mvrnorm(n = n_indep, mu = c(0, 0), Sigma = cov_indep)
+  }
+  
+  # --- 3. Generate Residuals (Environmental Effects) ---
+  # These are always correlated by rho_e
+  cov_epsilon <- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                          rho_e*sigma_e2, sigma_e2), 2, 2)
+  eps_all <- mvrnorm(n = n * m, mu = c(0, 0), Sigma = cov_epsilon)
+  
+  # Reshape to n x m
+  eps1_mat <- matrix(eps_all[, 1], nrow = n, ncol = m)
+  eps2_mat <- matrix(eps_all[, 2], nrow = n, ncol = m)
+  
+  # --- 4. Generate Phenotypes ---
+  Y1 <- sweep(G, 2, betas_true[, 1], `*`) + eps1_mat
+  Y2 <- sweep(G, 2, betas_true[, 2], `*`) + eps2_mat
+  
+  # --- 5. OLS Estimation ---
+  denom <- colSums(G^2)
+  beta1_hat <- colSums(G * Y1) / denom
+  beta2_hat <- colSums(G * Y2) / denom
+  
+  return(data.frame(
+    beta1_est = beta1_hat, 
+    beta2_est = beta2_hat,
+    beta1_true = betas_true[, 1],
+    beta2_true = betas_true[, 2],
+    Z = as.numeric(is_shared) # Return Z so we can color-code plots later
+  ))
+}
+```
+
+
+```{r, eval=F}
+estimate_pi0_mle_approx <- function(beta_hat_matrix, n, sigma_G2, sigma_e2, rho_G, rho_e) {
+  # beta_hat_matrix: 2 x m
+  # n: sample size (used to approximate g_sum_sq)
+  
+  # A. Approximation: scaling = 1/n
+  # This assumes genotypes were standardized (var=1)
+  scaling <- 1 / n
+  
+  # Error Matrix (V)
+  V <- matrix(c(sigma_e2, rho_e*sigma_e2, 
+                rho_e*sigma_e2, sigma_e2), 2, 2) * scaling
+  
+  # Prior Matrix: Independent (rho_G = 0)
+  U_ind <- matrix(c(sigma_G2, 0, 
+                    0, sigma_G2), 2, 2)
+  
+  # Prior Matrix: Shared (rho_G from input)
+  U_shared <- matrix(c(sigma_G2, rho_G*sigma_G2, 
+                       rho_G*sigma_G2, sigma_G2), 2, 2)
+  
+  # Total Variance Matrices
+  Sigma_0 <- U_ind + V    # Covariance if Z=0
+  Sigma_1 <- U_shared + V # Covariance if Z=1
+  
+  # B. Pre-calculate Densities
+  d0 <- dmvnorm(t(beta_hat_matrix), mean = c(0,0), sigma = Sigma_0)
+  d1 <- dmvnorm(t(beta_hat_matrix), mean = c(0,0), sigma = Sigma_1)
+  
+  # C. Minimize Negative Log Likelihood
+  neg_log_lik <- function(pi0) {
+    if(pi0 < 0 || pi0 > 1) return(Inf)
+    lik <- pi0 * d0 + (1 - pi0) * d1
+    lik[lik < 1e-300] <- 1e-300 # Prevent log(0)
+    return(-sum(log(lik)))
+  }
+  opt_result <- optimize(neg_log_lik, interval = c(0, 1))
+  return(opt_result$minimum)
+}
+```
+
+
+```{r, eval=F}
+### Estimate the accuracy of Pi0 estimate (not needed for the moment)
+
+n <- 50
+m <- 10000
+sigma_G2 <- 0.05
+sigma_e2 <- 1 - sigma_G2
+rho_G <- 0.2
+pi0 <- 0.2
+rho_e <- 0.8
+
+# IMPORTANT: Standardize G so sum(g^2) approx n
+# If G is not standardized, 1/n will be the wrong scaling factor
+G_raw <- matrix(rnorm(n * m), nrow = n, ncol = m)
+G <- scale(G_raw) 
+
+true_pi0_values <- seq(0.1, 0.9, by = 0.1)
+estimated_pi0s <- numeric(length(true_pi0_values))
+
+for (i in seq_along(true_pi0_values)) {
+  sim_res <- sim_mixture_regression(
+    n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=true_pi0_values[i])
+  beta_hat <- rbind(sim_res$beta1_est, sim_res$beta2_est)
+  
+  # Estimate using ONLY n (no G matrix input)
+  estimated_pi0s[i] <- estimate_pi0_mle_approx(
+    beta_hat, n, sigma_G2, sigma_e2, rho_G_model, rho_e
+  )
+}
+
+# --- 4. Plot ---
+results_df <- data.frame(True_Pi0 = true_pi0_values, Est_Pi0 = estimated_pi0s)
+
+ggplot(results_df, aes(x = True_Pi0, y = Est_Pi0)) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
+  geom_point(color = "darkgreen", size = 3) +
+  geom_line(color = "forestgreen") +
+  labs(
+    title = "Pi0 MLE Performance (matched rho_e)",
+    subtitle = "rho_G=0.8, PVE=5%",
+    x = "True pi0",
+    y = "Estimated pi0"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+```
+
+
 
