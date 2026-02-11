@@ -35,4 +35,4 @@ editor_options:
 [Extension to MASH](mashR_extension.html)
 \
 \
-
+[Extension to MIRAGE](MIRAGE_extension.html)

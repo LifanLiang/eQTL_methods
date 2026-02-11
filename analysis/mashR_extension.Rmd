@@ -675,6 +675,7 @@ C_0^* & C^*
 \end{bmatrix}
 $$
 
+
 $$
 \Sigma_{shared} = \begin{bmatrix}
 1 & \rho_G^*  \\
@@ -686,21 +687,23 @@ $$
 D^* & C_1^*  \\
 C_1^* & D^* 
 \end{bmatrix}
-
 $$
 
-#### How mis-specified $rho_e$ affects the estimation of $\pi$
+#### How mis-specified $\rho_e$ affects the estimation of $\pi$
 
 For simplicity, we assume that $\rho_e -\rho_e^*>0$ and $\rho_G=0$. Marginal variance is the same between ground truth and the mixture model. In that case, method of moment provides an intuitive explanation. We simply match the covariance of the mixture model to the ground truth:
 
 $$
-\rho_e \sigma_e^2 = \pi_1(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) + (1-\pi_1)\rho_e^* \sigma_e^2
+\pi_1 (\rho_e \sigma_e^2 + \rho_G \sigma_G^2) + (1-\pi_1)\rho_e \sigma_e^2=
+\pi_1^*(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) + (1-\pi_1^*)\rho_e^* \sigma_e^2
 $$
+
+
 
 it can rewritten as:
 
 $$
-\pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^* \sigma_G^2}
+\pi_1 - \pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^* \sigma_G^2}
 $$
 
 Therefore, if $\rho_e$ is much larger than $\rho_e^*$, the mixture model will prefer the shared effect component even though $\rho_G=0$ in ground truth.'
@@ -832,8 +835,7 @@ sim_mixture_regression <- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0) 
 ```{r,class.source="scroll-300"}
 library(mvtnorm)
 
-compute_mixture_posterior <- function(beta_hat_matrix, n, pi0, 
-                                      sigma_G2, sigma_e2, rho_G, rho_e) {
+compute_mixture_posterior <- function(beta_hat_matrix, n, sigma_G2, sigma_e2, rho_G, rho_e) {
   # beta_hat_matrix: 2 x m matrix of effect estimates
   # n: Sample size (used for scaling error variance)
   # pi0: Prior probability of Independent component (Z=0)
@@ -940,8 +942,8 @@ n <- 50
 m <- 10000
 sigma_G2 <- 0.02
 sigma_e2 <- 1 - sigma_G2
-rho_G <- 0.2
-pi0 <- 0.5
+rho_G <- 0.9
+pi0 <- 0.8
 rho_e <- 0.9
 
 #true_pi0_values <- seq(0.1, 0.9, by = 0.1)
@@ -950,7 +952,7 @@ rho_e <- 0.9
 sim_res <- sim_mixture_regression(
     n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=pi0)
 beta_hat <- rbind(sim_res$beta1_est, sim_res$beta2_est)
-post_res <- compute_mixture_posterior(beta_hat, n, pi0, sigma_G2, sigma_e2, rho_G, rho_e=0.1)
+post_res <- compute_mixture_posterior(beta_hat, n, sigma_G2=sigma_G2, sigma_e2, rho_G, rho_e=0.2)
 hist(post_res$prob_shared)
 ```
 
@@ -1085,7 +1087,7 @@ n <- 50
 m <- 10000
 sigma_G2 <- 0.05
 sigma_e2 <- 1 - sigma_G2
-rho_G <- 0.2
+rho_G <- 0.9
 pi0 <- 0.2
 rho_e <- 0.8
 
@@ -1104,7 +1106,7 @@ for (i in seq_along(true_pi0_values)) {
   
   # Estimate using ONLY n (no G matrix input)
   estimated_pi0s[i] <- estimate_pi0_mle_approx(
-    beta_hat, n, sigma_G2, sigma_e2, rho_G_model, rho_e
+    beta_hat, n, sigma_G2, sigma_e2, rho_G, rho_e
   )
 }
 
@@ -1124,9 +1126,6 @@ ggplot(results_df, aes(x = True_Pi0, y = Est_Pi0)) +
   theme_minimal()
 ```
 
-```{r}
-
-```
 
 
 

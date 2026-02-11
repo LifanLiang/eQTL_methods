@@ -1,0 +1,405 @@
+---
+title: "MIRAGE_extension"
+author: "Lifan Liang"
+date: "2026-02-09"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+<style>
+.scroll-300 {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+</style>
+
+## Introduction
+
+Extended [MIRAGE](https://www.cell.com/ajhg/abstract/S0002-9297(25)00438-0) to test rare variants from summary statistics of linear regression. 
+
+### Generative process
+
+Essentially, a risk variant ($Z_j=1$) for a risk gene ($U_i=1$) has nonzero genetic effect, whereas other variants and genes have zero genetic effects. The genetic effects were manifested in the summary statistics as $\beta_hat$. The magnitude of genetic effects for a risk variants depends on the category (i.e. loss of function, missense, and synonymous) it is in. The category of the $j$th variant is denoted as $C_j$.
+
+$$
+U_i \sim Bernoulli(\delta)
+$$
+
+$$
+U_i = \begin{cases}
+1 & Z_j \sim Bernouli(\pi_{C_j}) \\
+0 & Z_j=0
+\end{cases}
+$$
+
+$$
+Z_j = \begin{cases}
+1 & \beta_{ij} \sim Normal(\mu_{C_j}, \sigma_{C_j}^2) \\
+0 & \beta_{ij} = 0
+\end{cases}
+$$
+
+$$
+Z_j = \begin{cases}
+1 & \hat\beta_{ij} \sim Normal(\beta_{ij},\sigma_{C_j}^2+s_{ij}^2)\\
+0 & \hat\beta_{ij} \sim Normal(0,s_{ij}^2)
+\end{cases}
+$$
+
+```{r, class.source="scroll-300"}
+set.seed(42)
+
+# Model parameters
+N <- 1000 # number of genes
+J <- 100 # number of variants per gene
+delta <- 0.2 # percent of risk genes
+pi <- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
+#mu <- c(0, 0, 0)
+mu <- c(0.3, 0.2, 0.1) # mean effect size
+sigma <- c(0.2, 0.2, 0.2) # SD of effect size
+
+# Set up the variant categories and AF
+# For each gene, the first 5% are the first category, next 20% second category, next 75% are third category 
+cat.prop <- c(0.05, 0.2, 0.75) # the proportion of variants in each category
+cat.count <- J * cat.prop
+C <- cbind(
+  matrix(1, nrow = N, ncol = cat.count[1]),
+  matrix(2, nrow = N, ncol = cat.count[2]),
+  matrix(3, nrow = N, ncol = cat.count[3])
+)
+AF.all <- 0.001 # AF of all variants
+AF <- matrix(AF.all, nrow=N, ncol=J)
+
+# Sample risk genes: U is the vector of gene indicators
+# For simplicity, the first delta proportion are risk genes
+ngenes.risk <- N * delta
+U <- c(rep(1, ngenes.risk), rep(0, N - ngenes.risk))
+
+# Sample risk variants: Z is the matrix of variant indicators
+Z <- matrix(0, nrow=N, ncol=J)
+for (i in 1:N) {
+  Z[i,] <- U[i] * rbinom(n = J, size = 1, prob = pi[C[i,]])
+}
+
+# sample variant effects: true effects are beta, N times J matrix
+mu.var <- matrix(mu[C], nrow=N, ncol=J) # mean of all variants based on the categories
+sigma.var <- matrix(sigma[C], nrow=N, ncol=J) # variance of all variants
+beta <- matrix(0, nrow = N, ncol = J) 
+idx <- Z==1
+beta[idx] <- rnorm(
+  n = sum(idx),
+  mean = mu.var[idx],
+  sd = sigma.var[idx]
+)
+
+# Create summary statistics
+n.samples <- 100000 # sample size of association study
+se.var <- 1/sqrt(n.samples * 2 * AF * (1-AF))
+beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
+```
+
+
+
+
+### Model inference
+
+Starting with an easier problem, suppose that genetic parameters (i.e. $\pi$, $\sigma^2$, $s^2$) were known. We can compute the Bayes factor for the $j$th variant and the $i$th gene:
+
+$$
+B_{ij} = \dfrac{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=1,\sigma_{C_j}^2)}{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=0)}
+$$
+The Bayes factor for the gene aggregating all the corresponding variants would be:
+
+$$
+B_i = \prod_j (1-\eta_{ij}+\eta_{ij} B_{ij})
+$$
+
+Posterior of inclusion probability (PIP) for the $i$th gene is:
+
+$$
+P(U_i = 1 | D) = \dfrac{\delta B_i}{1-\delta+\delta B_i}
+$$
+
+where $D$ denotes all the observed data, including $\hat\beta$, $s^2$, and $\delta$. And we can derive the posterior of risk variants as:
+
+$$
+\begin{align}
+P(Z_{ij}=1|D) &= P(Z_{ij}=1, U_i=1|D) \\
+&= P(Z_{ij}=1| U_i=1,D) P(U_i=1|D) \\
+&= \dfrac{\delta B_i}{1-\delta+\delta B_i} \cdot \dfrac{\eta_{C_{ij}}B_{ij}}{1+ \eta_{C_{ij}} - \eta_{C_{ij}}B_{ij}}
+\end{align}
+$$
+
+
+```{r, class.source="scroll-300"}
+# MIRAGE method: make inference on a gene
+# Input: beta.hat and se, summary statistics data of all variants in a gene. 
+# Input: variant annotations (C) - the category of each variant. Each element is a number from 1 to K (number of categories)
+# Input: pi, mu and sigma, K-dim. vector. For each variant category, the prior probability of risk variants; the effect size mean and SE
+comp.gene <- function(beta.hat, se, C, pi, mu, sigma, delta=0.1) {
+  J <- length(beta.hat) # number of variants
+  
+  # compute BF of variants
+  # log-prob. under Z[j] = 1
+  l1 <- dnorm(beta.hat, mean=mu[C], sd=sqrt(sigma[C]^2 + se^2), log=TRUE)
+    
+  # log-prob. under Z[j] = 0
+  l0 <- dnorm(beta.hat, mean=0, sd=se, log=TRUE)
+    
+  # BF of a variant
+  B <- exp(l1 - l0)
+  
+  # compute BF of the gene
+  B.gene <- prod(1 - pi[C] + pi[C]*B)
+  
+  # compute the posterior of the gene E(U_i|D,theta)
+  post.gene <- B.gene * delta / (1 -delta + B.gene * delta)
+  
+  # compute the posterior of each variant E(U_i Z_{ij | D, theta})
+  post.var <- post.gene * (B * pi[C] / (B * pi[C] + 1 - pi[C]))
+  
+  log_add <- function(lx, ly) {
+    m <- pmax(lx, ly)
+    m + log(exp(lx - m) + exp(ly - m))
+  }
+  log.lik.var.given.U1 <- log_add(log(pi[C]) + l1, log(1-pi[C]) + l0)
+
+  log.lik.gene.given.U0 <- sum(l0) 
+  log.lik.gene.given.U1 <- sum(log.lik.var.given.U1)
+  
+  term_safe <- log(1 - delta) + log.lik.gene.given.U0
+  term_risk <- log(delta) + log.lik.gene.given.U1
+  
+  ll.gene <- log_add(term_safe, term_risk)
+  list(B.var=B, B.gene=B.gene, post.gene=post.gene, post.var=post.var, ll.gene=ll.gene)
+}
+```
+
+We can go further to update the global proportion of risk genes and risk variants with EM algorithm. Essentially, we alternated between estimating the posterior of $U$ and $Z$ for each gene and variant (the E step) and estimating the global proportions of risk variants in each category and risk genes (the M step). For now, we do not refine the estimate of genetic parameters $\mu$ and $\sigma^2$. The EM algorithm is to increase the marginal likelihood of observed data, which never decreases after each iteration. This is a useful metric to diagnose the EM algorithm.
+
+```{r, class.source="scroll-300"}
+### Compute observed log likelihood for each gene.
+
+obv.lik <- function(beta.hat, se, C, mu, sigma, delta, eta) {
+    # log-prob. under Z[j] = 1
+  l1 <- dnorm(beta.hat, mean=mu[C], sd=sqrt(sigma[C]^2 + se^2), log=TRUE)
+    
+  # log-prob. under Z[j] = 0
+  l0 <- dnorm(beta.hat, mean=0, sd=se, log=TRUE)
+  
+  log_add <- function(lx, ly) {
+    m <- pmax(lx, ly)
+    m + log(exp(lx - m) + exp(ly - m))
+  }
+  
+  log.lik.var.given.U1 <- log_add(log(pi[C]) + l1, log(1-pi[C]) + l0)
+
+  log.lik.gene.given.U0 <- sum(l0) 
+  log.lik.gene.given.U1 <- sum(log.lik.var.given.U1)
+  
+  term_safe <- log(1 - delta) + log.lik.gene.given.U0
+  term_risk <- log(delta) + log.lik.gene.given.U1
+  
+  log_add(term_safe, term_risk)
+}
+
+# Take one gene for example
+# obv.lik(beta.hat[1,], se.var[1,], C[1,], mu, sigma, delta, cat.prop)
+```
+
+
+Within each iteration, we updated the risk status for each genes and each variant ($delta_i$ and $\eta_{ij}$) from the equations above. Then we fixed the risk status and updated the priors to maximize the complete data likelihood. update the proportion of a gene conferring risk ($\delta$) and the priors for each variant category $\eta$.
+
+The Bernoulli MLE for the proportion of risk genes ($\delta$) is simply the average of risk status across all genes:
+
+$$
+\delta^{(t+1)} = \dfrac{1}{I} \sum_i P(U_i=1 | D,\delta^{(t)})
+$$
+where $I$ is the number of genes.
+
+As for the risk variant proportion in each variant category, we first compute the risk variant counts for each category within each gene ($\gamma_i$), given that the corresponding gene is a risk gene . 
+
+$$
+\gamma_{ik} = \sum_{C_j = k} P(Z_{ij}=1| U_i=1, D, \theta^{(t)})
+$$
+
+Then the MLE for the risk variant proportion in the $k$th category ($\pi_k$) can be updated as the average of $\gamma_i$ weighted by $\delta_i$. In practice, $\gamma_{ik}$ was not estimated separately. $\gamma_{ik}P(U_i=1 | D,\delta^{(t)})$ was computed together as $P(Z_{ij}=1, U_i=1|D$.
+
+$$
+\hat\pi_k^{(t+1)} = \dfrac{\sum_{i} \gamma_{ik}P(U_i=1 | D,\delta^{(t)})}{\sum_i n_{ik} P(U_i=1 | D,\delta^{(t)})}
+$$
+
+where $n_{ik}$ is the number of variants in $k$th category at the $i$th gene.
+
+
+```{r, class.source="scroll-300"}
+# parameter estimation by EM
+# only estimate pi and delta. Other paramteres are given
+# Input: data matrix beta.hat and SE. Variant annotations C.
+# Input: parameters mu and sigma are given. 
+# Input: initial values of parameters
+est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=5) {
+  ngenes <- nrow(beta.hat)
+  nvariants <- ncol(beta.hat)
+  ncat <- length(pi.init)
+  
+  # parameters to be updated
+  pi <- pi.init
+  delta <- delta.init
+  
+  delta.trac <- numeric(niter)
+  pi.trac <- matrix(nrow=niter, ncol=ncat)
+  data.lik <- numeric(niter)
+  
+
+  
+  # repeat certain number of iterations in EM
+  for (iter in 1:niter) {
+    delta.trac[iter] <- delta
+    pi.trac[iter,] <- pi
+    # make inference on the genes given current parameters
+    post.genes <- rep(0, ngenes)
+    #post.variants <- matrix(0, nrow=ngenes, ncol=nvariants)
+    post.cat.risk <- matrix(0, nrow=ngenes, ncol=ncat)
+    post.cat.count <- matrix(0, nrow=ngenes, ncol=ncat)
+    marg.lik <- 0
+    for (i in 1:ngenes) {
+      result <- comp.gene(beta.hat[i,], se[i,], C[i,], pi, mu, sigma, delta)
+      post.genes[i] <- result$post.gene
+      #post.variants[i,] <- result$post.var
+      post.cat.risk[i,] <- tapply(result$post.var, C[i,], sum)
+      # Assuming category in the order of 1,2,,...,K ca
+      post.cat.count[i,] <- as.numeric(table(factor(C[i,], levels = 1:ncat))) 
+      
+      marg.lik <- marg.lik + result$ll.gene
+    } 
+    
+    data.lik[iter] <- marg.lik
+    # update the parameters
+    delta.new <- sum(post.genes) / ngenes
+    #cat(dim(post.cat.risk), length)
+    pi.new <- colSums(post.cat.risk) / as.numeric(post.genes %*% post.cat.count)
+    
+    delta <- delta.new
+    pi <- pi.new
+    
+    
+    cat("The observed marignal likelihood at", iter, "th iteration:", marg.lik, "\n")
+  }
+  
+  result <- list(delta = delta, pi = pi, lik.tract = data.lik, pi.trac = pi.trac, delta.trac = delta.trac)
+  return(result)
+}
+```
+
+
+#### Diagnostics of the EM algorithm
+
+We have checked the convergence of the marginal data likelihood, the proportion of risk genes ($\delta$), and the proportion of risk variants ($\pi_k$). 
+
+In ground truth, we set $\pi=\{0.8,0.3,0.05\}$ and $\delta=0.2$.
+
+To validate the EM algorithm, the initial value was set quite different from the ground truth ($\bar\pi=\{0.1,0.1,0.1\}, \bar\delta=0.6$). The parameters has converged very close the ground truth.
+
+```{r,echo=F, message=F}
+res <- est.par(beta.hat, se.var, C, mu, sigma, pi=c(0.1,0.1,0.1), delta=0.6, niter=10)
+
+plot(1:length(res$lik.tract), res$lik.tract, type="l", ylab="marginal data likelihood", xlab="EM iterations")
+points(1:length(res$lik.tract), res$lik.tract, pch=20)
+```
+
+```{r,echo=F}
+plot(1:length(res$delta.trac), res$delta.trac, type="l", ylab="Proportion of risk genes", xlab="EM iterations", ylim=c(0,1))
+points(1:length(res$delta.trac), res$delta.trac, pch=20)
+```
+
+
+```{r,echo=F}
+matplot(1:nrow(res$pi.trac), res$pi.trac, type="l", ylab="Risk proportion  for different category", xlab="EM iterations", ylim=c(0,1))
+```
+
+### Simulation testing performance 
+
+We compared our method with ACAT and burden test on the simulated dataset. For the burden test, we tried two approach: (1) applied to all variants in the three categories; (2) only applied to variants in the LoF category.
+
+Since burden test assumes that variants within a gene has the same effect direction, we set up the genetic parametrs $\mu$ to be positive. Specifically:
+
+* There are 100,000 samples with 1000 genes. Each genes has 100 variants.
+* Proportion of risk genes: $\delta=0.2$. Hence there are 200 risk genes.
+* Proportion of risk variants for each category: $\pi=\{0.8,0.3,0.05\}$ 
+* LoF risk variants: $\beta \sim Normal(\mu=0.3, \sigma=0.2)$
+* Missense risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
+* Synonymous risk variants: $\beta \sim Normal(\mu=0.1, \sigma=0.2)$
+
+```{r}
+library(ACAT)
+# ACAT test: compute the p-value for each variant, then combine with ACAT
+test.ACAT <- function(beta.hat, se) {
+  z <- beta.hat / se
+  p.values <- 2 * (1 - pnorm(abs(z)))
+  
+  # use ACAT to combine p-values
+  p.ACAT <- ACAT(p.values)
+  
+  return (p.ACAT)
+}
+
+# Burden test: compute gene-level p value given sumstats and variant weights
+burden.test <- function(beta.hat, se, w) {
+  se2 <- se^2
+  U.burden <- sum(w*beta.hat/se2)
+  var.burden <- sum(w^2/se2)
+  T.burden <- U.burden^2 / var.burden
+  pchisq(T.burden, df=1, lower.tail=F)
+}
+```
+
+
+We used the EM algorithm above to estimate $\delta$ and $\pi$ for MIRAGE and computed the PIP. We also applied multiple testing correction to ACAT and burden test. We checked the power and empirical FDR for each method in the simulated dataset. As shown by the figure below:
+
+```{r,message=F,warning=F}
+mirage.pip <- rep(0, N)
+p.ACAT.genes <- rep(0, N)
+p.burden.all <- rep(0, N)
+p.burden.lof <- rep(0, N)
+w.all <- rep(1,ncol(beta.hat))
+w.lof <- ifelse(C[1,]==1,1,0)
+
+### Estimate the proportion of risk genes and risk variants
+par.est <- est.par(beta.hat, se.var, C,mu, sigma, pi.init = rep(0.1,3), delta.init = 0.5)
+
+### Testing one gene after another
+for (i in 1:N) {
+  mirage.pip[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], par.est$pi, mu, sigma, par.est$delta)$post.gene
+  p.ACAT.genes[i] <- test.ACAT(beta.hat[i,], se.var[i,])
+  p.burden.all[i] <- burden.test(beta.hat[i,], se.var[i,], w.all)
+  p.burden.lof[i] <- burden.test(beta.hat[i,], se.var[i,], w.lof)
+}
+
+#PIP <- (1-par.est$delta) / (1-par.est$delta+par.est$delta*B.genes)
+q.ACAT <- p.adjust(p.ACAT.genes, method="BH")
+q.burden.all <- p.adjust(p.burden.all, method="BH")
+q.burden.lof <- p.adjust(p.burden.lof, method="BH")
+```
+
+```{r,echo=F}
+library(ggplot2)
+
+dat <- data.frame(count=c(sum((mirage.pip>0.9)*U),sum((mirage.pip>0.9)*(1-U)),
+                          sum((q.ACAT<0.1)*U),sum((q.ACAT<0.1)*(1-U)),
+                          sum((q.burden.all<0.1)*U),sum((q.burden.all<0.1)*(1-U)),
+                          sum((q.burden.lof<0.1)*U),sum((q.burden.lof<0.1)*(1-U))),
+           method=rep(c("MIRAGE","ACAT","burden_all","burden_LoF"),each=2),
+           true_positive=rep(c(T,F),4))
+ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
+  geom_bar(stat="identity", position = position_stack()) + 
+  ylab("# of significant genes at FDR/PIP < 10%") + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+  
+```
+
+
+
+
