@@ -382,7 +382,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-02-02
+<strong>Last updated:</strong> 2026-02-11
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb874aeee4830565f45c72acb972551d868273692targetblankb874aeea">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree4827df877a2322c689f431761c2adec1641935b5targetblank4827df8a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/b874aeee4830565f45c72acb972551d868273692" target="_blank">b874aee</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/4827df877a2322c689f431761c2adec1641935b5" target="_blank">4827df8</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeb874aeee4830565f45c72acb972551d868273692targetblankb874aeea"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree4827df877a2322c689f431761c2adec1641935b5targetblank4827df8a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/b874aeee4830565f45c72acb972551d868273692" target="_blank">b874aee</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/4827df877a2322c689f431761c2adec1641935b5" target="_blank">4827df8</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -611,6 +611,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/4827df877a2322c689f431761c2adec1641935b5/analysis/mashR_extension.Rmd" target="_blank">4827df8</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-11
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/819b4b7af74521d7318fab879e6aa94919084ab9/docs/mashR_extension.html" target="_blank">819b4b7</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1539,26 +1573,22 @@ D^* &amp; C_0^*  \\
 C_0^* &amp; C^*
 \end{bmatrix}
 \]</span></p>
-$$ _{shared} =
-<span class="math display">\[\begin{bmatrix}
+<p><span class="math display">\[
+\Sigma_{shared} = \begin{bmatrix}
 1 &amp; \rho_G^*  \\
 \rho_G^* &amp; 1
-\end{bmatrix}\]</span>
-_G^*2 +
-<span class="math display">\[\begin{bmatrix}
+\end{bmatrix}\cdot \sigma_G^*2 + \begin{bmatrix}
 1 &amp; \rho_e^*  \\
 \rho_e^* &amp; 1
-\end{bmatrix}\]</span>
-=
-<span class="math display">\[\begin{bmatrix}
+\end{bmatrix}\cdot \dfrac{\sigma_e^2}{n} = \begin{bmatrix}
 D^* &amp; C_1^*  \\
 C_1^* &amp; D^*
-\end{bmatrix}\]</span>
-<p>$$</p>
+\end{bmatrix}
+\]</span></p>
 <div id="how-mis-specified-rho_e-affects-the-estimation-of-pi"
 class="section level4">
-<h4>How mis-specified <span class="math inline">\(rho_e\)</span> affects
-the estimation of <span class="math inline">\(\pi\)</span></h4>
+<h4>How mis-specified <span class="math inline">\(\rho_e\)</span>
+affects the estimation of <span class="math inline">\(\pi\)</span></h4>
 <p>For simplicity, we assume that <span class="math inline">\(\rho_e
 -\rho_e^*&gt;0\)</span> and <span
 class="math inline">\(\rho_G=0\)</span>. Marginal variance is the same
@@ -1566,12 +1596,14 @@ between ground truth and the mixture model. In that case, method of
 moment provides an intuitive explanation. We simply match the covariance
 of the mixture model to the ground truth:</p>
 <p><span class="math display">\[
-\rho_e \sigma_e^2 = \pi_1(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) +
-(1-\pi_1)\rho_e^* \sigma_e^2
+\pi_1 (\rho_e \sigma_e^2 + \rho_G \sigma_G^2) + (1-\pi_1)\rho_e
+\sigma_e^2=
+\pi_1^*(\rho_G^* \sigma_G^2 + \rho_e^*\sigma_e^2) + (1-\pi_1^*)\rho_e^*
+\sigma_e^2
 \]</span></p>
 <p>it can rewritten as:</p>
 <p><span class="math display">\[
-\pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^*
+\pi_1 - \pi_1 = (\rho_e - \rho_e^*) \cdot \dfrac{\sigma_e^2}{\rho_G^*
 \sigma_G^2}
 \]</span></p>
 <p>Therefore, if <span class="math inline">\(\rho_e\)</span> is much
@@ -1715,8 +1747,7 @@ sim_mixture_regression &lt;- function(n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi
 }</code></pre>
 <pre class="r scroll-300"><code>library(mvtnorm)
 
-compute_mixture_posterior &lt;- function(beta_hat_matrix, n, pi0, 
-                                      sigma_G2, sigma_e2, rho_G, rho_e) {
+compute_mixture_posterior &lt;- function(beta_hat_matrix, n, sigma_G2, sigma_e2, rho_G, rho_e) {
   # beta_hat_matrix: 2 x m matrix of effect estimates
   # n: Sample size (used for scaling error variance)
   # pi0: Prior probability of Independent component (Z=0)
@@ -1819,8 +1850,8 @@ compute_mixture_posterior &lt;- function(beta_hat_matrix, n, pi0,
 m &lt;- 10000
 sigma_G2 &lt;- 0.02
 sigma_e2 &lt;- 1 - sigma_G2
-rho_G &lt;- 0.2
-pi0 &lt;- 0.5
+rho_G &lt;- 0.9
+pi0 &lt;- 0.8
 rho_e &lt;- 0.9
 
 #true_pi0_values &lt;- seq(0.1, 0.9, by = 0.1)
@@ -1829,9 +1860,46 @@ rho_e &lt;- 0.9
 sim_res &lt;- sim_mixture_regression(
     n, m, sigma_G2, sigma_e2, rho_G, rho_e, pi0=pi0)
 beta_hat &lt;- rbind(sim_res$beta1_est, sim_res$beta2_est)
-post_res &lt;- compute_mixture_posterior(beta_hat, n, pi0, sigma_G2, sigma_e2, rho_G, rho_e=0.1)
+post_res &lt;- compute_mixture_posterior(beta_hat, n, sigma_G2=sigma_G2, sigma_e2, rho_G, rho_e=0.2)
 hist(post_res$prob_shared)</code></pre>
 <p><img src="figure/mashR_extension.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-14-1">
+Past versions of unnamed-chunk-14-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-14-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/819b4b7af74521d7318fab879e6aa94919084ab9/docs/figure/mashR_extension.Rmd/unnamed-chunk-14-1.png" target="_blank">819b4b7</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-02
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div
 id="low-rho_g-in-ground-truth-make-the-components-less-distinguishable."
@@ -1957,7 +2025,7 @@ n &lt;- 50
 m &lt;- 10000
 sigma_G2 &lt;- 0.05
 sigma_e2 &lt;- 1 - sigma_G2
-rho_G &lt;- 0.2
+rho_G &lt;- 0.9
 pi0 &lt;- 0.2
 rho_e &lt;- 0.8
 
@@ -1976,7 +2044,7 @@ for (i in seq_along(true_pi0_values)) {
   
   # Estimate using ONLY n (no G matrix input)
   estimated_pi0s[i] &lt;- estimate_pi0_mle_approx(
-    beta_hat, n, sigma_G2, sigma_e2, rho_G_model, rho_e
+    beta_hat, n, sigma_G2, sigma_e2, rho_G, rho_e
   )
 }
 
