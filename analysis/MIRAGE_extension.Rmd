@@ -53,10 +53,10 @@ set.seed(42)
 # Model parameters
 N <- 1000 # number of genes
 J <- 100 # number of variants per gene
-delta <- 0.2 # percent of risk genes
+delta <- 0.1 # percent of risk genes
 pi <- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
 #mu <- c(0, 0, 0)
-mu <- c(0.3, 0.2, 0.1) # mean effect size
+mu <- c(0.2, 0.2, 0.2) # mean effect size
 sigma <- c(0.2, 0.2, 0.2) # SD of effect size
 
 # Set up the variant categories and AF
@@ -94,7 +94,7 @@ beta[idx] <- rnorm(
 )
 
 # Create summary statistics
-n.samples <- 100000 # sample size of association study
+n.samples <- 20000 # sample size of association study
 se.var <- 1/sqrt(n.samples * 2 * AF * (1-AF))
 beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
 ```
@@ -239,7 +239,7 @@ where $n_{ik}$ is the number of variants in $k$th category at the $i$th gene.
 # Input: data matrix beta.hat and SE. Variant annotations C.
 # Input: parameters mu and sigma are given. 
 # Input: initial values of parameters
-est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=5) {
+est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=10, tol=0.5) {
   ngenes <- nrow(beta.hat)
   nvariants <- ncol(beta.hat)
   ncat <- length(pi.init)
@@ -284,8 +284,15 @@ est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=5) {
     delta <- delta.new
     pi <- pi.new
     
-    
     cat("The observed marignal likelihood at", iter, "th iteration:", marg.lik, "\n")
+    
+    if(iter>1) {
+      diff <- data.lik[iter] - data.lik[iter-1]
+      if(diff<tol) {
+        cat("Marginal likelihood reach convergence. (increase <",tol,")")
+        break
+      }
+    }
   }
   
   result <- list(delta = delta, pi = pi, lik.tract = data.lik, pi.trac = pi.trac, delta.trac = delta.trac)
@@ -298,12 +305,12 @@ est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=5) {
 
 We have checked the convergence of the marginal data likelihood, the proportion of risk genes ($\delta$), and the proportion of risk variants ($\pi_k$). 
 
-In ground truth, we set $\pi=\{0.8,0.3,0.05\}$ and $\delta=0.2$.
+In ground truth, we set $\pi=\{0.8,0.3,0.05\}$ and $\delta=0.1$.
 
 To validate the EM algorithm, the initial value was set quite different from the ground truth ($\bar\pi=\{0.1,0.1,0.1\}, \bar\delta=0.6$). The parameters has converged very close the ground truth.
 
 ```{r,echo=F, message=F}
-res <- est.par(beta.hat, se.var, C, mu, sigma, pi=c(0.1,0.1,0.1), delta=0.6, niter=10)
+res <- est.par(beta.hat, se.var, C, mu, sigma, pi=c(0.1,0.1,0.1), delta=0.6, niter=20)
 
 plot(1:length(res$lik.tract), res$lik.tract, type="l", ylab="marginal data likelihood", xlab="EM iterations")
 points(1:length(res$lik.tract), res$lik.tract, pch=20)
@@ -325,12 +332,12 @@ We compared our method with ACAT and burden test on the simulated dataset. For t
 
 Since burden test assumes that variants within a gene has the same effect direction, we set up the genetic parametrs $\mu$ to be positive. Specifically:
 
-* There are 100,000 samples with 1000 genes. Each genes has 100 variants.
-* Proportion of risk genes: $\delta=0.2$. Hence there are 200 risk genes.
+* There are 20,000 samples with 1000 genes. Each genes has 100 variants.
+* Proportion of risk genes: $\delta=0.1$. Hence there are 100 risk genes.
 * Proportion of risk variants for each category: $\pi=\{0.8,0.3,0.05\}$ 
-* LoF risk variants: $\beta \sim Normal(\mu=0.3, \sigma=0.2)$
+* LoF risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
 * Missense risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
-* Synonymous risk variants: $\beta \sim Normal(\mu=0.1, \sigma=0.2)$
+* Synonymous risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
 
 ```{r}
 library(ACAT)
@@ -367,7 +374,7 @@ w.all <- rep(1,ncol(beta.hat))
 w.lof <- ifelse(C[1,]==1,1,0)
 
 ### Estimate the proportion of risk genes and risk variants
-par.est <- est.par(beta.hat, se.var, C,mu, sigma, pi.init = rep(0.1,3), delta.init = 0.5)
+par.est <- est.par(beta.hat, se.var, C,mu, sigma, pi.init = rep(0.1,3), delta.init = 0.5, niter=20)
 
 ### Testing one gene after another
 for (i in 1:N) {
