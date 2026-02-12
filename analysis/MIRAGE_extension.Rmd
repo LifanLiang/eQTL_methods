@@ -311,14 +311,18 @@ To validate the EM algorithm, the initial value was set quite different from the
 
 ```{r,echo=F, message=F}
 res <- est.par(beta.hat, se.var, C, mu, sigma, pi=c(0.1,0.1,0.1), delta=0.6, niter=20)
-
-plot(1:length(res$lik.tract), res$lik.tract, type="l", ylab="marginal data likelihood", xlab="EM iterations")
-points(1:length(res$lik.tract), res$lik.tract, pch=20)
 ```
 
+
+```{r,echo=F, message=F}
+plot(1:sum(res$lik.tract!=0), res$lik.tract[res$lik.tract!=0], type="l", ylab="marginal data likelihood", xlab="EM iterations")
+points(1:sum(res$lik.tract!=0), res$lik.tract[res$lik.tract!=0], pch=20)
+```
+
+
 ```{r,echo=F}
-plot(1:length(res$delta.trac), res$delta.trac, type="l", ylab="Proportion of risk genes", xlab="EM iterations", ylim=c(0,1))
-points(1:length(res$delta.trac), res$delta.trac, pch=20)
+plot(1:sum(res$lik.tract!=0), res$delta.trac[res$lik.tract!=0], type="l", ylab="Proportion of risk genes", xlab="EM iterations", ylim=c(0,1), col="blue")
+points(1:sum(res$lik.tract!=0), res$delta.trac[res$lik.tract!=0], pch=20, col="blue")
 ```
 
 
