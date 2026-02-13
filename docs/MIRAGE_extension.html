@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree51fcd952bb269ac38c78b5d694236f3959e7cff9targetblank51fcd95a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree971174e5cac1f1b87d8e2cd3913023c7db644debtargetblank971174ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/51fcd952bb269ac38c78b5d694236f3959e7cff9" target="_blank">51fcd95</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/971174e5cac1f1b87d8e2cd3913023c7db644deb" target="_blank">971174e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree51fcd952bb269ac38c78b5d694236f3959e7cff9targetblank51fcd95a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree971174e5cac1f1b87d8e2cd3913023c7db644debtargetblank971174ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/51fcd952bb269ac38c78b5d694236f3959e7cff9" target="_blank">51fcd95</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/971174e5cac1f1b87d8e2cd3913023c7db644deb" target="_blank">971174e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -611,6 +611,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/971174e5cac1f1b87d8e2cd3913023c7db644deb/analysis/MIRAGE_extension.Rmd" target="_blank">971174e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/9ecb03618a4b438f9f5c2cdcd76d0aa7c8a8e5af/docs/MIRAGE_extension.html" target="_blank">9ecb036</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -724,9 +758,9 @@ whereas other variants and genes have zero genetic effects. The genetic
 effects were manifested in the summary statistics as <span
 class="math inline">\(\beta_hat\)</span>. The magnitude of genetic
 effects for a risk variants depends on the category (i.e. loss of
-function, missense, and synonymous) it is in. The category of the <span
-class="math inline">\(j\)</span>th variant is denoted as <span
-class="math inline">\(C_j\)</span>.</p>
+function, damaging missense, and benign missense) it is in. The category
+of the <span class="math inline">\(j\)</span>th variant is denoted as
+<span class="math inline">\(C_j\)</span>.</p>
 <p><span class="math display">\[
 U_i \sim Bernoulli(\delta)
 \]</span></p>
@@ -738,14 +772,14 @@ U_i = \begin{cases}
 \]</span></p>
 <p><span class="math display">\[
 Z_j = \begin{cases}
-1 &amp; \beta_{ij} \sim Normal(\mu_{C_j}, \sigma_{C_j}^2) \\
+1 &amp; \beta_{ij} \sim Normal(\mu_{C_j}, \sigma_{C_j}) \\
 0 &amp; \beta_{ij} = 0
 \end{cases}
 \]</span></p>
 <p><span class="math display">\[
 Z_j = \begin{cases}
-1 &amp; \hat\beta_{ij} \sim Normal(\beta_{ij},\sigma_{C_j}^2+s_{ij}^2)\\
-0 &amp; \hat\beta_{ij} \sim Normal(0,s_{ij}^2)
+1 &amp; \hat\beta_{ij} \sim Normal(\beta_{ij},s_{ij})\\
+0 &amp; \hat\beta_{ij} \sim Normal(0,s_{ij})
 \end{cases}
 \]</span></p>
 <pre class="r scroll-300"><code>set.seed(42)
@@ -754,10 +788,19 @@ Z_j = \begin{cases}
 N &lt;- 1000 # number of genes
 J &lt;- 100 # number of variants per gene
 delta &lt;- 0.1 # percent of risk genes
-pi &lt;- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
-#mu &lt;- c(0, 0, 0)
-mu &lt;- c(0.2, 0.2, 0.2) # mean effect size
+pi &lt;- c(0.5, 0.2, 0.05) # percent of risk variants in each variant category
+mu &lt;- c(0.15, 0.15, 0.15) # mean effect size
 sigma &lt;- c(0.2, 0.2, 0.2) # SD of effect size
+n.samples &lt;- 20000 # sample size of association study
+
+# Model parameters as positive control (all methods wll have high power)
+# N &lt;- 1000 # number of genes
+# J &lt;- 100 # number of variants per gene
+# delta &lt;- 0.2 # percent of risk genes
+# pi &lt;- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
+# mu &lt;- c(0.3, 0.2, 0.1) # mean effect size
+# sigma &lt;- c(0.2, 0.2, 0.2) # SD of effect size
+# n.samples &lt;- 100000 # sample size of association study
 
 # Set up the variant categories and AF
 # For each gene, the first 5% are the first category, next 20% second category, next 75% are third category 
@@ -794,7 +837,6 @@ beta[idx] &lt;- rnorm(
 )
 
 # Create summary statistics
-n.samples &lt;- 20000 # sample size of association study
 se.var &lt;- 1/sqrt(n.samples * 2 * AF * (1-AF))
 beta.hat &lt;- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)</code></pre>
 </div>
@@ -808,7 +850,7 @@ factor for the <span class="math inline">\(j\)</span>th variant and the
 <span class="math inline">\(i\)</span>th gene:</p>
 <p><span class="math display">\[
 B_{ij} =
-\dfrac{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=1,\sigma_{C_j}^2)}{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=0)}
+\dfrac{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=1,\sigma_{C_j})}{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=0)}
 \]</span> The Bayes factor for the gene aggregating all the
 corresponding variants would be:</p>
 <p><span class="math display">\[
@@ -1019,29 +1061,30 @@ proportion of risk genes (<span class="math inline">\(\delta\)</span>),
 and the proportion of risk variants (<span
 class="math inline">\(\pi_k\)</span>).</p>
 <p>In ground truth, we set <span
-class="math inline">\(\pi=\{0.8,0.3,0.05\}\)</span> and <span
+class="math inline">\(\pi=\{0.5,0.2,0.05\}\)</span> and <span
 class="math inline">\(\delta=0.1\)</span>.</p>
 <p>To validate the EM algorithm, the initial value was set quite
 different from the ground truth (<span
 class="math inline">\(\bar\pi=\{0.1,0.1,0.1\}, \bar\delta=0.6\)</span>).
 The parameters has converged very close the ground truth.</p>
-<pre><code>The observed marignal likelihood at 1 th iteration: 40478.58 
-The observed marignal likelihood at 2 th iteration: 40801.82 
-The observed marignal likelihood at 3 th iteration: 40903.47 
-The observed marignal likelihood at 4 th iteration: 40958.11 
-The observed marignal likelihood at 5 th iteration: 40993.68 
-The observed marignal likelihood at 6 th iteration: 41017.34 
-The observed marignal likelihood at 7 th iteration: 41033.2 
-The observed marignal likelihood at 8 th iteration: 41043.92 
-The observed marignal likelihood at 9 th iteration: 41051.23 
-The observed marignal likelihood at 10 th iteration: 41056.26 
-The observed marignal likelihood at 11 th iteration: 41059.73 
-The observed marignal likelihood at 12 th iteration: 41062.16 
-The observed marignal likelihood at 13 th iteration: 41063.87 
-The observed marignal likelihood at 14 th iteration: 41065.09 
-The observed marignal likelihood at 15 th iteration: 41065.98 
-The observed marignal likelihood at 16 th iteration: 41066.62 
-The observed marignal likelihood at 17 th iteration: 41067.1 
+<pre><code>The observed marignal likelihood at 1 th iteration: 41157.95 
+The observed marignal likelihood at 2 th iteration: 41365.05 
+The observed marignal likelihood at 3 th iteration: 41431.13 
+The observed marignal likelihood at 4 th iteration: 41455.6 
+The observed marignal likelihood at 5 th iteration: 41467.84 
+The observed marignal likelihood at 6 th iteration: 41475.79 
+The observed marignal likelihood at 7 th iteration: 41481.68 
+The observed marignal likelihood at 8 th iteration: 41486.25 
+The observed marignal likelihood at 9 th iteration: 41489.83 
+The observed marignal likelihood at 10 th iteration: 41492.63 
+The observed marignal likelihood at 11 th iteration: 41494.82 
+The observed marignal likelihood at 12 th iteration: 41496.55 
+The observed marignal likelihood at 13 th iteration: 41497.91 
+The observed marignal likelihood at 14 th iteration: 41498.98 
+The observed marignal likelihood at 15 th iteration: 41499.83 
+The observed marignal likelihood at 16 th iteration: 41500.5 
+The observed marignal likelihood at 17 th iteration: 41501.04 
+The observed marignal likelihood at 18 th iteration: 41501.46 
 Marginal likelihood reach convergence. (increase &lt; 0.5 )</code></pre>
 <p><img src="figure/MIRAGE_extension.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -1066,6 +1109,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9ecb03618a4b438f9f5c2cdcd76d0aa7c8a8e5af/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-6-1.png" target="_blank">9ecb036</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/57d3dfec3ef88151a5861a368b945b0d3cabaf07/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-6-1.png" target="_blank">57d3dfe</a>
@@ -1117,6 +1171,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9ecb03618a4b438f9f5c2cdcd76d0aa7c8a8e5af/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-7-1.png" target="_blank">9ecb036</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/57d3dfec3ef88151a5861a368b945b0d3cabaf07/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-7-1.png" target="_blank">57d3dfe</a>
 </td>
 <td>
@@ -1142,6 +1207,43 @@ Lifan Liang
 </div>
 </div>
 <p><img src="figure/MIRAGE_extension.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9ecb03618a4b438f9f5c2cdcd76d0aa7c8a8e5af/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-8-1.png" target="_blank">9ecb036</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="simulation-testing-performance" class="section level3">
@@ -1160,13 +1262,13 @@ variants.</li>
 class="math inline">\(\delta=0.1\)</span>. Hence there are 100 risk
 genes.</li>
 <li>Proportion of risk variants for each category: <span
-class="math inline">\(\pi=\{0.8,0.3,0.05\}\)</span></li>
+class="math inline">\(\pi=\{0.5,0.2,0.05\}\)</span></li>
 <li>LoF risk variants: <span class="math inline">\(\beta \sim
-Normal(\mu=0.2, \sigma=0.2)\)</span></li>
+Normal(\mu=0.15, \sigma=0.2)\)</span></li>
 <li>Missense risk variants: <span class="math inline">\(\beta \sim
-Normal(\mu=0.2, \sigma=0.2)\)</span></li>
+Normal(\mu=0.15, \sigma=0.2)\)</span></li>
 <li>Synonymous risk variants: <span class="math inline">\(\beta \sim
-Normal(\mu=0.2, \sigma=0.2)\)</span></li>
+Normal(\mu=0.15, \sigma=0.2)\)</span></li>
 </ul>
 <pre class="r"><code>library(ACAT)
 # ACAT test: compute the p-value for each variant, then combine with ACAT
@@ -1198,28 +1300,30 @@ dataset. As shown by the figure below:</p>
 p.ACAT.genes &lt;- rep(0, N)
 p.burden.all &lt;- rep(0, N)
 p.burden.lof &lt;- rep(0, N)
-w.all &lt;- rep(1,ncol(beta.hat))
-w.lof &lt;- ifelse(C[1,]==1,1,0)
+p.burden.lof_dmg &lt;- rep(0, N)
+w.all &lt;- rep(1,ncol(beta.hat)) # Use all variants
+w.lof &lt;- ifelse(C[1,]==1,1,0) # Only use LoF variants
+w.lof_dmg &lt;- ifelse(C[1,]&lt;3,1,0) # Leave out benigh missense variant
 
 ### Estimate the proportion of risk genes and risk variants
 par.est &lt;- est.par(beta.hat, se.var, C,mu, sigma, pi.init = rep(0.1,3), delta.init = 0.5, niter=20)</code></pre>
-<pre><code>The observed marignal likelihood at 1 th iteration: 40589.34 
-The observed marignal likelihood at 2 th iteration: 40832.15 
-The observed marignal likelihood at 3 th iteration: 40918.61 
-The observed marignal likelihood at 4 th iteration: 40968.84 
-The observed marignal likelihood at 5 th iteration: 41001.49 
-The observed marignal likelihood at 6 th iteration: 41022.95 
-The observed marignal likelihood at 7 th iteration: 41037.2 
-The observed marignal likelihood at 8 th iteration: 41046.77 
-The observed marignal likelihood at 9 th iteration: 41053.25 
-The observed marignal likelihood at 10 th iteration: 41057.69 
-The observed marignal likelihood at 11 th iteration: 41060.76 
-The observed marignal likelihood at 12 th iteration: 41062.9 
-The observed marignal likelihood at 13 th iteration: 41064.41 
-The observed marignal likelihood at 14 th iteration: 41065.49 
-The observed marignal likelihood at 15 th iteration: 41066.27 
-The observed marignal likelihood at 16 th iteration: 41066.84 
-The observed marignal likelihood at 17 th iteration: 41067.27 
+<pre><code>The observed marignal likelihood at 1 th iteration: 41247.7 
+The observed marignal likelihood at 2 th iteration: 41395.58 
+The observed marignal likelihood at 3 th iteration: 41441.97 
+The observed marignal likelihood at 4 th iteration: 41460.56 
+The observed marignal likelihood at 5 th iteration: 41470.92 
+The observed marignal likelihood at 6 th iteration: 41478.11 
+The observed marignal likelihood at 7 th iteration: 41483.57 
+The observed marignal likelihood at 8 th iteration: 41487.81 
+The observed marignal likelihood at 9 th iteration: 41491.11 
+The observed marignal likelihood at 10 th iteration: 41493.69 
+The observed marignal likelihood at 11 th iteration: 41495.7 
+The observed marignal likelihood at 12 th iteration: 41497.27 
+The observed marignal likelihood at 13 th iteration: 41498.51 
+The observed marignal likelihood at 14 th iteration: 41499.48 
+The observed marignal likelihood at 15 th iteration: 41500.24 
+The observed marignal likelihood at 16 th iteration: 41500.85 
+The observed marignal likelihood at 17 th iteration: 41501.33 
 Marginal likelihood reach convergence. (increase &lt; 0.5 )</code></pre>
 <pre class="r"><code>### Testing one gene after another
 for (i in 1:N) {
@@ -1227,13 +1331,108 @@ for (i in 1:N) {
   p.ACAT.genes[i] &lt;- test.ACAT(beta.hat[i,], se.var[i,])
   p.burden.all[i] &lt;- burden.test(beta.hat[i,], se.var[i,], w.all)
   p.burden.lof[i] &lt;- burden.test(beta.hat[i,], se.var[i,], w.lof)
+  p.burden.lof_dmg[i] &lt;- burden.test(beta.hat[i,], se.var[i,], w.lof_dmg)
 }
 
 #PIP &lt;- (1-par.est$delta) / (1-par.est$delta+par.est$delta*B.genes)
 q.ACAT &lt;- p.adjust(p.ACAT.genes, method=&quot;BH&quot;)
 q.burden.all &lt;- p.adjust(p.burden.all, method=&quot;BH&quot;)
-q.burden.lof &lt;- p.adjust(p.burden.lof, method=&quot;BH&quot;)</code></pre>
+q.burden.lof &lt;- p.adjust(p.burden.lof, method=&quot;BH&quot;)
+q.burden.lof_dmg &lt;- p.adjust(p.burden.lof_dmg, method=&quot;BH&quot;)</code></pre>
 <p><img src="figure/MIRAGE_extension.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9ecb03618a4b438f9f5c2cdcd76d0aa7c8a8e5af/docs/figure/MIRAGE_extension.Rmd/unnamed-chunk-11-1.png" target="_blank">9ecb036</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-02-12
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="different-categories-of-risk-for-genes."
+class="section level3">
+<h3>Different categories of risk for genes.</h3>
+<p>Now we have two groups of genes. The first group contains 200 genes,
+30% of which are risk genes. The second group has 800 genes, 5% of which
+are risk genes.</p>
+<pre class="r scroll-300"><code>set.seed(42)
+
+# Model parameters
+N &lt;- 1000 # number of genes
+J &lt;- 100 # number of variants per gene
+delta &lt;- c(0.3, 0.05)
+pi &lt;- c(0.5, 0.2, 0.05) # percent of risk variants in each variant category
+mu &lt;- c(0.15, 0.15, 0.15) # mean effect size
+sigma &lt;- c(0.2, 0.2, 0.2) # SD of effect size
+n.samples &lt;- 20000 # sample size of association study
+gene.cat.prop &lt;- c(0.2, 0.8)
+cat.prop &lt;- c(0.05, 0.2, 0.75) # the proportion of variants in each category
+
+cat.count &lt;- J * cat.prop
+C &lt;- cbind(
+  matrix(1, nrow = N, ncol = cat.count[1]),
+  matrix(2, nrow = N, ncol = cat.count[2]),
+  matrix(3, nrow = N, ncol = cat.count[3])
+)
+AF.all &lt;- 0.001 # AF of all variants
+AF &lt;- matrix(AF.all, nrow=N, ncol=J)
+
+### For convinience, the first category of genes are before the second category of genes.
+G &lt;- rep(1:2, times=N*gene.cat.prop)
+U &lt;- rbinom(N, 1, delta[G])
+
+# Sample risk variants: Z is the matrix of variant indicators
+Z &lt;- matrix(0, nrow=N, ncol=J)
+for (i in 1:N) {
+  Z[i,] &lt;- U[i] * rbinom(n = J, size = 1, prob = pi[C[i,]])
+}
+
+# sample variant effects: true effects are beta, N times J matrix
+mu.var &lt;- matrix(mu[C], nrow=N, ncol=J) # mean of all variants based on the categories
+sigma.var &lt;- matrix(sigma[C], nrow=N, ncol=J) # variance of all variants
+beta &lt;- matrix(0, nrow = N, ncol = J) 
+idx &lt;- Z==1
+beta[idx] &lt;- rnorm(
+  n = sum(idx),
+  mean = mu.var[idx],
+  sd = sigma.var[idx]
+)
+
+# Create summary statistics
+se.var &lt;- 1/sqrt(n.samples * 2 * AF * (1-AF))
+beta.hat &lt;- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)</code></pre>
+<p>We first checked if MIRAGE will have higher power with this
+information when all parameters are known.</p>
+<p><img src="figure/MIRAGE_extension.Rmd/unnamed-chunk-13-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
