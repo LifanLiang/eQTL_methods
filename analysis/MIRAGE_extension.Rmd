@@ -20,7 +20,7 @@ Extended [MIRAGE](https://www.cell.com/ajhg/abstract/S0002-9297(25)00438-0) to t
 
 ### Generative process
 
-Essentially, a risk variant ($Z_j=1$) for a risk gene ($U_i=1$) has nonzero genetic effect, whereas other variants and genes have zero genetic effects. The genetic effects were manifested in the summary statistics as $\beta_hat$. The magnitude of genetic effects for a risk variants depends on the category (i.e. loss of function, missense, and synonymous) it is in. The category of the $j$th variant is denoted as $C_j$.
+Essentially, a risk variant ($Z_j=1$) for a risk gene ($U_i=1$) has nonzero genetic effect, whereas other variants and genes have zero genetic effects. The genetic effects were manifested in the summary statistics as $\beta_hat$. The magnitude of genetic effects for a risk variants depends on the category (i.e. loss of function, damaging missense, and benign missense) it is in. The category of the $j$th variant is denoted as $C_j$.
 
 $$
 U_i \sim Bernoulli(\delta)
@@ -35,15 +35,15 @@ $$
 
 $$
 Z_j = \begin{cases}
-1 & \beta_{ij} \sim Normal(\mu_{C_j}, \sigma_{C_j}^2) \\
+1 & \beta_{ij} \sim Normal(\mu_{C_j}, \sigma_{C_j}) \\
 0 & \beta_{ij} = 0
 \end{cases}
 $$
 
 $$
 Z_j = \begin{cases}
-1 & \hat\beta_{ij} \sim Normal(\beta_{ij},\sigma_{C_j}^2+s_{ij}^2)\\
-0 & \hat\beta_{ij} \sim Normal(0,s_{ij}^2)
+1 & \hat\beta_{ij} \sim Normal(\beta_{ij},s_{ij})\\
+0 & \hat\beta_{ij} \sim Normal(0,s_{ij})
 \end{cases}
 $$
 
@@ -54,10 +54,19 @@ set.seed(42)
 N <- 1000 # number of genes
 J <- 100 # number of variants per gene
 delta <- 0.1 # percent of risk genes
-pi <- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
-#mu <- c(0, 0, 0)
-mu <- c(0.2, 0.2, 0.2) # mean effect size
+pi <- c(0.5, 0.2, 0.05) # percent of risk variants in each variant category
+mu <- c(0.15, 0.15, 0.15) # mean effect size
 sigma <- c(0.2, 0.2, 0.2) # SD of effect size
+n.samples <- 20000 # sample size of association study
+
+# Model parameters as positive control (all methods wll have high power)
+# N <- 1000 # number of genes
+# J <- 100 # number of variants per gene
+# delta <- 0.2 # percent of risk genes
+# pi <- c(0.8, 0.3, 0.05) # percent of risk variants in each variant category
+# mu <- c(0.3, 0.2, 0.1) # mean effect size
+# sigma <- c(0.2, 0.2, 0.2) # SD of effect size
+# n.samples <- 100000 # sample size of association study
 
 # Set up the variant categories and AF
 # For each gene, the first 5% are the first category, next 20% second category, next 75% are third category 
@@ -94,7 +103,6 @@ beta[idx] <- rnorm(
 )
 
 # Create summary statistics
-n.samples <- 20000 # sample size of association study
 se.var <- 1/sqrt(n.samples * 2 * AF * (1-AF))
 beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
 ```
@@ -107,7 +115,7 @@ beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
 Starting with an easier problem, suppose that genetic parameters (i.e. $\pi$, $\sigma^2$, $s^2$) were known. We can compute the Bayes factor for the $j$th variant and the $i$th gene:
 
 $$
-B_{ij} = \dfrac{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=1,\sigma_{C_j}^2)}{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=0)}
+B_{ij} = \dfrac{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=1,\sigma_{C_j})}{P(\hat\beta_{ij},s_{ij}^2|Z_{ij}=0)}
 $$
 The Bayes factor for the gene aggregating all the corresponding variants would be:
 
@@ -305,7 +313,7 @@ est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=10, t
 
 We have checked the convergence of the marginal data likelihood, the proportion of risk genes ($\delta$), and the proportion of risk variants ($\pi_k$). 
 
-In ground truth, we set $\pi=\{0.8,0.3,0.05\}$ and $\delta=0.1$.
+In ground truth, we set $\pi=\{0.5,0.2,0.05\}$ and $\delta=0.1$.
 
 To validate the EM algorithm, the initial value was set quite different from the ground truth ($\bar\pi=\{0.1,0.1,0.1\}, \bar\delta=0.6$). The parameters has converged very close the ground truth.
 
@@ -338,10 +346,10 @@ Since burden test assumes that variants within a gene has the same effect direct
 
 * There are 20,000 samples with 1000 genes. Each genes has 100 variants.
 * Proportion of risk genes: $\delta=0.1$. Hence there are 100 risk genes.
-* Proportion of risk variants for each category: $\pi=\{0.8,0.3,0.05\}$ 
-* LoF risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
-* Missense risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
-* Synonymous risk variants: $\beta \sim Normal(\mu=0.2, \sigma=0.2)$
+* Proportion of risk variants for each category: $\pi=\{0.5,0.2,0.05\}$ 
+* LoF risk variants: $\beta \sim Normal(\mu=0.15, \sigma=0.2)$
+* Missense risk variants: $\beta \sim Normal(\mu=0.15, \sigma=0.2)$
+* Synonymous risk variants: $\beta \sim Normal(\mu=0.15, \sigma=0.2)$
 
 ```{r}
 library(ACAT)
@@ -374,8 +382,10 @@ mirage.pip <- rep(0, N)
 p.ACAT.genes <- rep(0, N)
 p.burden.all <- rep(0, N)
 p.burden.lof <- rep(0, N)
-w.all <- rep(1,ncol(beta.hat))
-w.lof <- ifelse(C[1,]==1,1,0)
+p.burden.lof_dmg <- rep(0, N)
+w.all <- rep(1,ncol(beta.hat)) # Use all variants
+w.lof <- ifelse(C[1,]==1,1,0) # Only use LoF variants
+w.lof_dmg <- ifelse(C[1,]<3,1,0) # Leave out benigh missense variant
 
 ### Estimate the proportion of risk genes and risk variants
 par.est <- est.par(beta.hat, se.var, C,mu, sigma, pi.init = rep(0.1,3), delta.init = 0.5, niter=20)
@@ -386,29 +396,116 @@ for (i in 1:N) {
   p.ACAT.genes[i] <- test.ACAT(beta.hat[i,], se.var[i,])
   p.burden.all[i] <- burden.test(beta.hat[i,], se.var[i,], w.all)
   p.burden.lof[i] <- burden.test(beta.hat[i,], se.var[i,], w.lof)
+  p.burden.lof_dmg[i] <- burden.test(beta.hat[i,], se.var[i,], w.lof_dmg)
 }
 
 #PIP <- (1-par.est$delta) / (1-par.est$delta+par.est$delta*B.genes)
 q.ACAT <- p.adjust(p.ACAT.genes, method="BH")
 q.burden.all <- p.adjust(p.burden.all, method="BH")
 q.burden.lof <- p.adjust(p.burden.lof, method="BH")
+q.burden.lof_dmg <- p.adjust(p.burden.lof_dmg, method="BH")
 ```
 
 ```{r,echo=F}
 library(ggplot2)
 
-dat <- data.frame(count=c(sum((mirage.pip>0.9)*U),sum((mirage.pip>0.9)*(1-U)),
-                          sum((q.ACAT<0.1)*U),sum((q.ACAT<0.1)*(1-U)),
-                          sum((q.burden.all<0.1)*U),sum((q.burden.all<0.1)*(1-U)),
-                          sum((q.burden.lof<0.1)*U),sum((q.burden.lof<0.1)*(1-U))),
-           method=rep(c("MIRAGE","ACAT","burden_all","burden_LoF"),each=2),
-           true_positive=rep(c(T,F),4))
+thres.fdr <- 0.2
+thres.pip <- 0.8
+
+dat <- data.frame(count=c(sum((mirage.pip>thres.pip)*U),sum((mirage.pip>thres.pip)*(1-U)),
+                          sum((q.ACAT<thres.fdr)*U),sum((q.ACAT<thres.fdr)*(1-U)),
+                          sum((q.burden.all<thres.fdr)*U),sum((q.burden.all<thres.fdr)*(1-U)),
+                          sum((q.burden.lof<thres.fdr)*U),sum((q.burden.lof<thres.fdr)*(1-U)),
+                          sum((q.burden.lof_dmg<thres.fdr)*U),sum((q.burden.lof_dmg<thres.fdr)*(1-U))),
+           method=rep(c("MIRAGE","ACAT","burden_all","burden_LoF","burden_LoF+damaging"),each=2),
+           true_positive=rep(c(T,F),5))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
-  ylab("# of significant genes at FDR/PIP < 10%") + 
+  ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=0.5))
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   
+```
+
+
+### Different categories of risk for genes.
+
+Now we have two groups of genes. The first group contains 200 genes, 30% of which are risk genes. The second group has 800 genes, 5% of which are risk genes. 
+
+```{r, class.source="scroll-300"}
+set.seed(42)
+
+# Model parameters
+N <- 1000 # number of genes
+J <- 100 # number of variants per gene
+delta <- c(0.3, 0.05)
+pi <- c(0.5, 0.2, 0.05) # percent of risk variants in each variant category
+mu <- c(0.15, 0.15, 0.15) # mean effect size
+sigma <- c(0.2, 0.2, 0.2) # SD of effect size
+n.samples <- 20000 # sample size of association study
+gene.cat.prop <- c(0.2, 0.8)
+cat.prop <- c(0.05, 0.2, 0.75) # the proportion of variants in each category
+
+cat.count <- J * cat.prop
+C <- cbind(
+  matrix(1, nrow = N, ncol = cat.count[1]),
+  matrix(2, nrow = N, ncol = cat.count[2]),
+  matrix(3, nrow = N, ncol = cat.count[3])
+)
+AF.all <- 0.001 # AF of all variants
+AF <- matrix(AF.all, nrow=N, ncol=J)
+
+### For convinience, the first category of genes are before the second category of genes.
+G <- rep(1:2, times=N*gene.cat.prop)
+U <- rbinom(N, 1, delta[G])
+
+# Sample risk variants: Z is the matrix of variant indicators
+Z <- matrix(0, nrow=N, ncol=J)
+for (i in 1:N) {
+  Z[i,] <- U[i] * rbinom(n = J, size = 1, prob = pi[C[i,]])
+}
+
+# sample variant effects: true effects are beta, N times J matrix
+mu.var <- matrix(mu[C], nrow=N, ncol=J) # mean of all variants based on the categories
+sigma.var <- matrix(sigma[C], nrow=N, ncol=J) # variance of all variants
+beta <- matrix(0, nrow = N, ncol = J) 
+idx <- Z==1
+beta[idx] <- rnorm(
+  n = sum(idx),
+  mean = mu.var[idx],
+  sd = sigma.var[idx]
+)
+
+# Create summary statistics
+se.var <- 1/sqrt(n.samples * 2 * AF * (1-AF))
+beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
+
+```
+
+We first checked if MIRAGE will have higher power with this information when all parameters are known.
+
+```{r, echo=F}
+mirage.pip.uniform <- rep(0, N)
+mirage.pip.genegroup <- rep(0, N)
+
+for (i in 1:N) {
+  mirage.pip.uniform[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi, mu, sigma, delta=0.1)$post.gene
+  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi, mu, sigma, delta=delta[G[i]])$post.gene
+}
+
+thres.pip <- 0.8
+
+dat <- data.frame(count=c(sum((mirage.pip.uniform>thres.pip)*U),sum((mirage.pip.uniform>thres.pip)*(1-U)),
+                          sum((mirage.pip.genegroup>thres.pip)*U),sum((mirage.pip.genegroup>thres.pip)*(1-U))),
+           method=rep(c("Universal 10%","Gene group informed"),each=2),
+           true_positive=rep(c(T,F),2))
+ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
+  geom_bar(stat="identity", position = position_stack()) + 
+  ylab(paste0("# of significant genes at PIP>",thres.pip*100,"%")) + 
+  theme_bw() +
+  labs(title = "MIRAGE with different gene priors",
+       x = NULL) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
 
