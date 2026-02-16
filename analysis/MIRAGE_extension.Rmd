@@ -606,7 +606,7 @@ plot(res.uniform$delta.trac, type="l", ylab="Gene priors", xlab="EM iteration", 
 ```
 
 
-Using the estimated gene priors and variant priors,
+Using the estimated gene priors and variant priors, similar power increase was observed.
 
 ```{r, echo=F}
 mirage.pip.uniform <- rep(0, N)
@@ -614,7 +614,7 @@ mirage.pip.genegroup <- rep(0, N)
 
 for (i in 1:N) {
   mirage.pip.uniform[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], res.uniform$pi, mu, sigma, delta=res.uniform$delta)$post.gene
-  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], res$pi, mu, sigma, delta=res$delta)$post.gene
+  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], res$pi, mu, sigma, delta=res$delta[G[i]])$post.gene
 }
 
 
