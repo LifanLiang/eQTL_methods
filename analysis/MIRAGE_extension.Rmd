@@ -522,7 +522,7 @@ dat <- data.frame(count=c(sum((mirage.pip.uniform>thres.pip)*U),sum((mirage.pip.
            true_positive=rep(c(T,F),6))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
-  ylab(paste0("# of significant genes at PIP>",thres.pip*100,"%")) + 
+  ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   theme_bw() +
   labs(title = "MIRAGE with different gene priors",
        x = NULL) +
@@ -620,11 +620,10 @@ for (i in 1:N) {
 
 ```
 
-Compared to uniform gene priors, categorical gene priors have higher powers and also more false positives.
 
 ```{r, echo=F}
 thres.pip <- 0.8
-thres.fdr < 0.2
+thres.fdr <- 0.2
 
 dat[1:4,1] <- c(sum((mirage.pip.uniform>thres.pip)*U),
                 sum((mirage.pip.uniform>thres.pip)*(1-U)),
@@ -632,7 +631,7 @@ dat[1:4,1] <- c(sum((mirage.pip.uniform>thres.pip)*U),
                 sum((mirage.pip.genegroup>thres.pip)*(1-U)))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
-  ylab(paste0("# of significant genes at PIP>",thres.pip*100,"%")) + 
+  ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   theme_bw() +
   labs(title = "MIRAGE with different gene priors",
        x = NULL) +
