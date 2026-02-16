@@ -433,7 +433,7 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
 Now we have two groups of genes. The first group contains 200 genes, 30% of which are risk genes. The second group has 800 genes, 5% of which are risk genes. 
 
 ```{r, class.source="scroll-300"}
-set.seed(42)
+set.seed(1234)
 
 # Model parameters
 N <- 1000 # number of genes
@@ -491,14 +491,35 @@ mirage.pip.genegroup <- rep(0, N)
 for (i in 1:N) {
   mirage.pip.uniform[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi, mu, sigma, delta=0.1)$post.gene
   mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi, mu, sigma, delta=delta[G[i]])$post.gene
+  p.ACAT.genes[i] <- test.ACAT(beta.hat[i,], se.var[i,])
+  p.burden.all[i] <- burden.test(beta.hat[i,], se.var[i,], w.all)
+  p.burden.lof[i] <- burden.test(beta.hat[i,], se.var[i,], w.lof)
+  p.burden.lof_dmg[i] <- burden.test(beta.hat[i,], se.var[i,], w.lof_dmg)
 }
 
+#PIP <- (1-par.est$delta) / (1-par.est$delta+par.est$delta*B.genes)
+q.ACAT <- p.adjust(p.ACAT.genes, method="BH")
+q.burden.all <- p.adjust(p.burden.all, method="BH")
+q.burden.lof <- p.adjust(p.burden.lof, method="BH")
+q.burden.lof_dmg <- p.adjust(p.burden.lof_dmg, method="BH")
+
+
+```
+
+As shown by the figure below, MIRAGE has higher power with the categorical gene priors ("MIRAGE_gene_group"), compared to the uniform gene prior ("MIRAGE_uniform").
+
+```{r, echo=F}
 thres.pip <- 0.8
+thres.fdr < 0.2
 
 dat <- data.frame(count=c(sum((mirage.pip.uniform>thres.pip)*U),sum((mirage.pip.uniform>thres.pip)*(1-U)),
-                          sum((mirage.pip.genegroup>thres.pip)*U),sum((mirage.pip.genegroup>thres.pip)*(1-U))),
-           method=rep(c("Universal 10%","Gene group informed"),each=2),
-           true_positive=rep(c(T,F),2))
+                          sum((mirage.pip.genegroup>thres.pip)*U),sum((mirage.pip.genegroup>thres.pip)*(1-U)),
+                          sum((q.ACAT<thres.fdr)*U),sum((q.ACAT<thres.fdr)*(1-U)),
+                          sum((q.burden.all<thres.fdr)*U),sum((q.burden.all<thres.fdr)*(1-U)),
+                          sum((q.burden.lof<thres.fdr)*U),sum((q.burden.lof<thres.fdr)*(1-U)),
+                          sum((q.burden.lof_dmg<thres.fdr)*U),sum((q.burden.lof_dmg<thres.fdr)*(1-U))),
+           method=rep(c("MIRAGE_uniform","MIRANGE_gene_group","ACAT","burden_all","burden_LoF","burden_LoF+damaging"),each=2),
+           true_positive=rep(c(T,F),6))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
   ylab(paste0("# of significant genes at PIP>",thres.pip*100,"%")) + 
@@ -508,6 +529,112 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
+Then we modified the EM algorithm to estimate priors for different categories of genes. And check the estimation accuracy. Gene priors converged close to ground truth.
+
+```{r, class.source="scroll-300"}
+### Modify delta into a vector of probabilities
+### And add a membership vector for genes (G)
+### Update the computation for delta
+est.par.gene_prior <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, G, niter=10, tol=0.5) {
+  ngenes <- nrow(beta.hat)
+  nvariants <- ncol(beta.hat)
+  ncat <- length(pi.init)
+  
+  # parameters to be updated
+  pi <- pi.init
+  delta <- delta.init
+  
+  delta.trac <- matrix(nrow=niter, ncol=length(delta))
+  pi.trac <- matrix(nrow=niter, ncol=ncat)
+  data.lik <- numeric(niter)
+  
+  # repeat certain number of iterations in EM
+  for (iter in 1:niter) {
+    delta.trac[iter,] <- delta
+    pi.trac[iter,] <- pi
+    # make inference on the genes given current parameters
+    post.genes <- rep(0, ngenes)
+    #post.variants <- matrix(0, nrow=ngenes, ncol=nvariants)
+    post.cat.risk <- matrix(0, nrow=ngenes, ncol=ncat)
+    post.cat.count <- matrix(0, nrow=ngenes, ncol=ncat)
+    marg.lik <- 0
+    for (i in 1:ngenes) {
+      result <- comp.gene(beta.hat[i,], se[i,], C[i,], pi, mu, sigma, delta[G[i]])
+      post.genes[i] <- result$post.gene
+      #post.variants[i,] <- result$post.var
+      post.cat.risk[i,] <- tapply(result$post.var, C[i,], sum)
+      # Assuming category in the order of 1,2,,...,K ca
+      post.cat.count[i,] <- as.numeric(table(factor(C[i,], levels = 1:ncat))) 
+      
+      marg.lik <- marg.lik + result$ll.gene
+    } 
+    
+    data.lik[iter] <- marg.lik
+    # update the parameters
+    delta.new <- as.numeric(tapply(post.genes, G, mean))
+    #cat(dim(post.cat.risk), length)
+    pi.new <- colSums(post.cat.risk) / as.numeric(post.genes %*% post.cat.count)
+    
+    delta <- delta.new
+    pi <- pi.new
+    
+    cat("The observed marignal likelihood at", iter, "th iteration:", marg.lik, "\n")
+    
+    if(iter>1) {
+      diff <- data.lik[iter] - data.lik[iter-1]
+      if(diff<tol) {
+        cat("Marginal likelihood reach convergence. (increase <",tol,")")
+        break
+      }
+    }
+  }
+  
+  result <- list(delta = delta, pi = pi, lik.tract = data.lik, pi.trac = pi.trac, delta.trac = delta.trac)
+  return(result)
+}
+res <- est.par.gene_prior(beta.hat, se.var, C, mu, sigma, pi.init=rep(0.1,3), delta.init=rep(0.1,2), G=G, niter=20, tol=0.5)
+```
+
+```{r,echo=F}
+
+matplot(res$delta.trac[1:17,], type="l", ylab="Gene priors", xlab="EM iteration", main="Categorical gene priors")
+```
+
+```{r}
+res.uniform <- est.par(beta.hat, se.var, C, mu, sigma, pi.init=rep(0.1,3), delta.init=0.2, niter=20, tol=0.)
+plot(res.uniform$delta.trac, type="l", ylab="Gene priors", xlab="EM iteration", main="Uniform gene priors")
+```
 
 
+Using the estimated gene priors and variant priors,
 
+```{r, echo=F}
+mirage.pip.uniform <- rep(0, N)
+mirage.pip.genegroup <- rep(0, N)
+
+for (i in 1:N) {
+  mirage.pip.uniform[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], res.uniform$pi, mu, sigma, delta=res.uniform$delta)$post.gene
+  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], res$pi, mu, sigma, delta=res$delta)$post.gene
+}
+
+
+```
+
+Compared to uniform gene priors, categorical gene priors have higher powers and also more false positives.
+
+```{r, echo=F}
+thres.pip <- 0.8
+thres.fdr < 0.2
+
+dat[1:4,1] <- c(sum((mirage.pip.uniform>thres.pip)*U),
+                sum((mirage.pip.uniform>thres.pip)*(1-U)),
+                sum((mirage.pip.genegroup>thres.pip)*U),
+                sum((mirage.pip.genegroup>thres.pip)*(1-U)))
+ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
+  geom_bar(stat="identity", position = position_stack()) + 
+  ylab(paste0("# of significant genes at PIP>",thres.pip*100,"%")) + 
+  theme_bw() +
+  labs(title = "MIRAGE with different gene priors",
+       x = NULL) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
