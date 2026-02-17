@@ -427,7 +427,9 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
 
 ### Different categories of risk for genes.
 
-Now we have two groups of genes. The first group contains 200 genes, 30% of which are risk genes. The second group has 800 genes, 5% of which are risk genes. 
+Now we have two groups of genes. The first group contains 100 genes, 50% of which are risk genes. The second group has 900 genes, 5.56% of which are risk genes. In total, there are 103 genes in our simulation data set. 
+
+Please note that the dataset used in this section is identical to the one in the previous section. The only difference is that the previous section ignored the category of genes and only considered the total proportion of risk genes.
 
 We first checked if MIRAGE will have higher power with this information when all parameters are known.
 
