@@ -408,6 +408,12 @@ dat <- data.frame(count=c(sum((mirage.pip>thres.pip)*U),sum((mirage.pip>thres.pi
            true_positive=rep(c(T,F),5))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
+  # Adding the labels
+  geom_text(
+    aes(label = count), 
+    position = position_stack(vjust = 0.5), # Centers the text inside each stack
+    size = 3.5                              # Adjust size as needed
+  ) +
   ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   geom_hline(yintercept = sum(U==1), color="red", linetype="dashed") +
   annotate(
@@ -471,6 +477,12 @@ dat <- data.frame(count=c(sum((mirage.pip.uniform>thres.pip)*U),sum((mirage.pip.
            true_positive=rep(c(T,F),6))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
+  # Adding the labels
+  geom_text(
+    aes(label = count), 
+    position = position_stack(vjust = 0.5), # Centers the text inside each stack
+    size = 3.5                              # Adjust size as needed
+  ) +
   ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   geom_hline(yintercept = sum(U==1), color="red", linetype="dashed") +
   annotate(
@@ -584,6 +596,12 @@ dat[1:4,1] <- c(sum((mirage.pip.uniform>thres.pip)*U),
                 sum((mirage.pip.genegroup>thres.pip)*(1-U)))
 ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   geom_bar(stat="identity", position = position_stack()) + 
+  # Adding the labels
+  geom_text(
+    aes(label = count), 
+    position = position_stack(vjust = 0.5), # Centers the text inside each stack
+    size = 3.5                              # Adjust size as needed
+  ) +
   ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
   geom_hline(yintercept = sum(U==1), color="red", linetype="dashed") +
   annotate(
