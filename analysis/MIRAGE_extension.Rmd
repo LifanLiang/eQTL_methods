@@ -329,6 +329,8 @@ matplot(1:nrow(res$pi.trac), res$pi.trac, type="l", ylab="Risk proportion  for d
 
 ## Simulation testing performance 
 
+### Basic simulation setting with uniform gene priors
+
 We compared our method with ACAT and burden test on the simulated dataset. For the burden test, we tried two approach: (1) applied to all variants in the three categories; (2) only applied to variants in the LoF category.
 
 Since burden test assumes that variants within a gene has the same effect direction, we set up the genetic parametrs $\mu$ to be positive. Specifically:
