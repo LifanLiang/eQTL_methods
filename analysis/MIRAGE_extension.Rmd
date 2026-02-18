@@ -18,7 +18,7 @@ editor_options:
 
 Extended [MIRAGE](https://www.cell.com/ajhg/abstract/S0002-9297(25)00438-0) to test rare variants from summary statistics of linear regression. 
 
-### Generative process
+## Generative process
 
 Essentially, a risk variant ($Z_j=1$) for a risk gene ($U_i=1$) has nonzero genetic effect, whereas other variants and genes have zero genetic effects. The genetic effects were manifested in the summary statistics as $\beta_hat$. The magnitude of genetic effects for a risk variants depends on the category (i.e. loss of function, damaging missense, and benign missense) it is in. The category of the $j$th variant is denoted as $C_j$.
 
@@ -99,7 +99,7 @@ beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
 
 
 
-### Model inference
+## Model inference
 
 Starting with an easier problem, suppose that genetic parameters (i.e. $\pi$, $\sigma^2$, $s^2$) were known. We can compute the Bayes factor for the $j$th variant and the $i$th gene:
 
@@ -298,7 +298,7 @@ est.par <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=10, t
 ```
 
 
-#### Diagnostics of the EM algorithm
+### Diagnostics of the EM algorithm
 
 We have checked the convergence of the marginal data likelihood, the proportion of risk genes ($\delta$), and the proportion of risk variants ($\pi_k$). 
 
@@ -327,7 +327,7 @@ points(1:sum(res$lik.tract!=0), res$delta.trac[res$lik.tract!=0], pch=20, col="b
 matplot(1:nrow(res$pi.trac), res$pi.trac, type="l", ylab="Risk proportion  for different category", xlab="EM iterations", ylim=c(0,1))
 ```
 
-### Simulation testing performance 
+## Simulation testing performance 
 
 We compared our method with ACAT and burden test on the simulated dataset. For the burden test, we tried two approach: (1) applied to all variants in the three categories; (2) only applied to variants in the LoF category.
 
@@ -431,7 +431,7 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
 ```
 
 
-### Different categories of risk for genes.
+### Two categories of risk for genes.
 
 Now we have two groups of genes. The first group contains 100 genes, 50% of which are risk genes. The second group has 900 genes, 5.56% of which are risk genes. In total, there are 103 genes in our simulation data set. 
 
@@ -619,11 +619,13 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
-#### Three groups of genes
+### Three groups of genes
 
 We further tried a different setting where genes fall in three categories: (1) 50 genes with 50% chance being a risk genes; (2) 275 genes with 15% chance; (3) 675 genes with 5% chance. Assuming that all parameters are known. MIRAGE with gene group priors found 49 genes, where as MIRANGE with the uniform prior found 44 genes.
 
 ```{r, class.source="scroll-300"}
+### Generate data with the three gene categories
+
 set.seed(42)
 
 # Model parameters
@@ -674,6 +676,8 @@ beta.hat <- matrix(rnorm(n=N*J, mean=beta, sd=se.var), nrow=N, ncol=J)
 
 
 ```{r,message=F,warning=F, class.source="scroll-300"}
+### 
+
 mirage.pip <- rep(0, N)
 p.ACAT.genes <- rep(0, N)
 p.burden.all <- rep(0, N)
@@ -735,6 +739,7 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
+Estimating gene priors and variant priors with EM results in smaller power gain:
 
 ```{r, class.source="scroll-300"}
 res.uniform <- est.par(beta.hat, se.var, C, mu, sigma, pi.init=rep(0.1,3), delta.init=0.1, niter=20, tol=0.5)
@@ -742,7 +747,7 @@ res.genecat <- est.par.gene_prior(beta.hat, se.var, C, mu, sigma, pi.init=rep(0.
 
 for (i in 1:N) {
   mirage.pip.uniform[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi=res.uniform$pi, mu, sigma, delta=res.uniform$delta)$post.gene
-  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi=res.genecat$pi, mu, sigma, delta=res.genecat$delta)$post.gene
+  mirage.pip.genegroup[i] <- comp.gene(beta.hat[i,], se.var[i,], C[i,], pi=res.genecat$pi, mu, sigma, delta=res.genecat$delta[G[i]])$post.gene
 }
 
 thres.pip <- 0.8
