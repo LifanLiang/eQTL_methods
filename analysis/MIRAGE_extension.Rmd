@@ -398,7 +398,7 @@ q.burden.lof_dmg <- p.adjust(p.burden.lof_dmg, method="BH")
 ```{r,echo=F}
 library(ggplot2)
 
-thres.fdr <- 0.2
+thres.fdr <- 0.1
 thres.pip <- 0.8
 
 dat <- data.frame(count=c(sum((mirage.pip>thres.pip)*U),sum((mirage.pip>thres.pip)*(1-U)),
@@ -467,38 +467,44 @@ As shown by the figure below, MIRAGE has higher power with the categorical gene 
 
 ```{r, echo=F}
 thres.pip <- 0.8
-thres.fdr < 0.2
+thres.fdr <- 0.1
 
 dat <- data.frame(count=c(sum((mirage.pip.uniform>thres.pip)*U),sum((mirage.pip.uniform>thres.pip)*(1-U)),
                           sum((mirage.pip.genegroup>thres.pip)*U),sum((mirage.pip.genegroup>thres.pip)*(1-U)),
                           sum((q.ACAT<thres.fdr)*U),sum((q.ACAT<thres.fdr)*(1-U)),
-                          sum((q.burden.all<thres.fdr)*U),sum((q.burden.all<thres.fdr)*(1-U)),
+                          #sum((q.burden.all<thres.fdr)*U),sum((q.burden.all<thres.fdr)*(1-U)),
                           sum((q.burden.lof<thres.fdr)*U),sum((q.burden.lof<thres.fdr)*(1-U)),
                           sum((q.burden.lof_dmg<thres.fdr)*U),sum((q.burden.lof_dmg<thres.fdr)*(1-U))),
-           method=rep(c("MIRAGE_uniform","MIRAGE_gene_group","ACAT","burden_all","burden_LoF","burden_LoF+damaging"),each=2),
-           true_positive=rep(c(T,F),6))
-ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
+           method=factor(rep(c("S-MIRAGE","S-MIRAGE-prior","ACAT","Burden LoF","Burden"),each=2), levels=c("Burden LoF", "Burden", "ACAT", "S-MIRAGE", "S-MIRAGE-prior")),
+           risk_gene=rep(c("True","False"),5))
+ggplot(dat, aes(x=method,y=count,fill=risk_gene)) +
   geom_bar(stat="identity", position = position_stack()) + 
   # Adding the labels
   geom_text(
     aes(label = count), 
     position = position_stack(vjust = 0.5), # Centers the text inside each stack
-    size = 3.5                              # Adjust size as needed
+    size = 5                             # Adjust size as needed
   ) +
-  ylab(paste0("# of significant genes at FDR<",thres.fdr*100,"% or PIP>",thres.pip*100,"%")) + 
-  geom_hline(yintercept = sum(U==1), color="red", linetype="dashed") +
-  annotate(
-    "text", 
-    x = 1,                          # Adjust this to move text left/right
-    y = sum(U==1),                  # Matches the line height
-    label = "# of risk genes in ground truth", 
-    vjust = -0.5,                   # Offsets text slightly above the line
-    hjust = 0,                      # Aligns text to the left of the 'x' point
-    color = "red"
-  ) +
-  labs(title = "MIRAGE with different gene priors") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  ylab("Power (%)") + 
+  xlab(NULL) +
+  #geom_hline(yintercept = sum(U==1), color="red", linetype="dashed") +
+  # annotate(
+  #   "text", 
+  #   x = 1,                          # Adjust this to move text left/right
+  #   y = sum(U==1),                  # Matches the line height
+  #   label = "# of risk genes in ground truth", 
+  #   vjust = -0.5,                   # Offsets text slightly above the line
+  #   hjust = 0,                      # Aligns text to the left of the 'x' point
+  #   color = "red"
+  # ) +
+  # labs(title = "MIRAGE with different gene priors") +
+  labs(fill = "Risk gene") +
+  theme_classic(base_size=16) +
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
+    legend.title = element_text(size = 14),
+    axis.title = element_text(size = 16)
+  )
 ```
 
 Then we modified the EM algorithm to estimate priors for different categories of genes. And check the estimation accuracy. Gene priors converged close to ground truth.
@@ -596,7 +602,7 @@ dat[1:4,1] <- c(sum((mirage.pip.uniform>thres.pip)*U),
                 sum((mirage.pip.uniform>thres.pip)*(1-U)),
                 sum((mirage.pip.genegroup>thres.pip)*U),
                 sum((mirage.pip.genegroup>thres.pip)*(1-U)))
-ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
+ggplot(dat, aes(x=method,y=count,fill=risk_gene)) +
   geom_bar(stat="identity", position = position_stack()) + 
   # Adding the labels
   geom_text(
@@ -784,3 +790,328 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
+
+## Application to real data
+
+### Preprocessing of variant level summary statistics
+
+We applied MIRAGE to [AstraZeneca](https://doi.org/10.1038/s41586-021-03855-y). We chose the trait of LDL cholesterol from UK BioBank 470 (v5) and the summary statistics of the genotypic model (dominant model and recessive model were also tested). Variants with over 0.5% MAF were removed. The publicly available summary statistics have already filtered variants with P value > 0.01. Hence there are 3648 variants, related to 3036 genes, for our analysis. The count of variants for each category are shown below:
+
+```{r,echo=F}
+vl <- read.csv("data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv")
+vl1 <- vl[vl$Model=="genotypic",]
+vl2 <- vl1[vl1$AAF<5e-3,]
+table(vl2$Consequence.type)
+```
+
+They are divided into four categories according to potential functional impact: (1) high impact (LoF); (2) moderate impact (missense); (3) low impact (synonymous); (4) modifier (regulatory variants such as UTR variant, splice region).
+
+```{r}
+library(dplyr)
+library(stringr)
+
+vl3 <- vl2 %>%
+    mutate(impact_tier = case_when(
+      # Tier 1: High Impact (Loss of Function)
+      str_detect(Consequence.type, "stop_gained|frameshift|splice_acceptor|splice_donor|start_lost|stop_lost") ~ "High",
+      
+      # Tier 2: Moderate Impact (Protein altering)
+      str_detect(Consequence.type, "missense|inframe_deletion|inframe_insertion") ~ "Moderate",
+      
+      # Tier 3: Modifier/Regulatory (UTR & Splicing regions)
+      str_detect(Consequence.type, "UTR|splice_region|non_coding_transcript_exon") ~ "Modifier",
+      
+      # Tier 4: Low Impact (Synonymous)
+      str_detect(Consequence.type, "synonymous|stop_retained") ~ "Low",
+      
+      TRUE ~ "Unknown"
+    ))
+
+
+table(vl3$impact_tier)
+```
+
+```{r}
+summary_data <- aggregate(vl3$p.value<1.37e-5, list(vl3$impact_tier), mean)
+colnames(summary_data) <- c("Group","Value")
+# Sort the Factor levels by Value so bars appear in descending order
+summary_data$Group <- factor(summary_data$Group, 
+                             levels = summary_data$Group[order(-summary_data$Value)])
+
+# Create the plot
+ggplot(summary_data, aes(x = Group, y = Value, fill = Group)) +
+  geom_bar(stat = "identity", width = 0.7, color = "black") +
+  theme_minimal() +
+  labs(
+    title = "Proportion of Risk Variants (P<1.37e-5)",
+    y = "Proportion",
+    x = "Impact Category"
+  ) +
+  scale_fill_manual(values = c("High" = "#d7191c", "Moderate" = "#fdae61", 
+                               "Modifier" = "#abdda4", "Low" = "#2b83ba")) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(size = 12)
+  )
+```
+
+Most genes (2567) only have one associated variant. Below is the distribution of the count of variants per gene.
+
+```{r,echo=F}
+table(table(vl3$Gene))
+```
+
+### Estimation of genetic parameters
+
+We first estimated the measurement error ($s^2$):
+
+$$
+\hat s^2 = \dfrac{Var(\epsilon)}{N\cdot Var(G)}
+$$
+
+where $\epsilon$ is the residual of phenotype after regressing the variant. Since the sample size ($N$) is known and $Var(G)$ can be derived from allelic frequency. The only unknown variable is $\epsilon$. Given that heritability is low, we can approximate $Var(\epsilon)$ with $Var(Y)$. Still, the phenotype is not normalized with variance one in the test. We need to estimate $Var(Y)$ by regression the actual standard error against the reciprocate of $N\cdot Var(G)$.
+
+We took variants with P>8e-3 as the null set. The figure below shows a strong linear trend between $\hat s$ and $\sqrt{\dfrac{1}{N\cdot Var(G)}}$
+
+```{r}
+vl.null <- vl3[vl3$p.value>8e-3,]
+inverse.G.square <- 1/sqrt(vl.null$No..samples*vl.null$AAF*(1-vl.null$AAF))
+observed.se <- vl.null$Effect.size.standard.error
+plot(inverse.G.square , observed.se, pch=20)
+```
+
+```{r}
+sd.Y <- summary(lm(observed.se~inverse.G.square+0))$coefficients[1]
+```
+
+For the trait of LDL-C, the estimated $sd(Y)$ is 0.66742. This value will be used to estimate $S^2$ for all variants.
+
+Then we estimated the $\mu$ and $\sigma$ for risk variants across all the four categories. We assumed that risk variants have the same genetic parameters regardless of the categories. Essentially, we have samples of $\hat\beta$ of risk variants from a Normal distribution:
+
+$$
+\hat\beta_i \sim Normal(\mu,\sigma^2+s_i^2)
+$$
+
+Given $\hat\beta_i$ and $s_i^2$, $\hat\mu$ would be the average of $\hat\beta$ weighted by the inverse of $\sigma^2+s_i^2$. The estimator for $\sigma^2$ is simply the Method of Moment: subtracting $Var(\hat\beta)$ by the average of $s_i$. We used 41 rare variants with P value over the Bonferroni threshold (1.37e-5) as the true risk variants to estimate $\mu$ and $\sigma$.
+
+REML of $\sigma^2$ may be more accurate, but it relies on $\hat\mu$. In the future, we may adopt an iterative process to converge on the estimate of $\mu$ and $\sigma$.
+
+
+```{r}
+vl.sig <- vl3[vl3$p.value<1.37e-5,]
+sig.beta <- vl.sig$Effect.size
+var.Y <- sd.Y^2
+sig.se2 <- var.Y/(vl.sig$No..samples*vl.sig$AAF*(1-vl.sig$AAF)) # Squared
+
+sigma2 <- pmax(0, var(sig.beta) - mean(sig.se2))
+w <- 1 / (sigma2 + sig.se2)
+mu <- weighted.mean(sig.beta, w)
+```
+
+$$
+\hat\mu = -0.174,  \sigma^2=0.426
+$$
+
+
+### Estimation of risk proportion for genes and variant categories
+
+We used EM algorithm to estimate the risk proportions. Because the summary statistics has been filtered, observed $\hat\beta$ was biased towards large magnitude (Winner's curse?). We need to take that into account by estimating the truncated likelihood for the null (L0) and alternative (L1)
+
+```{r, class.source="scroll-300"}
+### Modify EM algorithm above so that each gene can have different numbers of variants.
+### Beta.hat, se, and C becomes a list. Each element (gene) contains a vector.
+est.par.list <- function(beta.hat, se, C, mu, sigma, pi.init, delta.init, niter=10, tol=0.5) {
+  ngenes <- length(beta.hat)
+  nvariants <- sapply(beta.hat, length)
+  ncat <- length(pi.init)
+  
+  # parameters to be updated
+  pi <- pi.init
+  delta <- delta.init
+  
+  delta.trac <- numeric(niter)
+  pi.trac <- matrix(nrow=niter, ncol=ncat)
+  data.lik <- numeric(niter)
+  
+  # repeat certain number of iterations in EM
+  for (iter in 1:niter) {
+    delta.trac[iter] <- delta
+    pi.trac[iter,] <- pi
+    # make inference on the genes given current parameters
+    post.genes <- rep(0, ngenes)
+    names(post.genes) <- names(beta.hat)
+    #post.variants <- matrix(0, nrow=ngenes, ncol=nvariants)
+    post.cat.risk <- matrix(0, nrow=ngenes, ncol=ncat)
+    post.cat.count <- matrix(0, nrow=ngenes, ncol=ncat)
+    rownames(post.cat.risk) <- names(beta.hat)
+    rownames(post.cat.count) <- names(beta.hat)
+    colnames(post.cat.risk) <- levels(C[[1]]) # Expect each element of C to be a factor
+    colnames(post.cat.count) <- levels(C[[1]])
+    marg.lik <- 0
+    for (n in names(beta.hat)) {
+      result <- comp.gene.trunc(beta.hat[[n]], se[[n]], C[[n]], pi, mu, sigma, delta)
+      post.genes[n] <- result$post.gene
+      #post.variants[i,] <- result$post.var
+      post.cat.risk[n,] <- tapply(result$post.var, C[[n]], sum)
+      # Assuming category in the order of 1,2,,...,K ca
+      post.cat.count[n,] <- as.numeric(table(C[[n]])) 
+      
+      marg.lik <- marg.lik + result$ll.gene
+    } 
+    data.lik[iter] <- marg.lik
+    # update the parameters
+    delta.new <- sum(post.genes) / ngenes
+    #cat(dim(post.cat.risk), length)
+    pi.new <- colSums(post.cat.risk,na.rm = T) / as.numeric(post.genes %*% post.cat.count)
+    
+    delta <- delta.new
+    pi <- pi.new
+    
+    cat("The observed marignal likelihood at", iter, "th iteration:", marg.lik, "\n")
+    
+    if(iter>1) {
+      diff <- data.lik[iter] - data.lik[iter-1]
+      if(diff<tol) {
+        cat("Marginal likelihood reach convergence. (increase <",tol,")")
+        break
+      }
+    }
+  }
+  
+  result <- list(delta = delta, pi = pi, lik.tract = data.lik, pi.trac = pi.trac, delta.trac = delta.trac)
+  return(result)
+}
+
+comp.gene.trunc <- function(beta.hat, se, C, pi, mu, sigma, delta=0.1) {
+  # The Z-score threshold for P < 0.01 is approx 2.5758
+  z_thresh <- 2.5758 
+  
+  # --- 1. Compute original Log-Likelihoods ---
+  sd_risk <- sqrt(sigma[C]^2 + se^2)
+  l1_raw <- dnorm(beta.hat, mean=mu[C], sd=sd_risk, log=TRUE)
+  l0_raw <- dnorm(beta.hat, mean=0, sd=se, log=TRUE)
+  
+  # --- 2. Calculate survival probabilities (Normalizing Constants) ---
+  # Probability Null survives filter: exactly 0.01
+  prob_survive_null <- 0.01
+  
+  # Probability Risk survives filter: 
+  # 1 - P(variant falls inside the "boring" [-2.576*se, +2.576*se] window)
+  upper_bound <- z_thresh * se
+  lower_bound <- -z_thresh * se
+  prob_inside <- pnorm(upper_bound, mean=mu[C], sd=sd_risk) - 
+                 pnorm(lower_bound, mean=mu[C], sd=sd_risk)
+  prob_survive_risk <- 1 - prob_inside
+  
+  # --- 3. Compute Truncated Log-Likelihoods ---
+  # log(L / P_survive) = log(L) - log(P_survive)
+  l1 <- l1_raw - log(prob_survive_risk)
+  l0 <- l0_raw - log(prob_survive_null)
+    
+  # BF of a variant
+  B <- exp(l1 - l0)
+  
+  # compute BF of the gene
+  B.gene <- prod(1 - pi[C] + pi[C]*B)
+  
+  # compute the posterior of the gene E(U_i|D,theta)
+  post.gene <- B.gene * delta / (1 -delta + B.gene * delta)
+  
+  # compute the posterior of each variant E(U_i Z_{ij | D, theta})
+  post.var <- post.gene * (B * pi[C] / (B * pi[C] + 1 - pi[C]))
+  
+  log_add <- function(lx, ly) {
+    m <- pmax(lx, ly)
+    m + log(exp(lx - m) + exp(ly - m))
+  }
+  log.lik.var.given.U1 <- log_add(log(pi[C]) + l1, log(1-pi[C]) + l0)
+
+  log.lik.gene.given.U0 <- sum(l0) 
+  log.lik.gene.given.U1 <- sum(log.lik.var.given.U1)
+  
+  term_safe <- log(1 - delta) + log.lik.gene.given.U0
+  term_risk <- log(delta) + log.lik.gene.given.U1
+  
+  ll.gene <- log_add(term_safe, term_risk)
+  list(B.var=B, B.gene=B.gene, post.gene=post.gene, post.var=post.var, ll.gene=ll.gene)
+}
+```
+
+### Computing PIP with all parameters estimated above
+
+#### Likelihood estimates from truncated distribution
+
+As adopted in the EM section, we can compute the posterior of risk genes while rescaling the likelihood function with the filtered proportion.
+
+```{r}
+vl3$se <- sd.Y/sqrt(vl3$No..samples*vl3$AAF*(1-vl3$AAF))
+sumstats <- vl3[,c("Effect.size","se","impact_tier","Gene")]
+sumstats$impact_tier <- factor(sumstats$impact_tier, levels = c("High","Moderate","Modifier","Low"))
+beta.hat <- split(sumstats$Effect.size, sumstats$Gene)
+se <- split(sumstats$se, sumstats$Gene)
+C <- split(sumstats$impact_tier, sumstats$Gene)
+sigma <- rep(sqrt(sigma2),4)
+
+## Only use multiple variants per gene for EM algorithm
+## Otherwise there are identifiability problem
+## Also the filtered sumstats inflate the estimate of priors
+res <- est.par.list(beta.hat, se, C, rep(mu,4), sigma, c(0.3,0.2,0.1,0.05), 0.2)
+cat("The estimated proportion of risk genes are:", res$delta, "\n")
+cat("The estimated risk variant proportion for each category:", "\n", res$pi)
+```
+
+With parameters estimated from above, risk genes that can be found are very sparse. As shown by the histogram below, only 17 genes have PIP>50% and 11 of them have PIP over 80%. But most putative risk genes are well known for regulating LDL-C (e.g. LDLR, PCSK9, PPP1R37)
+
+```{r}
+post.gene <- numeric(length(beta.hat))
+names(post.gene) <- names(beta.hat)
+for (n in names(beta.hat)) {
+  post.gene[n] <- comp.gene.trunc(beta.hat[[n]], se[[n]], C[[n]], res$pi, rep(mu,4), rep(sqrt(sigma2),4), res$delta)$post.gene
+}
+hist(post.gene)
+```
+
+```{r}
+sort(post.gene[post.gene>0.5], decreasing = T)
+```
+
+We overlapped the 11 risk genes with the significant genes from the original studies. The 
+
+```{r}
+library(VennDiagram)
+library(grid)
+
+gl <- read.csv("data/23405_NMR_LDL_Cholesterol_GL_0218T174802Z_AZ_PheWAS_Portal.csv")
+gl$FDR <- p.adjust(gl$P.value, method = "BH")
+sig.gene <- gl$Gene[gl$FDR<0.05]
+sig.gene1 <- unique(sig.gene[sig.gene %in% vl3$Gene])
+
+p1 <- venn.diagram(list(Original=sig.gene1, `S-MIRAGE`=names(post.gene)[post.gene>0.8]), 
+             filename=NULL,)
+grid.newpage()
+grid.draw(p1)
+```
+
+### Direct likelihood estimate pretending data are fully observed
+
+We also tried to compute PIP pretending that these are all the variants observed. It results in many more risk genes. But it is probably inflated.
+
+```{r}
+post.gene <- numeric(length(beta.hat))
+names(post.gene) <- names(beta.hat)
+for (n in names(beta.hat)) {
+  post.gene[n] <- comp.gene(beta.hat[[n]], se[[n]], C[[n]], res$pi, rep(mu,4), rep(sqrt(sigma2),4), res$delta)$post.gene
+}
+hist(post.gene)
+```
+
+```{r}
+library(VennDiagram)
+library(grid)
+
+p1 <- venn.diagram(list(Original=sig.gene1, `S-MIRAGE`=names(post.gene)[post.gene>0.8]), 
+             filename=NULL,)
+grid.newpage()
+grid.draw(p1)
+```
