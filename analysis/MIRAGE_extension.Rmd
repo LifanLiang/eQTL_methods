@@ -795,7 +795,7 @@ ggplot(dat, aes(x=method,y=count,fill=true_positive)) +
 
 ### Preprocessing of variant level summary statistics
 
-We applied MIRAGE to [AstraZeneca](https://doi.org/10.1038/s41586-021-03855-y). We chose the trait of LDL cholesterol from UK BioBank 470 (v5) and the summary statistics of the genotypic model (dominant model and recessive model were also tested). Variants with over 0.5% MAF were removed. The publicly available summary statistics have already filtered variants with P value > 0.01. Hence there are 3648 variants, related to 3036 genes, for our analysis. The count of variants for each category are shown below:
+We applied S-MIRAGE to [AstraZeneca](https://doi.org/10.1038/s41586-021-03855-y). We chose the trait of LDL cholesterol from UK BioBank 470 (v5) and the summary statistics of the genotypic model (dominant model and recessive model were also tested). Variants with over 0.5% MAF were removed. The publicly available summary statistics have already filtered variants with P value > 0.01. Hence there are 3648 variants, related to 3036 genes, for our analysis. The count of variants for each category are shown below:
 
 ```{r,echo=F}
 vl <- read.csv("data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv")
@@ -830,6 +830,9 @@ vl3 <- vl2 %>%
 
 table(vl3$impact_tier)
 ```
+
+We applied Bonferroni threshold (P=1.37e-5) to identify confident risk variants. The proportion of confident risk variants per category were shown below. These proportion will be used as the initial pi estimate for the EM algorithm.
+
 
 ```{r}
 summary_data <- aggregate(vl3$p.value<1.37e-5, list(vl3$impact_tier), mean)
@@ -881,11 +884,7 @@ observed.se <- vl.null$Effect.size.standard.error
 plot(inverse.G.square , observed.se, pch=20)
 ```
 
-```{r}
-sd.Y <- summary(lm(observed.se~inverse.G.square+0))$coefficients[1]
-```
-
-For the trait of LDL-C, the estimated $sd(Y)$ is 0.66742. This value will be used to estimate $S^2$ for all variants.
+We directly used the standard error in the summary statistics as $s^2$.
 
 Then we estimated the $\mu$ and $\sigma$ for risk variants across all the four categories. We assumed that risk variants have the same genetic parameters regardless of the categories. Essentially, we have samples of $\hat\beta$ of risk variants from a Normal distribution:
 
@@ -893,7 +892,7 @@ $$
 \hat\beta_i \sim Normal(\mu,\sigma^2+s_i^2)
 $$
 
-Given $\hat\beta_i$ and $s_i^2$, $\hat\mu$ would be the average of $\hat\beta$ weighted by the inverse of $\sigma^2+s_i^2$. The estimator for $\sigma^2$ is simply the Method of Moment: subtracting $Var(\hat\beta)$ by the average of $s_i$. We used 41 rare variants with P value over the Bonferroni threshold (1.37e-5) as the true risk variants to estimate $\mu$ and $\sigma$.
+Given $\hat\beta_i$ and $s_i^2$, maximum likelihood estimate (MLE) of $\mu$ would be the average of $\hat\beta$ weighted by the inverse of $\sigma^2+s_i^2$. The estimator for $\sigma^2$ is simply the Method of Moment: subtracting $Var(\hat\beta)$ by the average of $s_i$. We used 41 rare variants with P value over the Bonferroni threshold (1.37e-5) as the true risk variants to estimate $\mu$ and $\sigma$.
 
 REML of $\sigma^2$ may be more accurate, but it relies on $\hat\mu$. In the future, we may adopt an iterative process to converge on the estimate of $\mu$ and $\sigma$.
 
@@ -901,8 +900,8 @@ REML of $\sigma^2$ may be more accurate, but it relies on $\hat\mu$. In the futu
 ```{r}
 vl.sig <- vl3[vl3$p.value<1.37e-5,]
 sig.beta <- vl.sig$Effect.size
-var.Y <- sd.Y^2
-sig.se2 <- var.Y/(vl.sig$No..samples*vl.sig$AAF*(1-vl.sig$AAF)) # Squared
+#sig.se2 <- var.Y/(vl.sig$No..samples*vl.sig$AAF*(1-vl.sig$AAF)) # Squared
+sig.se2 <- vl.sig$Effect.size.standard.error^2
 
 sigma2 <- pmax(0, var(sig.beta) - mean(sig.se2))
 w <- 1 / (sigma2 + sig.se2)
@@ -1042,10 +1041,10 @@ comp.gene.trunc <- function(beta.hat, se, C, pi, mu, sigma, delta=0.1) {
 
 #### Likelihood estimates from truncated distribution
 
-As adopted in the EM section, we can compute the posterior of risk genes while rescaling the likelihood function with the filtered proportion.
+As adopted in the EM section, we can compute the posterior of risk genes while rescaling the likelihood function with the truncated (filtered) distribution.
 
 ```{r}
-vl3$se <- sd.Y/sqrt(vl3$No..samples*vl3$AAF*(1-vl3$AAF))
+vl3$se <- vl3$Effect.size.standard.error
 sumstats <- vl3[,c("Effect.size","se","impact_tier","Gene")]
 sumstats$impact_tier <- factor(sumstats$impact_tier, levels = c("High","Moderate","Modifier","Low"))
 beta.hat <- split(sumstats$Effect.size, sumstats$Gene)
@@ -1069,7 +1068,7 @@ names(post.gene) <- names(beta.hat)
 for (n in names(beta.hat)) {
   post.gene[n] <- comp.gene.trunc(beta.hat[[n]], se[[n]], C[[n]], res$pi, rep(mu,4), rep(sqrt(sigma2),4), res$delta)$post.gene
 }
-hist(post.gene)
+hist(post.gene, main="Histogram of Posterior inclusion probability (PIP)")
 ```
 
 ```{r}
@@ -1115,3 +1114,53 @@ p1 <- venn.diagram(list(Original=sig.gene1, `S-MIRAGE`=names(post.gene)[post.gen
 grid.newpage()
 grid.draw(p1)
 ```
+
+
+### Application to [REGENIE dataset](https://www.nature.com/articles/s41586-021-04103-z)
+
+We downloaded the full dataset of variant level summary statistics. However, the mapped genes and the molecular consequences were not inclucded in the sumstats. So we queried Ensembl VEP to obtain these information for each variants. When one variant can be mapped to multiple genes, usually it serves as noncoding variants in all genes but one. Therefore only the gene with the most severe consequence was retained. Then, we removed variants whose mapped genes are not protein coding genes. ~470,000 variants remained in the analysis.
+
+The molecular consequence of variants have been grouped into
+
+#### Parameter estimation
+
+Similar to the procedure in the AstraPhewas dataset, we estimated $\mu$ and $\sigma$ from the 31 variants that passed the Bonferroni threshold (P<1.1e-7). The genetic parameters for LoF variants were estimated separately:
+
+$$
+\mu_{LoF} = -0.17, \sigma_{LoF} = 1.2
+$$
+
+$$
+\mu_{other} = -0.12, \sigma_{other} = 1.23
+$$
+
+Then we run EM algorithm to estimate the prior for variants and genes:
+
+```{r, echo=F}
+res <- readRDS("data/REGENIE_mirage_res.RDS")
+barplot(res$params$pi, col=1:4)
+```
+
+We found 9 genes with PIP>80%.
+
+```{r}
+sig.gene <- names(res$post.gene)[res$post.gene>0.8]
+cat(sig.gene)
+```
+
+
+The original sudy identify 14 genes: PCSK9, ANGPTL3, APOB, ABCGS, ALB, NPC1L1, GIGYF1, JAK2, APOC3, ASGR1, LDLR, ZNF229, NECTIN2, and RRBP1.
+
+
+```{r}
+library(VennDiagram)
+library(grid)
+
+ori.gene <- c("PCSK9", "ANGPTL3", "APOB", "ABCGS", "ALB", "NPC1L1", "GIGYF1", "JAK2", "APOC3", "ASGR1", "LDLR", "ZNF229", "NECTIN2", "RRBP1")
+p1 <- venn.diagram(list(`S-MIRAGE`=sig.gene, REGENIE=ori.gene), filename=NULL)
+grid.newpage()
+grid.draw(p1)
+```
+
+
+
