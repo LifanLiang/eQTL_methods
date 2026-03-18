@@ -514,15 +514,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef8dba2438bef5a05ca47560f90b49210b469a74atargetblankf8dba24a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56targetblank7ace4d7a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/f8dba2438bef5a05ca47560f90b49210b469a74a" target="_blank">f8dba24</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56" target="_blank">7ace4d7</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreef8dba2438bef5a05ca47560f90b49210b469a74atargetblankf8dba24a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56targetblank7ace4d7a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -532,7 +532,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/f8dba2438bef5a05ca47560f90b49210b469a74a" target="_blank">f8dba24</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56" target="_blank">7ace4d7</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -577,6 +577,7 @@ Untracked files:
     Untracked:  VennDiagram.2026-03-03_14-48-04.log
     Untracked:  VennDiagram.2026-03-18_15-13-06.log
     Untracked:  VennDiagram.2026-03-18_15-13-38.log
+    Untracked:  VennDiagram.2026-03-18_15-48-12.log
     Untracked:  data/23405_NMR_LDL_Cholesterol_GL_0218T174802Z_AZ_PheWAS_Portal.csv
     Untracked:  data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv
     Untracked:  data/REGENIE_mirage_res.RDS
@@ -649,6 +650,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56/analysis/MIRAGE_real_data.Rmd" target="_blank">7ace4d7</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/44e95609cfc6e189e261d890752da83f412fb8da/docs/MIRAGE_real_data.html" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/f8dba2438bef5a05ca47560f90b49210b469a74a/analysis/MIRAGE_real_data.Rmd" target="_blank">f8dba24</a>
 </td>
 <td>
@@ -668,6 +703,13 @@ wflow_publish("analysis")
 </div>
 </div>
 </div>
+<style>
+.scroll-300 {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+</style>
 <div id="previous-issues" class="section level2">
 <h2>Previous issues</h2>
 <p>We applied S-MIRAGE to REGENERON EWAS for the trait of LDL-C. The <a
@@ -691,7 +733,7 @@ Then we estimated <span class="math inline">\(\sigma\)</span> and <span
 class="math inline">\(\mu\)</span> from the filtered summary statistics.
 The estimated parameters have much larger magnitude than the ground
 truth.</p>
-<pre class="r"><code># 1. Simulate a full genome of 10,000 variants
+<pre class="r scroll-300"><code># 1. Simulate a full genome of 10,000 variants
 set.seed(42)
 total_M &lt;- 10000
 true_mu &lt;- -0.05
@@ -718,13 +760,13 @@ mu_hat &lt;- weighted.mean(obs_beta, w=1/(sigma2_hat+obs_se))
   
 cat(&quot;Variants passing filter:&quot;, length(obs_beta), &quot;out of&quot;, total_M, &quot;\n&quot;)</code></pre>
 <pre><code>Variants passing filter: 325 out of 10000 </code></pre>
-<pre class="r"><code>cat(&quot;Ground truth variance of genetic effects&quot;, sqrt(true_sigma2), &quot;\n&quot;)</code></pre>
+<pre class="r scroll-300"><code>cat(&quot;Ground truth variance of genetic effects&quot;, sqrt(true_sigma2), &quot;\n&quot;)</code></pre>
 <pre><code>Ground truth variance of genetic effects 0.2 </code></pre>
-<pre class="r"><code>cat(&quot;Naive Variance Estimate (Winner&#39;s Curse):&quot;, sqrt(sigma2_hat), &quot;\n&quot;)</code></pre>
+<pre class="r scroll-300"><code>cat(&quot;Naive Variance Estimate (Winner&#39;s Curse):&quot;, sqrt(sigma2_hat), &quot;\n&quot;)</code></pre>
 <pre><code>Naive Variance Estimate (Winner&#39;s Curse): 0.4402171 </code></pre>
-<pre class="r"><code>cat(&quot;Ground truth genetic effects:&quot;,true_mu, &quot;\n&quot;)</code></pre>
+<pre class="r scroll-300"><code>cat(&quot;Ground truth genetic effects:&quot;,true_mu, &quot;\n&quot;)</code></pre>
 <pre><code>Ground truth genetic effects: -0.05 </code></pre>
-<pre class="r"><code>cat(&quot;Naive Mu estimate (Winner&#39;s Curse):&quot;, mu_hat,&quot; \n\n&quot;)</code></pre>
+<pre class="r scroll-300"><code>cat(&quot;Naive Mu estimate (Winner&#39;s Curse):&quot;, mu_hat,&quot; \n\n&quot;)</code></pre>
 <pre><code>Naive Mu estimate (Winner&#39;s Curse): -0.3315442  </code></pre>
 </div>
 <div id="correcting-winners-curse-with-em-algorithm"
@@ -928,6 +970,88 @@ than the naive estimate.</p>
 <pre><code>EM estimate for genetic effect: -0.05604716 </code></pre>
 <pre class="r"><code>cat(&quot;EM estimate for variance of genetic effect:&quot;, results$estimated_sigma2, &quot;\n\n&quot;)</code></pre>
 <pre><code>EM estimate for variance of genetic effect: 0.03565411 </code></pre>
+<pre class="r"><code>barplot(c(Naive=sigma2_hat, EM=results$estimated_sigma2), main=&quot;Estimated sigma2 in the winners&#39; curse&quot;)
+lines(c(0,10),c(0.04,0.04), col=&quot;red&quot;, , lty=2)
+text(0.5,0.05,&quot;Ground truth&quot;, col=&quot;red&quot;)</code></pre>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-4-1">
+Past versions of unnamed-chunk-4-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-4-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-4-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>barplot(c(Naive=mu_hat, EM=results$estimated_mu), main=&quot;Estimated mu in the winners&#39; curse&quot;)
+lines(c(0,10),c(-0.1,-0.1), col=&quot;red&quot;, lty=2)
+text(0.5, -0.09,&quot;Ground truth&quot;, col=&quot;red&quot;)</code></pre>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-5-1">
+Past versions of unnamed-chunk-5-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-5-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-5-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="updated-results" class="section level2">
 <h2>Updated results</h2>
@@ -944,13 +1068,87 @@ much higher. Synonymous variants’s prior is close to zero (5e-8).</p>
 <pre class="r"><code>params &lt;- readRDS(&quot;data/REGENIE_params_03122026.RDS&quot;)
 matplot(params$pi.trac[1:113,], xlab=&quot;EM iterations&quot;, 
         ylab=&quot;risk proportion for each variant category&quot;)</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>barplot(params$pi, col=1:4, main = &quot;converged estimates&quot;)</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>The proportion of risk genes was 0.67%, much higher than the previous
 estimate (0.1%):</p>
 <pre class="r"><code>plot(params$delta.trac[1:113], xlab=&quot;EM iteration&quot;, ylab=&quot;Proportion of risk genes&quot;)</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
+Past versions of unnamed-chunk-8-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-8-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>We found 25 risk genes with the parameters above. Around half of them
 are well known risk genes for LDL. A few could be false positive due to
 being positioned close to APOE gene cluster.</p>
@@ -968,7 +1166,44 @@ positives due to shared risk variants.</p>
 library(ggplot2)
 ori.gene &lt;- c(&quot;PCSK9&quot;, &quot;ANGPTL3&quot;, &quot;APOB&quot;, &quot;ABCGS&quot;, &quot;ALB&quot;, &quot;NPC1L1&quot;, &quot;GIGYF1&quot;, &quot;JAK2&quot;, &quot;APOC3&quot;, &quot;ASGR1&quot;, &quot;LDLR&quot;, &quot;ZNF229&quot;, &quot;NECTIN2&quot;, &quot;RRBP1&quot;)
 ggVennDiagram(list(`S-MIRAGE`=high.pip, Original=ori.gene)) + scale_fill_gradient(low=&quot;grey90&quot;,high = &quot;red&quot;)</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="application-to-neutrophil-counts" class="section level2">
 <h2>Application to neutrophil counts</h2>
@@ -983,7 +1218,44 @@ variants above the Bonferroni threshold were:</p>
 <p>We estimated the proportion of risk genes and risk variants with the
 genetic effect parameter. Risk variants from all categories converged to
 around 27%. The proportion of risk genes converged to 5.5%.</p>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
+Past versions of unnamed-chunk-12-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-12-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" target="_blank">44e9560</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>With the parameters above, we inferred the posterior of risk genes
 for all the 17723 genes. 27 of them has PIP&gt;80%. Compared to the 16
 risk genes identified in the original study, we have 7 genes in
@@ -998,7 +1270,7 @@ common.</p>
 1.0000000 0.9934832 0.9903469 </code></pre>
 <pre><code>Loading required package: grid</code></pre>
 <pre><code>Loading required package: futile.logger</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
