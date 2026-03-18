@@ -6,6 +6,13 @@ output: workflowr::wflow_html
 editor_options:
   chunk_output_type: console
 ---
+<style>
+.scroll-300 {
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: inherit;
+}
+</style>
 
 ## Previous issues
 
@@ -16,7 +23,7 @@ There are two major issues that compromised the statistical power of S-MIRAGE. T
 The second issue is the winners' curse for estimating $\mu$ and $\sigma$. These parameters will be severely overestimated using a truncated set. This is obvious with simulation experiments below. We synthesized 10,000 variants with true genetic effects and filtered the variants with Bonferroni cutoff (P<5e-7). Then we estimated $\sigma$ and $\mu$ from the filtered summary statistics. The estimated parameters have much larger magnitude than the ground truth.
 
 
-```{r}
+```{r, class.source="scroll-300"}
 # 1. Simulate a full genome of 10,000 variants
 set.seed(42)
 total_M <- 10000
@@ -216,6 +223,20 @@ cat("EM estimate for genetic effect:", results$estimated_mu, "\n")
 cat("EM estimate for variance of genetic effect:", results$estimated_sigma2, "\n\n")
 ```
 
+
+```{r}
+barplot(c(Naive=sigma2_hat, EM=results$estimated_sigma2), main="Estimated sigma2 in the winners' curse")
+lines(c(0,10),c(0.04,0.04), col="red", , lty=2)
+text(0.5,0.05,"Ground truth", col="red")
+```
+
+```{r}
+barplot(c(Naive=mu_hat, EM=results$estimated_mu), main="Estimated mu in the winners' curse")
+lines(c(0,10),c(-0.1,-0.1), col="red", lty=2)
+text(0.5, -0.09,"Ground truth", col="red")
+```
+
+
 ## Updated results
 
 Using the aforementioned EM algorithm, $\sigma$ estimated from 31 risk variants becomes much smaller:
@@ -252,7 +273,6 @@ post.gene <- readRDS("data/REGENIE_post_gene_03122026.RDS")
 high.pip <- names(post.gene)[post.gene>0.8]
 print(high.pip)
 ```
-
 
 Compared to the risk genes discovered by the original study, we have much higher statistical power. Although some new risk genes may be false positives due to shared risk variants.
 
