@@ -36,3 +36,8 @@ editor_options:
 \
 \
 [Extension to MIRAGE](MIRAGE_extension.html)
+\
+\
+[Updated S-MIRAGE real data analysis](MIRAGE_real_data.html)
+
+

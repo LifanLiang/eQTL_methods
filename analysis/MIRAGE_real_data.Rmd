@@ -1,0 +1,308 @@
+---
+title: "Updated real data analysis with S-MIRAGE"
+author: "Lifan Liang"
+date: "2026-03-13"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Previous issues
+
+We applied S-MIRAGE to REGENERON EWAS for the trait of LDL-C. The [initial results](MIRAGE_extension.html#Application_to_REGENIE_dataset) discovered 9 genes, whereas the burden test from the original study found 14 genes. 
+
+There are two major issues that compromised the statistical power of S-MIRAGE. The first is that we only retained the most severe molecular consequence of a variant, so that a variant can only be mapped to one gene. This approach lost too much information. In this updated result, we keep all the molecular consequences for every variant, allowing multiple mapped genes for a single variant. S-MIRAGE can now identify at least 15 genes that is robust to genetic parameter settings.
+
+The second issue is the winners' curse for estimating $\mu$ and $\sigma$. These parameters will be severely overestimated using a truncated set. This is obvious with simulation experiments below. We synthesized 10,000 variants with true genetic effects and filtered the variants with Bonferroni cutoff (P<5e-7). Then we estimated $\sigma$ and $\mu$ from the filtered summary statistics. The estimated parameters have much larger magnitude than the ground truth.
+
+
+```{r}
+# 1. Simulate a full genome of 10,000 variants
+set.seed(42)
+total_M <- 10000
+true_mu <- -0.05
+true_sigma2 <- 0.04
+
+# True biological effects
+true_beta <- rnorm(total_M, mean = true_mu, sd = sqrt(true_sigma2))
+
+# Add measurement noise (standard errors around 0.1)
+se_full <- runif(total_M, 0.08, 0.12)
+beta_hat_full <- true_beta + rnorm(total_M, mean = 0, sd = se_full)
+
+# 2. Apply a strict p-value filter (e.g., p < 0.01)
+z_scores <- beta_hat_full / se_full
+p_values <- 2 * pnorm(-abs(z_scores))
+
+# Keep only the significant variants
+sig_idx <- which(p_values < 5e-7)
+obs_beta <- beta_hat_full[sig_idx]
+obs_se <- se_full[sig_idx]
+
+sigma2_hat <- var(obs_beta)-mean(obs_se^2)
+mu_hat <- weighted.mean(obs_beta, w=1/(sigma2_hat+obs_se))
+  
+cat("Variants passing filter:", length(obs_beta), "out of", total_M, "\n")
+cat("Ground truth variance of genetic effects", sqrt(true_sigma2), "\n")
+cat("Naive Variance Estimate (Winner's Curse):", sqrt(sigma2_hat), "\n")
+cat("Ground truth genetic effects:",true_mu, "\n")
+cat("Naive Mu estimate (Winner's Curse):", mu_hat," \n\n")
+
+```
+
+## Correcting winner's curse with EM algorithm
+
+A more conceptually straightforward approach would be estimating $\mu$ and $\sigma$ inside the EM algorithm where we estimated $\pi$ and $\delta$. However, there is no close-form solution to the MLE of $\mu$ and $\sigma$. Optimization involve frequent computation of the likelihood function over half a million variants. The time complexity of such computation is too high for a single M-step.
+
+It is more feasible to use variants above the Bonferroni threshold as true risk variants. But we need to account for the risk variants filtered by the Bonferroni threshold. EM algorithm can address this problem by treating the filtered causal variants as the missing data. And we are essentially finding $\hat\mu$ and $\hat\sigma$ that maximize the complete data log likelihood:
+
+$$
+\begin{align}
+\mathcal{ll}_{complete}(\mu,\sigma) &= \sum_{i=1}^N \mathcal{ll}(\hat\beta_i;\mu,\sigma,s_i) + \sum_{j=1}^{M-N} \mathcal{ll}(\hat\beta_j;\mu,\sigma,s_j)
+\end{align}
+$$
+
+where $N$ is the number of true risk variants that pass the filter, and $M$ is the total number of true risk variants. In the M-step, we simply used `optim()` to find the $\mu$ and $\sigma$ that maximzie the complete data likelihood. The real problem is how to impute $\hat\beta$ for the missing data given $\mu$ and $\sigma$ in the E-step. We can expand the log likelihood function related to $\hat\beta$:
+
+$$
+\begin{align}
+\mathcal{ll}_{missing} &\propto \sum_{j=1}^{M-N}\dfrac{(\hat\beta_j - \mu)^2}{-2(\sigma^2+s_j^2)}\\
+&\propto \sum_{j=1}^{M-N}(\hat\beta_j^2 - 2\mu \hat\beta_j) \\
+&= (M-N)\left(E[\hat\beta^2] - 2 \mu E[\hat\beta]\right)
+\end{align}
+$$
+
+To compute the complete data likelihood, we only need the first moment and the second moment of $\hat\beta$ conditioned on failing the filter. A simpler and more general approach would be to perform Monte Carlo sampling to estimate the two moments. But that would be computationally expensive when M grows large. Fortunately, we can derive the analytical solution from the [statistical results for the truncated Normal distribution](10.1080/00031305.1999.10474490):
+
+$$
+E[\hat\beta_j] = \mu + \sqrt{\sigma^2 + s_j^2} \cdot \left( \dfrac{\phi(\alpha_j)-\phi(\gamma_j)}{T_j} \right)
+$$
+where $\phi$ is PDF for standard Normal, $\alpha$ and $\gamma$ are the truncation boundary after Z transformation (e.g. $\alpha_j=\dfrac{\hat\beta_j - \mu}{\sqrt{\sigma^2 + s_j^2}}$), and $T_j$ is the proportion of $Normal(\mu, \sigma^2+s^2)$ that falls within the Null truncation ($\Phi(\alpha_j)-\Phi(\gamma_j)$).
+
+$$
+E[\hat\beta_j^2] = Var(\hat\beta) + (E[\hat\beta])^2
+$$
+
+
+$$
+Var(\hat\beta_j) = V_j\left[ 1+\dfrac{\alpha_j \phi(\alpha_j) - \beta_j\phi({\beta_j})}{T_j} - \left( \dfrac{\phi(\alpha)-\phi(\beta)}{T_j}\right)^2 \right]
+$$
+
+```{r, class.source="scroll-300"}
+em_winner_curse <- function(beta_hat, se, p_threshold, total_M, 
+                            init_mu = 0, init_sigma2 = 0.01, 
+                            max_iter = 500, tol = 1e-6) {
+  
+  # 1. Basic Setup & Validation
+  N_obs <- length(beta_hat)
+  N_miss <- total_M - N_obs
+  
+  if (N_miss <= 0) {
+    stop("total_M must be strictly greater than the number of observed variants.")
+  }
+  
+  # Calculate the Z-score truncation threshold
+  c_thresh <- qnorm(1 - p_threshold / 2)
+  
+  # Approximate the standard error for the missing variants
+  s_miss <- median(se)
+  
+  # Initialize parameters
+  mu <- init_mu
+  sigma2 <- init_sigma2
+  
+  for (iter in 1:max_iter) {
+    mu_old <- mu
+    sigma2_old <- sigma2
+    
+    # ========================================================
+    # E-STEP: Impute expected moments for the missing variants
+    # ========================================================
+    V_miss <- sigma2 + s_miss^2
+    sd_miss <- sqrt(V_miss)
+    
+    # Truncation boundaries
+    a <- -c_thresh * s_miss
+    b <-  c_thresh * s_miss
+    
+    # Standardize boundaries based on current parameter estimates
+    alpha <- (a - mu) / sd_miss
+    beta  <- (b - mu) / sd_miss
+    
+    # Normalization constant Z (probability of falling in the missing zone)
+    Z <- pnorm(beta) - pnorm(alpha)
+    
+    # Prevent division by zero if Z gets vanishingly small
+    if (Z < 1e-15) Z <- 1e-15 
+    
+    # Calculate E[z] and E[z^2] for the standard normal
+    phi_alpha <- dnorm(alpha)
+    phi_beta  <- dnorm(beta)
+    
+    E_z  <- (phi_alpha - phi_beta) / Z
+    E_z2 <- 1 + (alpha * phi_alpha - beta * phi_beta) / Z
+    
+    # Unstandardize to get E[beta] and E[beta^2] for a single missing variant
+    E_beta_miss  <- mu + sd_miss * E_z
+    E_beta2_miss <- mu^2 + 2 * mu * sd_miss * E_z + V_miss * E_z2
+    
+    # ========================================================
+    # M-STEP: Maximize the expected complete data log-likelihood
+    # ========================================================
+    # We define the negative Q-function to minimize using optim()
+    neg_Q <- function(params) {
+      curr_mu <- params[1]
+      curr_sigma2 <- params[2]
+      
+      # 1. Log-likelihood of the OBSERVED data
+      V_obs <- curr_sigma2 + se^2
+      ll_obs <- -0.5 * sum(log(V_obs) + (beta_hat - curr_mu)^2 / V_obs)
+      
+      # 2. Expected log-likelihood of the MISSING data
+      V_m <- curr_sigma2 + s_miss^2
+      
+      # E[(beta - mu)^2] = E[beta^2] - 2*mu*E[beta] + mu^2
+      exp_sq_diff <- E_beta2_miss - 2 * curr_mu * E_beta_miss + curr_mu^2
+      ll_miss <- -0.5 * N_miss * (log(V_m) + exp_sq_diff / V_m)
+      
+      # Return negative sum for minimization
+      return(-(ll_obs + ll_miss))
+    }
+    
+    # Optimize Q with respect to mu and sigma2 (keeping sigma2 > 0)
+    opt <- optim(par = c(mu, sigma2), 
+                 fn = neg_Q, 
+                 method = "L-BFGS-B", 
+                 lower = c(-Inf, 1e-8))
+    
+    mu <- opt$par[1]
+    sigma2 <- opt$par[2]
+    
+    # ========================================================
+    # Convergence Check
+    # ========================================================
+    if (max(abs(mu - mu_old), abs(sigma2 - sigma2_old)) < tol) {
+      cat("Converged successfully in", iter, "iterations.\n")
+      break
+    }
+  }
+  
+  if (iter == max_iter) cat("Warning: Reached max_iter without fully converging.\n")
+  
+  return(list(
+    estimated_mu = mu,
+    estimated_sigma2 = sigma2,
+    estimated_sigma = sqrt(sigma2),
+    iterations = iter
+  ))
+}
+
+
+```
+
+We applied this EM algorithm to the data. The estimate for $\mu$ and $\sigma$ are much closer to ground truth than the naive estimate.
+
+```{r}
+results <- em_winner_curse(
+  beta_hat = obs_beta, 
+  se = obs_se, 
+  p_threshold = 5e-7, 
+  total_M = total_M,
+  init_mu = mean(obs_beta),     # Good starting point
+  init_sigma2 = var(obs_beta)   # Good starting point
+)
+
+cat("EM estimate for genetic effect:", results$estimated_mu, "\n")
+cat("EM estimate for variance of genetic effect:", results$estimated_sigma2, "\n\n")
+```
+
+## Updated results
+
+Using the aforementioned EM algorithm, $\sigma$ estimated from 31 risk variants becomes much smaller:
+
+$$
+\begin{align}
+\hat\mu = -0.1, && \hat\sigma = 0.2,
+\end{align}
+$$
+
+The prior proportion of risk genes and risk variants also becomes much higher. Synonymous variants's prior is close to zero (5e-8).
+
+```{r}
+params <- readRDS("data/REGENIE_params_03122026.RDS")
+matplot(params$pi.trac[1:113,], xlab="EM iterations", 
+        ylab="risk proportion for each variant category")
+```
+
+```{r}
+barplot(params$pi, col=1:4, main = "converged estimates")
+```
+
+The proportion of risk genes was 0.67%, much higher than the previous estimate (0.1%):
+
+```{r}
+plot(params$delta.trac[1:113], xlab="EM iteration", ylab="Proportion of risk genes")
+```
+
+
+We found 25 risk genes with the parameters above. Around half of them are well known risk genes for LDL. A few could be false positive due to being positioned close to APOE gene cluster.
+
+```{r}
+post.gene <- readRDS("data/REGENIE_post_gene_03122026.RDS")
+high.pip <- names(post.gene)[post.gene>0.8]
+print(high.pip)
+```
+
+
+Compared to the risk genes discovered by the original study, we have much higher statistical power. Although some new risk genes may be false positives due to shared risk variants.
+
+```{r}
+library(ggVennDiagram)
+library(ggplot2)
+ori.gene <- c("PCSK9", "ANGPTL3", "APOB", "ABCGS", "ALB", "NPC1L1", "GIGYF1", "JAK2", "APOC3", "ASGR1", "LDLR", "ZNF229", "NECTIN2", "RRBP1")
+ggVennDiagram(list(`S-MIRAGE`=high.pip, Original=ori.gene)) + scale_fill_gradient(low="grey90",high = "red")
+```
+
+
+
+## Application to neutrophil counts
+
+We applied the same procedure to the summary statistics of the trait of neutrophil counts. The estimate of genetic parameter from 10 risk variants above the Bonferroni threshold were:
+
+```{r,echo=F}
+params <- readRDS("data/neutrophil_params.RDS")
+```
+
+
+$$
+\begin{align}
+\mu=0.01, &&  \sigma=0.11
+\end{align}
+$$
+
+We estimated the proportion of risk genes and risk variants with the genetic effect parameter. Risk variants from all categories converged to around 27%. The proportion of risk genes converged to 5.5%.
+
+```{r,echo=F}
+matplot(params$pi.trac, xlab="EM iteration", 
+        ylab="Proportion of risk variants for each category")
+```
+
+
+With the parameters above, we inferred the posterior of risk genes for all the 17723 genes. 27 of them has PIP>80%. Compared to the 16 risk genes identified in the original study, we have 7 genes in common.
+
+```{r,echo=F}
+post.gene <- readRDS("data/neutrophil_pip.RDS")
+risk.gene <- names(post.gene)[post.gene>0.8]
+print(post.gene[post.gene>0.8])
+```
+
+```{r,echo=F}
+library(VennDiagram)
+
+orig <- c("GNB1","CSF3R","CXCR4","CXCR2","CXCL6","CXCL2","TET2","BRAF","JAK2","SH2B3","NF1","MPO","SLC9A3R1","S1PR4","IL17RA","CHEK2")
+
+p1 <- venn.diagram(list(REGENIE=orig, MIRAGE=risk.gene),filename=NULL)
+grid.newpage()
+grid.draw(p1)
+```
+
