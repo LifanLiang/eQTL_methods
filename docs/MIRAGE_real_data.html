@@ -383,7 +383,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2026-03-18
+<strong>Last updated:</strong> 2026-03-30
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -514,15 +514,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56targetblank7ace4d7a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8dc9e608068d2ba49b48e9f3df6a7e7361f45787targetblank8dc9e60a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56" target="_blank">7ace4d7</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/8dc9e608068d2ba49b48e9f3df6a7e7361f45787" target="_blank">8dc9e60</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56targetblank7ace4d7a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree8dc9e608068d2ba49b48e9f3df6a7e7361f45787targetblank8dc9e60a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -532,7 +532,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/7ace4d790f4ebc7f2a46c55c50dd4c46d2bf8c56" target="_blank">7ace4d7</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/8dc9e608068d2ba49b48e9f3df6a7e7361f45787" target="_blank">8dc9e60</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -550,6 +550,7 @@ Ignored files:
     Ignored:    .DS_Store
     Ignored:    .RData
     Ignored:    .Rhistory
+    Ignored:    analysis/figure/
 
 Untracked files:
     Untracked:  VennDiagram.2026-02-23_11-42-42.log
@@ -578,6 +579,9 @@ Untracked files:
     Untracked:  VennDiagram.2026-03-18_15-13-06.log
     Untracked:  VennDiagram.2026-03-18_15-13-38.log
     Untracked:  VennDiagram.2026-03-18_15-48-12.log
+    Untracked:  VennDiagram.2026-03-18_16-31-23.log
+    Untracked:  VennDiagram.2026-03-23_15-34-05.log
+    Untracked:  VennDiagram.2026-03-23_15-34-22.log
     Untracked:  data/23405_NMR_LDL_Cholesterol_GL_0218T174802Z_AZ_PheWAS_Portal.csv
     Untracked:  data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv
     Untracked:  data/REGENIE_mirage_res.RDS
@@ -588,6 +592,7 @@ Untracked files:
     Untracked:  data/neutrophil_pip.RDS
     Untracked:  data/susie_code.R
     Untracked:  data/susie_simulation.zip
+    Untracked:  data/three_type_LDL_risk_genes.RDS
     Untracked:  test_matrixeqtl.R
 
 Unstaged changes:
@@ -645,6 +650,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/8dc9e608068d2ba49b48e9f3df6a7e7361f45787/analysis/MIRAGE_real_data.Rmd" target="_blank">8dc9e60</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-30
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b0f47668c53fb553204269545c760b1a97e841d8/docs/MIRAGE_real_data.html" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -716,14 +755,7 @@ wflow_publish("analysis")
 href="MIRAGE_extension.html#Application_to_REGENIE_dataset">initial
 results</a> discovered 9 genes, whereas the burden test from the
 original study found 14 genes.</p>
-<p>There are two major issues that compromised the statistical power of
-S-MIRAGE. The first is that we only retained the most severe molecular
-consequence of a variant, so that a variant can only be mapped to one
-gene. This approach lost too much information. In this updated result,
-we keep all the molecular consequences for every variant, allowing
-multiple mapped genes for a single variant. S-MIRAGE can now identify at
-least 15 genes that is robust to genetic parameter settings.</p>
-<p>The second issue is the winners’ curse for estimating <span
+<p>One major issue is the winners’ curse for estimating <span
 class="math inline">\(\mu\)</span> and <span
 class="math inline">\(\sigma\)</span>. These parameters will be severely
 overestimated using a truncated set. This is obvious with simulation
@@ -998,6 +1030,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-4-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-4-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1039,6 +1082,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-5-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-5-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1053,21 +1107,22 @@ Lifan Liang
 </div>
 </div>
 </div>
-<div id="updated-results" class="section level2">
-<h2>Updated results</h2>
-<p>Using the aforementioned EM algorithm, <span
-class="math inline">\(\sigma\)</span> estimated from 31 risk variants
-becomes much smaller:</p>
-<p><span class="math display">\[
-\begin{align}
-\hat\mu = -0.1, &amp;&amp; \hat\sigma = 0.2,
-\end{align}
-\]</span></p>
-<p>The prior proportion of risk genes and risk variants also becomes
-much higher. Synonymous variants’s prior is close to zero (5e-8).</p>
-<pre class="r"><code>params &lt;- readRDS(&quot;data/REGENIE_params_03122026.RDS&quot;)
-matplot(params$pi.trac[1:113,], xlab=&quot;EM iterations&quot;, 
-        ylab=&quot;risk proportion for each variant category&quot;)</code></pre>
+<div id="updated-with-alphamissense-annotation" class="section level2">
+<h2>Updated with AlphaMissense annotation</h2>
+<p>We currently have 78235 LoF variants and 328440 missense variants.
+The missense variants may need more detail annotations. So we use the
+prediction from AlphaMissense to annotate the missense variants. The
+missense variants were further divided into three categories: (1) likely
+pathogenic; (2) ambiguous; (3) likely benign.</p>
+<pre class="r"><code>library(ggplot2)
+df &lt;- data.frame(category=c(&quot;LoF&quot;,&quot;Pathogenic&quot;,&quot;Ambiguous&quot;,&quot;Benigh&quot;), 
+                 mean=-0.06132739, -0.04140436, 0.01981949, -0.01473132,
+                 SE=0.3368726, 0.2492694, 0.1797131, 0.2009707)
+
+ggplot(df, aes(x = category, y = mean)) +
+  geom_point(size = 3, color = &quot;blue&quot;) +
+  geom_errorbar(aes(ymin = mean - SE, ymax = mean + SE), width = 0.1) +
+  theme_classic()</code></pre>
 <p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
@@ -1093,6 +1148,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-6-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1106,11 +1172,79 @@ Lifan Liang
 </table>
 </div>
 </div>
-<pre class="r"><code>barplot(params$pi, col=1:4, main = &quot;converged estimates&quot;)</code></pre>
+<p>Using this set of parameters to estimate the risk proportion of genes
+and variants, we have roughly 1.77% of genes being risk genes. The risk
+proportion for each category of variants are:</p>
+<pre class="r"><code>barplot(c(&quot;LoF&quot;=0.28383799, &quot;Pathogenic&quot;=0.19723679, &quot;Ambiguous&quot;=0.06492431, &quot;Benign&quot;=0.07392038),
+        las=2, col=1:4)</code></pre>
 <p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-7-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>The proportion of risk genes was 0.67%, much higher than the previous
-estimate (0.1%):</p>
-<pre class="r"><code>plot(params$delta.trac[1:113], xlab=&quot;EM iteration&quot;, ylab=&quot;Proportion of risk genes&quot;)</code></pre>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-7-1">
+Past versions of unnamed-chunk-7-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-7-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-7-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>This set of parameters yields 13 risk genes. Missing ZNF318 compared
+to the previous results.</p>
+</div>
+<div id="updated-with-estimating-sigma-and-mu-in-the-main-em-algorithm"
+class="section level2">
+<h2>Updated with estimating <span class="math inline">\(\sigma\)</span>
+and <span class="math inline">\(\mu\)</span> in the main EM
+algorithm</h2>
+<p>We applied a more loose threshold, P &lt; 1e-5, to extract around 30
+variants for the category of LoF and missense, respectively. Then we
+only used the top variant per gene. 7 variants remains for LoF and 10
+variants for missense.</p>
+<p>Use the most severe consequence of the variants and only use LoF and
+missense. Mu and Sigma were estimated for the two categories
+separately.</p>
+<p><span class="math display">\[
+\begin{align}
+\sigma_{LoF} = 0.5, &amp;&amp; \sigma_{missense}=0.2 \\
+\mu_{LoF} = -0.1, &amp;&amp; \mu_{missense} = 0
+\end{align}
+\]</span></p>
+<p>We compared our methods with ACAT and the sumstats version of burden
+test.</p>
+<pre class="r"><code>library(VennDiagram)</code></pre>
+<pre><code>Loading required package: grid</code></pre>
+<pre><code>Loading required package: futile.logger</code></pre>
+<pre class="r"><code>tri.res &lt;- readRDS(&quot;data/three_type_LDL_risk_genes.RDS&quot;)
+p1 &lt;- venn.diagram(tri.res, filename = NULL)
+grid.newpage()
+grid.draw(p1)</code></pre>
 <p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-8-1">
@@ -1136,6 +1270,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-8-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1149,23 +1294,94 @@ Lifan Liang
 </table>
 </div>
 </div>
-<p>We found 25 risk genes with the parameters above. Around half of them
-are well known risk genes for LDL. A few could be false positive due to
-being positioned close to APOE gene cluster.</p>
-<pre class="r"><code>post.gene &lt;- readRDS(&quot;data/REGENIE_post_gene_03122026.RDS&quot;)
-high.pip &lt;- names(post.gene)[post.gene&gt;0.8]
-print(high.pip)</code></pre>
-<pre><code> [1] &quot;PCSK9&quot;   &quot;DOCK7&quot;   &quot;ANGPTL3&quot; &quot;APOB&quot;    &quot;ABCG5&quot;   &quot;ABCG8&quot;   &quot;SPOCK3&quot; 
- [8] &quot;ZNF318&quot;  &quot;NPC1L1&quot;  &quot;JAK2&quot;    &quot;ABCA1&quot;   &quot;APOC3&quot;   &quot;LRRK2&quot;   &quot;ASGR1&quot;  
-[15] &quot;SPHK1&quot;   &quot;UBE2O&quot;   &quot;LDLR&quot;    &quot;SPC24&quot;   &quot;KANK2&quot;   &quot;DOCK6&quot;   &quot;ZNF234&quot; 
-[22] &quot;ZNF180&quot;  &quot;NECTIN2&quot; &quot;TOMM40&quot;  &quot;MARK4&quot;  </code></pre>
-<p>Compared to the risk genes discovered by the original study, we have
-much higher statistical power. Although some new risk genes may be false
-positives due to shared risk variants.</p>
-<pre class="r"><code>library(ggVennDiagram)
-library(ggplot2)
-ori.gene &lt;- c(&quot;PCSK9&quot;, &quot;ANGPTL3&quot;, &quot;APOB&quot;, &quot;ABCGS&quot;, &quot;ALB&quot;, &quot;NPC1L1&quot;, &quot;GIGYF1&quot;, &quot;JAK2&quot;, &quot;APOC3&quot;, &quot;ASGR1&quot;, &quot;LDLR&quot;, &quot;ZNF229&quot;, &quot;NECTIN2&quot;, &quot;RRBP1&quot;)
-ggVennDiagram(list(`S-MIRAGE`=high.pip, Original=ori.gene)) + scale_fill_gradient(low=&quot;grey90&quot;,high = &quot;red&quot;)</code></pre>
+<p>Burden test has found two more genes. Among the six genes uniquely
+discovered by the burden test, HMGCR is known to be related to the
+transportation of LDL. This gene is missed by S-MIRAGE because several
+variants have large positive Z score. But S-MIRAGE has estimated a
+negative <span class="math inline">\(\mu\)</span> for the variant
+effects.</p>
+<p>One single Normal distribution assumes that variant effects are
+mostly small. It does not hold for rare variants that convey risks,
+especially the LoF variants. Moreover, although most variants’ impact on
+genes are mostly negative, the gene’s association to the trait could be
+positive or negative. This would flip the signs of the variant effects
+on the trait. Therefore, it would be more reasonable to adopt the
+symmetric bimodal distribution to model the genetic effects of the risk
+variants.</p>
+</div>
+<div id="symmetric-bimodal-distribution-for-risk-variants"
+class="section level2">
+<h2>Symmetric bimodal distribution for risk variants</h2>
+<p>When the variant is a risk variant, <span
+class="math inline">\(\hat\beta\)</span> is sampled from the following
+procedure:</p>
+<p><span class="math display">\[
+P(\beta_i|\mu,\sigma) = 0.5 \mathcal N(\beta_i; \mu,\sigma^2) +
+0.5\mathcal N(\beta_i; -\mu, \sigma^2)
+\]</span></p>
+<p><span class="math display">\[
+P(\hat\beta_i|\beta_i, s_i) = \mathcal N(\hat\beta_i;\beta_i,s_i^2)
+\]</span></p>
+<div id="em-algorithm-for-inference" class="section level3">
+<h3>EM algorithm for inference</h3>
+<p>In the E step, we compute the posterior of the variants belonging to
+one of the modes if this is a risk variant (<span
+class="math inline">\(\gamma_i\)</span>), the posterior mean and
+variance of variant effect (<span
+class="math inline">\(\bar\beta_i\)</span> and <span
+class="math inline">\(Var(\bar\beta_i)\)</span>) given that the variant
+is a risk variant, the variance of the posterior of risk variants (<span
+class="math inline">\(z_i\)</span>), and the posterior of risk genes
+(<span class="math inline">\(u_j\)</span>).</p>
+<p><span class="math display">\[
+\begin{align}
+&amp;L_{1+} = \mathcal N(\hat\beta_i;\mu,\sigma^2+s_i^2) \\
+&amp;L_{1-} = \mathcal N(\hat\beta_i;-\mu,\sigma^2+s_i^2) \\
+&amp;\gamma_{i+} = \dfrac{L_{1+}}{L_{1+}+L_{1-}} \\
+&amp;w_i = \dfrac{\sigma^2}{\sigma^2+s_i^2} \\
+&amp;\mu_{i+} = (1-w_i)\mu + w_i \hat\beta \\
+&amp;\bar\beta_i = \gamma_{i-}\cdot\mu_{i-} + \gamma_{i+}\cdot\mu_{i+}
+\\
+&amp;\Sigma_i = \dfrac{\sigma^2 s_i^2}{\sigma^2+s_i^2} \\
+&amp;Var(\bar\beta_i) = \Sigma_i + \gamma_{i+}(\mu_{i+}-\bar\beta_i)^2
++\gamma_{i-}(\mu_{i-}-\bar\beta_i)^2 \\
+&amp;B_i = \dfrac{0.5\pi(L_{1+} + L_{1-})}{0.5\pi(L_{1+} + L_{1-}) +
+(1-\pi)L_0}
+\end{align}
+\]</span></p>
+<p>The rest is the same as the previous model. We introduced extra steps
+to compute the posterior of genetic effects under the alternative model
+because we can use them to update <span
+class="math inline">\(\mu\)</span> and <span
+class="math inline">\(\sigma\)</span> for each variant category with a
+close-form solution in the M-step. When the <span
+class="math inline">\(\bar\beta\)</span> is fixed, we can directly
+estimate <span class="math inline">\(\mu\)</span> and <span
+class="math inline">\(\sigma\)</span> with the close-form MLE over the
+complete data likelihood, ignoring <span
+class="math inline">\(s_i\)</span>.</p>
+<p><span class="math display">\[
+\mu = \dfrac{\sum_i z_i ( \gamma_{i+}\cdot\mu_{i+} -
+\gamma_{i-}\cdot\mu_{i-})}{\sum_i z_i}
+\]</span></p>
+<p><span class="math display">\[
+\sigma = \dfrac{\sum_i z_i Var(\bar\beta_i)}{\sum_i z_i}
+\]</span></p>
+</div>
+</div>
+<div id="application-to-neutrophil-counts" class="section level2">
+<h2>Application to neutrophil counts</h2>
+<p>We applied the same procedure to the summary statistics of the trait
+of neutrophil counts. The estimate of genetic parameter from 10 risk
+variants above the Bonferroni threshold were:</p>
+<p><span class="math display">\[
+\begin{align}
+\mu=0.01, &amp;&amp;  \sigma=0.11
+\end{align}
+\]</span></p>
+<p>We estimated the proportion of risk genes and risk variants with the
+genetic effect parameter. Risk variants from all categories converged to
+around 27%. The proportion of risk genes converged to 5.5%.</p>
 <p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
@@ -1191,6 +1407,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-10-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1204,20 +1431,18 @@ Lifan Liang
 </table>
 </div>
 </div>
-</div>
-<div id="application-to-neutrophil-counts" class="section level2">
-<h2>Application to neutrophil counts</h2>
-<p>We applied the same procedure to the summary statistics of the trait
-of neutrophil counts. The estimate of genetic parameter from 10 risk
-variants above the Bonferroni threshold were:</p>
-<p><span class="math display">\[
-\begin{align}
-\mu=0.01, &amp;&amp;  \sigma=0.11
-\end{align}
-\]</span></p>
-<p>We estimated the proportion of risk genes and risk variants with the
-genetic effect parameter. Risk variants from all categories converged to
-around 27%. The proportion of risk genes converged to 5.5%.</p>
+<p>With the parameters above, we inferred the posterior of risk genes
+for all the 17723 genes. 27 of them has PIP&gt;80%. Compared to the 16
+risk genes identified in the original study, we have 7 genes in
+common.</p>
+<pre><code>     GNB1    MRPS15     CSF3R     ANXA9    MINDY1      LYST      LY75      DPP4 
+1.0000000 0.9972757 1.0000000 0.8237136 0.8054039 0.9920613 0.9162834 0.8921505 
+    CXCR2      STC2   ABHD16A     KCNH2      JAK2     PRSS3     PDE3B       SF1 
+0.9995549 0.9920977 0.9540280 0.8365244 1.0000000 0.8504258 0.8773075 0.9409263 
+      ATM  C11orf65      JAML     SH2B3     ATXN2     NR1D1       LPO       MPO 
+0.8541204 0.8876647 0.9992009 1.0000000 1.0000000 0.9156271 0.9999951 1.0000000 
+   NHERF1      GNAS     CHEK2 
+1.0000000 0.9934832 0.9903469 </code></pre>
 <p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-12-1">
@@ -1243,6 +1468,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/b0f47668c53fb553204269545c760b1a97e841d8/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" target="_blank">b0f4766</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-03-18
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/LifanLiang/eQTL_methods/blob/44e95609cfc6e189e261d890752da83f412fb8da/docs/figure/MIRAGE_real_data.Rmd/unnamed-chunk-12-1.png" target="_blank">44e9560</a>
 </td>
 <td>
@@ -1256,21 +1492,6 @@ Lifan Liang
 </table>
 </div>
 </div>
-<p>With the parameters above, we inferred the posterior of risk genes
-for all the 17723 genes. 27 of them has PIP&gt;80%. Compared to the 16
-risk genes identified in the original study, we have 7 genes in
-common.</p>
-<pre><code>     GNB1    MRPS15     CSF3R     ANXA9    MINDY1      LYST      LY75      DPP4 
-1.0000000 0.9972757 1.0000000 0.8237136 0.8054039 0.9920613 0.9162834 0.8921505 
-    CXCR2      STC2   ABHD16A     KCNH2      JAK2     PRSS3     PDE3B       SF1 
-0.9995549 0.9920977 0.9540280 0.8365244 1.0000000 0.8504258 0.8773075 0.9409263 
-      ATM  C11orf65      JAML     SH2B3     ATXN2     NR1D1       LPO       MPO 
-0.8541204 0.8876647 0.9992009 1.0000000 1.0000000 0.9156271 0.9999951 1.0000000 
-   NHERF1      GNAS     CHEK2 
-1.0000000 0.9934832 0.9903469 </code></pre>
-<pre><code>Loading required package: grid</code></pre>
-<pre><code>Loading required package: futile.logger</code></pre>
-<p><img src="figure/MIRAGE_real_data.Rmd/unnamed-chunk-14-1.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1297,7 +1518,7 @@ attached base packages:
 
 other attached packages:
 [1] VennDiagram_1.7.3   futile.logger_1.4.3 ggplot2_4.0.1      
-[4] ggVennDiagram_1.5.4 workflowr_1.7.2    
+[4] workflowr_1.7.2    
 
 loaded via a namespace (and not attached):
  [1] tidyselect_1.2.1     xfun_0.54            bslib_0.3.1         
