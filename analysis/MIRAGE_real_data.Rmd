@@ -288,9 +288,100 @@ grid.draw(p1)
 
 Burden test has found two more genes. Among the six genes uniquely discovered by the burden test, HMGCR is known to be related to the transportation of LDL. This gene is missed by S-MIRAGE because several variants have large positive Z score. But S-MIRAGE has estimated a negative $\mu$ for the variant effects.
 
+There are two limitations of updating $\mu$ and $\sigma$ with a few significant variants: (1) the small number of variants leads to high uncertainty of the estimate; (2) the estimator relies on a reasonable guess of the total number of true risk variants. If the number is too high, $\sigma$ would be underestimated. If the number is too high, $\sigma$ would be overestimated.
+
+We modified the main EM algorithm to infer the posterior distribution of genetic effects given the variant is a risk variant and estimate $\mu$ and $\sigma$ in the M-step. Focusing on the variant-level summary statistics, the complete data likelihood looks like:
+
+$$
+\begin{align}
+\mathcal L(\hat\beta_i;\pi,\delta,\beta,U,Z_i,\mu,\sigma,s_i) &= P(\hat\beta_i|\beta_i,s_i) \cdot P(\beta_i|\mu,\sigma,Z=1) \cdot (Z_i=1|\pi) + P(\hat\beta_i|\beta_i=0,s_i) \cdot P(Z_i=0|\pi) \\
+&= w_i P(\hat\beta_i|\beta_i,s_i) P(\beta_i|\mu,\sigma,Z=1) + (1-w_i)P(\hat\beta_i|\beta_i=0,s_i,Z=0)
+\end{align}
+$$
+
+Since there is zero genetic effect when $Z=0$, we only need to infer $P(\beta_i|Z_i=1)$ for each variant in the E step and M step:
+
+$$
+P(\beta|\hat\beta, s, \mu, \sigma, Z=1) = \dfrac{\mathcal N(\hat\beta;\beta,s^2)\mathcal N(\beta;\mu,\sigma^2)}{\mathcal N(\hat\beta;\mu,\sigma^2+s^2)}
+$$
+
+The mean and variance of such Normal-Normal posterior distribution is:
+
+$$
+E(\bar\beta_i) = E(\beta_i|\hat\beta_i, s, \mu^{(t)}, \sigma^{(t)}, Z=1) = \dfrac{\sigma^{(t)2}\hat\beta_i + s^2\mu^{(t)}}{\sigma^{(t)2}+s^2}
+$$
+
+$$
+Var(\bar\beta_i) = \dfrac{\sigma^{(t)2}s^2}{\sigma^{(t)2} + s^2}
+$$
+
+With the posterior distribution of $\bar\beta|Z=1$, we only focus on the situation on the scenario of maximize the Q function:
+
+$$
+\begin{align}
+Q(\mu^{(t+1)},\sigma^{(t+1)}| \mu^{(t)}, \sigma^{(t)}) = \underset{\mu,\sigma}{\arg\max} &E_{\bar\beta,Z}\sum_i \left[logP(\hat\beta_i|\bar\beta_i,s_i) + logP(\bar\beta_i|\mu, \sigma, Z_i) + logP(Z_i|\pi) \right] \\
+\propto &E_{\bar\beta,Z}\sum_i logP(\bar\beta_i|\mu, \sigma, Z_i=1) \\
+=&\sum_i w_i \cdot logP(\bar\beta_i|\mu, \sigma, Z_i=1) \\
+\propto &\sum_i w_i \left(log(\sigma) - \dfrac{E_{\beta}[(\bar\beta-\mu)^2]}{2\sigma^2}   \right)
+\end{align}
+$$
+
+The partial derivative regarding $\mu$ is:
+
+$$
+\dfrac{\partial Q(\mu^{(t+1)},\sigma^{(t+1)}| \mu^{(t)}, \sigma^{(t)})}{\partial \mu} = \sum_i w_i(E(\bar\beta) - \mu) 
+$$
+
+Setting the derivative to zero, we have:
+
+$$
+\mu^{(t+1)} = \dfrac{\sum_i w_i E(\bar\beta)}{\sum_i w_i}
+$$
+
+Regarding $\sigma$, the partial derivative is:
+
+$$
+\dfrac{\partial Q(\mu^{(t+1)},\sigma^{(t+1)}| \mu^{(t)}, \sigma^{(t)})}{\partial \sigma} = \sum_i w_i \left(\dfrac{1}{\sigma}-\dfrac{E_{\beta}[(\bar\beta-\mu)^2]}{\sigma^3} \right)
+$$
+
+Setting the partial derivative to 0, we obtain:
+
+$$
+\begin{align}
+\sigma^2 &= \dfrac{\sum_i w_i E_{\beta}[(\bar\beta-\mu)^2]}{\sum_i w_i} \\
+&=\dfrac{\sum_i w_i E[\bar\beta^2]}{\sum_i w_i} - 2\mu\dfrac{E[\bar\beta]}{\sum_i w_i} + \mu^2 \\
+&=\dfrac{\sum_i w_i E[\bar\beta^2]}{\sum_i w_i} - \mu^2 \\
+&=\dfrac{\sum_i w_i (Var(\bar\beta)+E[\bar\beta]^2)}{\sum_i w_i} - \mu^2
+\end{align}
+$$
+
+Therefore, we can compute both the first and second moment of $\bar\beta$ in the E-step. And use that to update $\mu$ and $\sigma$ in the M-step.
+
+We used the simulation setting in the simulation experiment to verify the EM algorithm. Repeating the experiment 20 times and compared that to the ground truth.
+
+![Performance of parameter estimation of EM algorithm within simulation experiment.](docs/assets/mirage_sim_params.pdf)
+
+The parameter is quite different from 
+```{r,echo=F}
+params.alphasm <- readRDS("data/params_alpham.RDS")
+params.alphasm$pi
+```
+
+```{r,echo=F}
+params.alphasm$mu
+```
+
+```{r,echo=F}
+params.alphasm$sigma
+```
+
+We only found 9 genes with these parameters.
+
+
+
 One single Normal distribution assumes that variant effects are mostly small. It does not hold for rare variants that convey risks, especially the LoF variants. Moreover, although most variants' impact on genes are mostly negative, the gene's association to the trait could be positive or negative. This would flip the signs of the variant effects on the trait. Therefore, it would be more reasonable to adopt the symmetric bimodal distribution to model the genetic effects of the risk variants.
 
-## Symmetric bimodal distribution for risk variants
+## Symmetric bimodal distribution for risk variants {.hidden .unlisted .unnumbered}
 
 When the variant is a risk variant, $\hat\beta$ is sampled from the following procedure:
 
