@@ -361,7 +361,7 @@ div.tocify {
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
 <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
-workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+workflowr <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span>
 </button>
 </p>
@@ -372,8 +372,8 @@ aria-hidden="true"></span>
 </li>
 <li>
 <a data-toggle="tab" href="#checks"> Checks <span
-class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> </a>
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
 </li>
 <li>
 <a data-toggle="tab" href="#versions">Past versions</a>
@@ -386,9 +386,9 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> 1
+aria-hidden="true"></span> 0
 </p>
 <p>
 <strong>Knit directory:</strong> <code>eQTL_methods/</code> <span
@@ -411,21 +411,18 @@ versions</em> tab lists the development history.
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
-<span class="glyphicon glyphicon-exclamation-sign text-danger"
-aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
-changes </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
 </p>
 </div>
-<div id="strongRMarkdownfilestronguncommittedchanges"
+<div id="strongRMarkdownfilestronguptodate"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown is untracked by Git. To know which version of the R
-Markdown file created these results, you’ll want to first commit it to
-the Git repo. If you’re still working on the analysis, you can ignore
-this warning. When you’re finished, you can run
-<code>wflow_publish</code> to commit the R Markdown file and build the
-HTML.</p>
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
 </div>
 </div>
 </div>
@@ -516,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree0f2c9800bc1a13137cb633a3690bbe76fe671e84targetblank0f2c980a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1targetblank9e94aeaa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/0f2c9800bc1a13137cb633a3690bbe76fe671e84" target="_blank">0f2c980</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1" target="_blank">9e94aea</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree0f2c9800bc1a13137cb633a3690bbe76fe671e84targetblank0f2c980a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1targetblank9e94aeaa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -534,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/0f2c9800bc1a13137cb633a3690bbe76fe671e84" target="_blank">0f2c980</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1" target="_blank">9e94aea</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -591,7 +588,8 @@ Untracked files:
     Untracked:  VennDiagram.2026-04-06_12-40-46.log
     Untracked:  VennDiagram.2026-04-13_14-24-42.log
     Untracked:  VennDiagram.2026-04-13_14-24-44.log
-    Untracked:  analysis/mirage_diag.Rmd
+    Untracked:  VennDiagram.2026-04-13_15-23-37.log
+    Untracked:  VennDiagram.2026-04-13_15-23-39.log
     Untracked:  data/23405_NMR_LDL_Cholesterol_GL_0218T174802Z_AZ_PheWAS_Portal.csv
     Untracked:  data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv
     Untracked:  data/REGENIE_mirage_res.RDS
@@ -609,8 +607,6 @@ Untracked files:
     Untracked:  test_matrixeqtl.R
 
 Unstaged changes:
-    Modified:   analysis/MIRAGE_real_data.Rmd
-    Modified:   analysis/index.Rmd
     Modified:   data/mixedmodel_res_phi0.02.csv
     Modified:   data/mixedmodel_res_phi0.03.csv
     Modified:   data/mixedmodel_res_phi0.04.csv
@@ -634,10 +630,74 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
+
 <p>
-There are no past versions. Publish this analysis with
-<code>wflow_publish()</code> to start tracking its development.
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/mirage_diag.Rmd</code>) and HTML
+(<code>docs/mirage_diag.html</code>) files. If you’ve configured a
+remote Git repository (see <code>?wflow_git_remote</code>), click on the
+hyperlinks in the table below to view the files as they were in that
+past version.
 </p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/analysis/mirage_diag.Rmd" target="_blank">9e94aea</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-13
+</td>
+<td>
+wflow_publish(c("analysis", "docs"))
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/docs/mirage_diag.html" target="_blank">9e94aea</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-13
+</td>
+<td>
+wflow_publish(c("analysis", "docs"))
+</td>
+</tr>
+</tbody>
+</table>
+</div>
 <hr>
 </div>
 </div>
@@ -665,6 +725,43 @@ estimated <span class="math inline">\(\sigma\)</span> is 0.745. The
 estimated <span class="math inline">\(\pi\)</span> for each category
 was:</p>
 <p><img src="figure/mirage_diag.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-1-1">
+Past versions of unnamed-chunk-1-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/docs/figure/mirage_diag.Rmd/unnamed-chunk-1-1.png" target="_blank">9e94aea</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>The numbers from 1 to 4 corresponds to LoF, pathogenic, ambiguous,
 and benign.</p>
 <p>The estimate of risk gene proportion (<span
