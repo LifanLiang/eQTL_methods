@@ -39,5 +39,7 @@ editor_options:
 \
 \
 [Updated S-MIRAGE real data analysis](MIRAGE_real_data.html)
-
+\
+\
+[Diagnostics of S-MIRAGE on real data](mirage_diag.html)
 

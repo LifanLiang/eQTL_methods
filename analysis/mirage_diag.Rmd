@@ -1,0 +1,62 @@
+---
+title: "S-MIRAGE diagnosis"
+author: "Lifan Liang"
+date: "2026-04-13"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+This page summarizes the investigation into risk genes uniquely found by the Burden test, namely, ABCA1, ABCG5, GKCR, HMGCR, SOX15, SLC33A1, PDE88. All of these genes have FDR<0.01 except GCKR (0.046) and PDE8B (0.017).
+
+
+## Potential inflation of Z score in the null distribution
+
+The Z scores seem fine. Standard error is not under-estimated.
+
+![](assets/qqplot_benign_LDL.png)
+
+## Comparing statistics of the genes
+
+We first let all the four categories of variants share $\mu$ and $\sigma$ to ease the diagnosis. The estimated $\mu$ is -0.234 and estimated $\sigma$ is 0.745. The estimated $\pi$ for each category was:
+
+```{r, echo=F}
+params <- readRDS("data/params_shared_mu_sigma.RDS")
+matplot(params$pi.trac[1:23,], ylab="Proportion of risk variants for each category")
+```
+
+The numbers from 1 to 4 corresponds to LoF, pathogenic, ambiguous, and benign.
+
+The estimate of risk gene proportion ($\delta$) was 0.12%.
+
+Following were example genes showcasing two types of reasons for S-MIRAGE to miss the burden genes.
+
+### Small genetic effects in the leading variants
+
+Most missing genes fall into this category. Somehow the top variants have both small genetic effects and small standard error. Is it because the top variants are not actually rare variants?
+
+![](assets/ABCG5_visual.png)
+
+![](assets/SLC33A1_visual.png)
+
+![](assets/HMGCR_visual.png)
+
+![](assets/SH2B3_visual.png)
+
+![](assets/PDE88_visual.png)
+
+
+### Too many null variants compromising the power
+
+
+![](assets/ABCA1_visual.png)
+
+### Unknown reasons
+
+![](assets/SOX15_visual.png)
+
+
+
+

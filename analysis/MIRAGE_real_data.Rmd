@@ -361,21 +361,28 @@ We used the simulation setting in the simulation experiment to verify the EM alg
 
 ![Performance of parameter estimation of EM algorithm within simulation experiment.](docs/assets/mirage_sim_params.pdf)
 
-The parameter is quite different from 
+The parameter is quite different from those with Winners' curse corrected. The prior for risk genes is 0.12%.
+
+* Proportion of risk variants ($\pi$)
+
 ```{r,echo=F}
 params.alphasm <- readRDS("data/params_alpham.RDS")
 params.alphasm$pi
 ```
 
+* Genetic effects of the variants ($\mu$)
+
 ```{r,echo=F}
 params.alphasm$mu
 ```
+
+* Standard deviation of the genetic effects ($\sigma$)
 
 ```{r,echo=F}
 params.alphasm$sigma
 ```
 
-We only found 9 genes with these parameters.
+We only found 9 genes with these parameters. Among them is ABCG5. 
 
 
 

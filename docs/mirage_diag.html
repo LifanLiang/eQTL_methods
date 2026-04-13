@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Lifan Liang" />
 
+<meta name="date" content="2026-04-13" />
 
-<title>Single cell eQTL methods development</title>
+<title>S-MIRAGE diagnosis</title>
 
 <script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,6 +31,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -229,6 +234,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -236,6 +304,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -273,7 +351,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Single cell eQTL methods development</h1>
+<h1 class="title toc-ignore">S-MIRAGE diagnosis</h1>
+<h4 class="author">Lifan Liang</h4>
+<h4 class="date">2026-04-13</h4>
 
 </div>
 
@@ -306,7 +386,7 @@ aria-hidden="true"></span> </a>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 1
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span> 1
 </p>
@@ -340,12 +420,96 @@ changes </a>
 <div id="strongRMarkdownfilestronguncommittedchanges"
 class="panel-collapse collapse">
 <div class="panel-body">
-<p>The R Markdown file has unstaged changes. To know which version of
-the R Markdown file created these results, you’ll want to first commit
-it to the Git repo. If you’re still working on the analysis, you can
-ignore this warning. When you’re finished, you can run
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
 <code>wflow_publish</code> to commit the R Markdown file and build the
 HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250106code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250106)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250106code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250106)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
@@ -438,6 +602,7 @@ Untracked files:
     Untracked:  data/neutrophil_params.RDS
     Untracked:  data/neutrophil_pip.RDS
     Untracked:  data/params_alpham.RDS
+    Untracked:  data/params_shared_mu_sigma.RDS
     Untracked:  data/susie_code.R
     Untracked:  data/susie_simulation.zip
     Untracked:  data/three_type_LDL_risk_genes.RDS
@@ -469,346 +634,104 @@ have uncommitted changes.
 <hr>
 </div>
 <div id="versions" class="tab-pane fade">
-
 <p>
-These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
-(<code>docs/index.html</code>) files. If you’ve configured a remote Git
-repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
-in the table below to view the files as they were in that past version.
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
 </p>
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-File
-</th>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-<th>
-Message
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/44e95609cfc6e189e261d890752da83f412fb8da/docs/index.html" target="_blank">44e9560</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/f8dba2438bef5a05ca47560f90b49210b469a74a/analysis/index.Rmd" target="_blank">f8dba24</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/dda8fcc8de5121736f7217e98ce082cf62a3b0a7/docs/index.html" target="_blank">dda8fcc</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/4827df877a2322c689f431761c2adec1641935b5/analysis/index.Rmd" target="_blank">4827df8</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b42d3741d22acf8eb259d1707be2ff119598bf3d/docs/index.html" target="_blank">b42d374</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/03517e0ba31a215595f83999605ab7f0408df75c/analysis/index.Rmd" target="_blank">03517e0</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/bac1cb198551c06114d496ac395ac5cde01f15d3/docs/index.html" target="_blank">bac1cb1</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/index.Rmd" target="_blank">b196d33</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b66cf934485dbf61280816b532131ea637318592/docs/index.html" target="_blank">b66cf93</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/a0f0980c85ae273282089aa243d5a48182f72b61/analysis/index.Rmd" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a0f0980c85ae273282089aa243d5a48182f72b61/docs/index.html" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/6bb4819a6e58c5ced1ce05262008a56dd5ae6e46/docs/index.html" target="_blank">6bb4819</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b62f35382521fcea5baaabdb6d860c2d668dd786/analysis/index.Rmd" target="_blank">b62f353</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fb9f866236c21db5e99d9367066f02fd0d40b647/docs/index.html" target="_blank">fb9f866</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/c1a2fa73c15fc9ec8223d438fdd2375c65375f6b/analysis/index.Rmd" target="_blank">c1a2fa7</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/e498299ee21bfc271e40450ad6af100276715a9f/analysis/index.Rmd" target="_blank">e498299</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-06
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
-</tbody>
-</table>
-</div>
 <hr>
 </div>
 </div>
 </div>
-<p><a href="dynamic_eqtl.html">Alternative approache to compute dynamic
-eQTL</a><br />
-<br />
-<a href="dynamic_vs_psbulk.html">Pseudo-bulk as a special case</a><br />
-<br />
-<a href="context_eqtl.html">eQTL mapping in the latent cellular
-context</a><br />
-<br />
-<a href="cate.html">eQTL mapping with nonlinear environmental
-effect</a><br />
-<br />
-<a href="factor_eqtl.html">eQTL mapping to the latent factors in gene
-expresison</a><br />
-<br />
-<a href="informative_prior.html">TWAS prediction model with informative
-prior</a><br />
-<br />
-<a href="deconvolution_eqtl.html">Borrowing power from bulk
-RNAseq</a><br />
-<br />
-<a href="epigenetic_eqtl.html">Borrowing power from egigenetic
-features</a><br />
-<br />
-<a href="mashR_extension.html">Extension to MASH</a><br />
-<br />
-<a href="MIRAGE_extension.html">Extension to MIRAGE</a><br />
-<br />
-<a href="MIRAGE_real_data.html">Updated S-MIRAGE real data
-analysis</a><br />
-<br />
-<a href="mirage_diag.html">Diagnostics of S-MIRAGE on real data</a></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This page summarizes the investigation into risk genes uniquely found
+by the Burden test, namely, ABCA1, ABCG5, GKCR, HMGCR, SOX15, SLC33A1,
+PDE88. All of these genes have FDR&lt;0.01 except GCKR (0.046) and PDE8B
+(0.017).</p>
+</div>
+<div id="potential-inflation-of-z-score-in-the-null-distribution"
+class="section level2">
+<h2>Potential inflation of Z score in the null distribution</h2>
+<p>The Z scores seem fine. Standard error is not under-estimated.</p>
+<p><img src="assets/qqplot_benign_LDL.png" /></p>
+</div>
+<div id="comparing-statistics-of-the-genes" class="section level2">
+<h2>Comparing statistics of the genes</h2>
+<p>We first let all the four categories of variants share <span
+class="math inline">\(\mu\)</span> and <span
+class="math inline">\(\sigma\)</span> to ease the diagnosis. The
+estimated <span class="math inline">\(\mu\)</span> is -0.234 and
+estimated <span class="math inline">\(\sigma\)</span> is 0.745. The
+estimated <span class="math inline">\(\pi\)</span> for each category
+was:</p>
+<p><img src="figure/mirage_diag.Rmd/unnamed-chunk-1-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>The numbers from 1 to 4 corresponds to LoF, pathogenic, ambiguous,
+and benign.</p>
+<p>The estimate of risk gene proportion (<span
+class="math inline">\(\delta\)</span>) was 0.12%.</p>
+<p>Following were example genes showcasing two types of reasons for
+S-MIRAGE to miss the burden genes.</p>
+<div id="small-genetic-effects-in-the-leading-variants"
+class="section level3">
+<h3>Small genetic effects in the leading variants</h3>
+<p>Most missing genes fall into this category. Somehow the top variants
+have both small genetic effects and small standard error. Is it because
+the top variants are not actually rare variants?</p>
+<p><img src="assets/ABCG5_visual.png" /></p>
+<p><img src="assets/SLC33A1_visual.png" /></p>
+<p><img src="assets/HMGCR_visual.png" /></p>
+<p><img src="assets/SH2B3_visual.png" /></p>
+<p><img src="assets/PDE88_visual.png" /></p>
+</div>
+<div id="too-many-null-variants-compromising-the-power"
+class="section level3">
+<h3>Too many null variants compromising the power</h3>
+<p><img src="assets/ABCA1_visual.png" /></p>
+</div>
+<div id="unknown-reasons" class="section level3">
+<h3>Unknown reasons</h3>
+<p><img src="assets/SOX15_visual.png" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.2 (2021-11-01)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] workflowr_1.7.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.10       compiler_4.1.2    pillar_1.11.1     bslib_0.3.1      
+ [5] later_1.3.1       git2r_0.32.0      jquerylib_0.1.4   tools_4.1.2      
+ [9] getPass_0.2-4     digest_0.6.31     jsonlite_2.0.0    evaluate_1.0.5   
+[13] lifecycle_1.0.4   tibble_3.3.0      pkgconfig_2.0.3   rlang_1.1.6      
+[17] cli_3.6.5         rstudioapi_0.17.1 yaml_2.3.11       xfun_0.54        
+[21] fastmap_1.1.1     httr_1.4.7        stringr_1.6.0     knitr_1.50       
+[25] fs_1.6.2          vctrs_0.6.5       sass_0.4.6        rprojroot_2.1.1  
+[29] glue_1.8.0        R6_2.6.1          processx_3.8.6    otel_0.2.0       
+[33] rmarkdown_2.30    callr_3.7.6       magrittr_2.0.4    whisker_0.4.1    
+[37] ps_1.9.1          promises_1.5.0    htmltools_0.5.9   httpuv_1.6.10    
+[41] stringi_1.7.12   </code></pre>
+</div>
+</div>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -826,6 +749,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -858,6 +783,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
