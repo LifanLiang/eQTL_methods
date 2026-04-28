@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedd0b4903ac609ce812fbfe13f21247390f7b8205targetblankdd0b490a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree0fa04dbd13ca7993be0e7a6c569bbfc6f1f971e3targetblank0fa04dba">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/dd0b4903ac609ce812fbfe13f21247390f7b8205" target="_blank">dd0b490</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/0fa04dbd13ca7993be0e7a6c569bbfc6f1f971e3" target="_blank">0fa04db</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedd0b4903ac609ce812fbfe13f21247390f7b8205targetblankdd0b490a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree0fa04dbd13ca7993be0e7a6c569bbfc6f1f971e3targetblank0fa04dba"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/dd0b4903ac609ce812fbfe13f21247390f7b8205" target="_blank">dd0b490</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/0fa04dbd13ca7993be0e7a6c569bbfc6f1f971e3" target="_blank">0fa04db</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -662,6 +662,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/0fa04dbd13ca7993be0e7a6c569bbfc6f1f971e3/analysis/celltype_specific_effect.Rmd" target="_blank">0fa04db</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-28
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a1bb4764ddd511f91df9392d722942dcbabde672/docs/celltype_specific_effect.html" target="_blank">a1bb476</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -803,17 +837,17 @@ And we did not observe power increase.</p>
 <p><span class="math display">\[
 Y_{ijk} \sim \mu +\sum X_{j}G_i\beta_j + u_i + \epsilon_{ijk}
 \]</span></p>
-<pre><code>                                  Estimate Std. Error    t value
-genotype                         0.5985001 0.20202695   2.962477
-genotype:celltype_idCellType_10 -0.3778570 0.01170822 -32.272804
-genotype:celltype_idCellType_2  -0.3685516 0.01170822 -31.478024
-genotype:celltype_idCellType_3  -0.3670581 0.01170822 -31.350464
-genotype:celltype_idCellType_4  -0.3779388 0.01170822 -32.279789
-genotype:celltype_idCellType_5  -0.3731499 0.01170822 -31.870763
-genotype:celltype_idCellType_6  -0.3829212 0.01170822 -32.705336
-genotype:celltype_idCellType_7  -0.3742289 0.01170822 -31.962924
-genotype:celltype_idCellType_8  -0.3802561 0.01170822 -32.477705
-genotype:celltype_idCellType_9  -0.3870408 0.01170822 -33.057193</code></pre>
+<pre><code>                                 Estimate Std. Error  t value
+celltype_idCellType_1:genotype  0.5985001  0.2020269 2.962477
+celltype_idCellType_10:genotype 0.2206431  0.2020269 1.092147
+celltype_idCellType_2:genotype  0.2299485  0.2020269 1.138207
+celltype_idCellType_3:genotype  0.2314420  0.2020269 1.145600
+celltype_idCellType_4:genotype  0.2205613  0.2020269 1.091742
+celltype_idCellType_5:genotype  0.2253503  0.2020269 1.115447
+celltype_idCellType_6:genotype  0.2155789  0.2020269 1.067080
+celltype_idCellType_7:genotype  0.2242712  0.2020269 1.110106
+celltype_idCellType_8:genotype  0.2182441  0.2020269 1.080272
+celltype_idCellType_9:genotype  0.2114593  0.2020269 1.046689</code></pre>
 <p>The statistical power of detecting the genetic effect in the first
 cell type is basically the same across all the three models above. It is
 probably because calculating the standard error is quite similar between
