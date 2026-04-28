@@ -1,0 +1,337 @@
+---
+title: "celltype_specific_effect"
+author: "Lifan Liang"
+date: "2026-04-22"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+Given that there is donor random effect shared across all cell types, the eQTL only exists in one cell type in ground truth. This section validates the ability of different eQTL mapping approaches to detect this cell type specific eQTL for one gene-SNP pair. Simply, the dataset is generated from the follow linear mixed model:
+
+$$
+Y_{ijk} = \mu + G_i\beta_j + u_i + \epsilon_{ijk}
+$$
+
+Where
+
+* $Y_{ijk}$ is the gene expression for $k$th cell in the $j$th cell type and $i$th donor
+* $\mu$ is the baseline gene expression
+* $\beta_j$ is the genetic effect in the $j$th cell type, $beta_j$ is nonzero only the first cell type
+* $G_i$ is the genotype for the $i$th donor
+* $u_i$ is the $i$th donor effect
+* $\epsilon$ is the cell-level residual noise
+
+## Balanced cell counts with no cell-level covariates
+
+In this setting, we have 100 donors, 10 cell types, and 100 cells per donor per cell type. PVE of eQTL was 2.5%.
+
+
+```{r,echo=F}
+library(dplyr)
+library(lme4)
+
+set.seed(42)
+n_donors <- 100
+n_celltypes <- 10
+n_cells_per_donor_ct <- 100
+target_celltype <- "CellType_1"
+baseline_expr <- 10.0
+
+# Variance parameters
+sigma_donor <- 1.5    # Std dev of the shared donor random effect
+sigma_noise <- 0.8    # Std dev of the cell-level residual noise
+maf <- 0.3            # Minor Allele Frequency
+
+target_variance_explained <- 0.02 # 5% PVE
+
+var_genotype <- 2 * maf * (1 - maf)
+var_other <- (sigma_donor^2) + (sigma_noise^2)
+
+# Solve for Beta (effect size)
+var_eqtl <- (target_variance_explained / (1 - target_variance_explained)) * var_other
+eqtl_effect_size <- sqrt(var_eqtl / var_genotype)
+
+
+sim.dat <- function(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size) {
+  donor_ids <- paste0("Donor_", sprintf("%03d", 1:n_donors))
+  celltype_ids <- paste0("CellType_", 1:n_celltypes)
+  
+  genotypes <- rbinom(n_donors, size = 2, prob = maf)
+  donor_effects <- rnorm(n_donors, mean = 0, sd = sigma_donor)
+  
+  df_donors <- data.frame(
+    donor_id = donor_ids,
+    genotype = genotypes,
+    donor_effect = donor_effects
+  )
+  
+  df_cells <- expand.grid(
+    cell_index = 1:n_cells_per_donor_ct,
+    celltype_id = celltype_ids,
+    donor_id = donor_ids,
+    stringsAsFactors = FALSE
+  ) %>%
+    left_join(df_donors, by = "donor_id") %>%
+    mutate(
+      cell_id = paste(donor_id, celltype_id, cell_index, sep = "_"),
+      
+      # Apply the mathematically derived effect size ONLY to target cell type
+      eqtl_contribution = ifelse(
+        celltype_id == target_celltype, 
+        eqtl_effect_size * genotype, 
+        0
+      ),
+      
+      noise = rnorm(n(), mean = 0, sd = sigma_noise),
+      expression = baseline_expr + donor_effect + eqtl_contribution + noise
+    ) %>%
+    select(cell_id, donor_id, celltype_id, genotype, expression)
+}
+
+df_cells <- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+
+#target_data <- df_cells %>% filter(celltype_id == "CellType_1")
+#lmm <- lmer(expression ~ genotype + (1 | donor_id), data = target_data)
+#r.squaredGLMM(lmm)
+```
+
+### Pseudobulk fixed effect 
+
+We run eQTL mapping on the pseudobulk sample (average gene expression) for each cell type seperately:
+
+$$
+\bar Y_{ij} \sim \mu_j + G_i \beta_j + \epsilon_i
+$$
+
+```{r}
+### Pseudo bulk eQTL mapping
+df_pseudobulk <- df_cells %>%
+  group_by(donor_id, celltype_id) %>%
+  summarize(
+    mean_expression = mean(expression),
+    
+    # We also want to keep the genotype! 
+    # Since genotype is identical for all cells from the same donor, 
+    # we can just grab the first value.
+    genotype = first(genotype),
+    
+    # Optional: count how many cells went into this average
+    n_cells = n(),
+    
+    .groups = "drop" # Drops the grouping structure afterward
+  )
+
+sumstats <- list()
+for(i in 1:n_celltypes) {
+  n <- paste0("CellType_",i)
+  temp <- df_pseudobulk[df_pseudobulk$celltype_id==n,]
+  sumstats[[n]] <- summary(lm(mean_expression~genotype, temp))$coefficient[2,]
+}
+
+sumstats.ps <- do.call(rbind, sumstats)
+sumstats.ps
+```
+
+### Joint LMM on pseudobulk samples
+
+Running eQTL mapping across all cell types together with linear mixed model (LMM) to estimate genetic effects:
+
+$$
+\bar Y_{ij} \sim \mu_j + \sum X_{j}G_i\beta_j + u_i + \epsilon_i
+$$
+
+where $X_j$ is the binary indicator of the $j$th cell type.
+
+```{r, echo=F}
+### LMM an the pseudo-bulk sample
+sumstats.lmm.ps <- summary(lmer(mean_expression~celltype_id:genotype + (1|donor_id), df_pseudobulk))$coefficients
+sumstats.lmm.ps[-1,]
+```
+
+
+### Joint LMM on single cell level
+
+We fit the model below directly using the cell-level simulation data. And we did not observe power increase.
+
+$$
+Y_{ijk} \sim \mu +\sum X_{j}G_i\beta_j + u_i + \epsilon_{ijk}
+$$
+
+```{r, echo=F}
+sumstats.lmm.cell <- summary(lmer(expression~ genotype+celltype_id:genotype + (1|donor_id), df_cells))$coefficients
+sumstats.lmm.cell[-1,]
+```
+
+
+The statistical power of detecting the genetic effect in the first cell type is basically the same across all the three models above. It is probably because calculating the standard error is quite similar between the two approaches.
+
+For the pseudobulk fixed effect approach, residual noise ($\epsilon$) has effectively absorbed the random donor effects. Hence $Var(\hat\beta)=\dfrac{Var(G)}{Var(\epsilon)+Var(u_i)}$.
+
+For the LMM approach, the variance of $\beta_j$ is derived as
+
+$$
+Var(\hat\beta_j) = (G'V^{-1}G)^{-1}
+$$
+$$
+V = ZGZ' + Var(\epsilon)I= Var(u_i)+Var(\epsilon)
+$$
+
+Therefore, $Var(\hat\beta_j)$ is also $Var(u_i)+Var(\epsilon)$, same as that in the fixed effect model.
+
+However, if we included a main genetic effect in the model, then $\beta_{ij}$ in each cell type represents deviation from the $j$th cell type.
+
+### Two-step framework (diffQTL)
+
+
+```{r,echo=F}
+sumstats.dqtl <- matrix(nrow=n_celltypes, ncol=4)
+for(j in 1:n_celltypes) {
+  dat.diff <- as.data.frame(matrix(nrow=n_donors, ncol=3))
+  colnames(dat.diff) <- c("genotype","theta", "theta.se")
+  for(i in 1:n_donors) {
+    donor <- paste0("Donor_", sprintf("%03.0f",i))
+    celltype <- paste0("CellType_", j)
+    temp <- df_cells[df_cells$donor_id==donor,]
+    temp$target <- 0
+    temp$target[temp$celltype_id==celltype] <- 1
+    dat.diff[i,2:3] <- summary(lm(expression~target, temp))$coefficients[2,1:2]
+    dat.diff$genotype[i] <- temp$genotype[1]
+  }
+  sumstats.dqtl[j,] <- summary(lm(theta~genotype,dat.diff, weights = 1/dat.diff$theta.se^2))$coefficients[2,]
+}
+```
+
+
+## Unbalanced cell count and cell level covariates
+
+The number of cells per donor per cell type varies in the range of $[50,500]$.
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+
+# ---------------------------------------------------------
+# 1. Define Base Simulation Parameters
+# ---------------------------------------------------------
+set.seed(42) 
+n_donors <- 100
+n_celltypes <- 10
+target_celltype <- "CellType_1"
+baseline_expr <- 10.0
+
+# Variance parameters
+sigma_donor <- 1.5    # Shared donor random effect
+sigma_noise <- 0.8    # Cell-level residual noise
+maf <- 0.3            # Minor Allele Frequency
+beta_mito <- -0.1     # Linear effect of mito % on expression (e.g., higher mito = lower expr)
+
+# New Target PVE
+target_pve <- 0.02    # 2% variance explained by eQTL
+
+# ---------------------------------------------------------
+# 2. Simulate Donor-Level Data
+# ---------------------------------------------------------
+donor_ids <- paste0("Donor_", sprintf("%03d", 1:n_donors))
+celltype_ids <- paste0("CellType_", 1:n_celltypes)
+
+df_donors <- data.frame(
+  donor_id = donor_ids,
+  genotype = rbinom(n_donors, size = 2, prob = maf),
+  donor_effect = rnorm(n_donors, mean = 0, sd = sigma_donor)
+)
+
+# ---------------------------------------------------------
+# 3. Simulate Unbalanced Cell Counts & Grid
+# ---------------------------------------------------------
+# Create the base grid of all donors and cell types
+df_grid <- expand.grid(
+  donor_id = donor_ids, 
+  celltype_id = celltype_ids, 
+  stringsAsFactors = FALSE
+)
+
+# Randomly sample the number of cells (50 to 500) for each donor-celltype pair
+df_grid$n_cells <- sample(50:500, size = nrow(df_grid), replace = TRUE)
+
+# Expand the grid into single cells
+df_cells <- df_grid %>%
+  uncount(n_cells) %>%                           # Duplicates rows based on n_cells
+  group_by(donor_id, celltype_id) %>%
+  mutate(cell_index = row_number()) %>%          # Assign unique index within the cluster
+  ungroup() %>%
+  left_join(df_donors, by = "donor_id") %>%
+  mutate(cell_id = paste(donor_id, celltype_id, cell_index, sep = "_"))
+
+# ---------------------------------------------------------
+# 4. Simulate Mitochondria Covariate (Mixture Distribution)
+# ---------------------------------------------------------
+n_total_cells <- nrow(df_cells)
+
+# Create a boolean mask where 90% of cells are TRUE (low mito)
+is_low_mito <- runif(n_total_cells) < 0.90
+
+# Generate mito percentages: 
+# 90% drawn uniformly from 0 to 5%
+# 10% drawn uniformly from 5% to 25%
+df_cells$mito_percent <- ifelse(
+  is_low_mito,
+  runif(n_total_cells, min = 0, max = 5),
+  runif(n_total_cells, min = 5, max = 25)
+)
+
+# Calculate the strict linear effect of mito on expression
+df_cells$mito_effect <- df_cells$mito_percent * beta_mito
+
+# ---------------------------------------------------------
+# 5. Dynamically Calculate eQTL Effect Size
+# ---------------------------------------------------------
+# To hit exactly 2% PVE, we must account for the variance added by the mito effect
+# We calculate the empirical variance of the mito effect specifically in the target cell type
+target_mito_variance <- var(df_cells$mito_effect[df_cells$celltype_id == target_celltype])
+
+var_genotype <- 2 * maf * (1 - maf)
+var_other <- (sigma_donor^2) + (sigma_noise^2) + target_mito_variance
+
+# Solve for Beta
+var_eqtl <- (target_pve / (1 - target_pve)) * var_other
+eqtl_effect_size <- sqrt(var_eqtl / var_genotype)
+
+cat(sprintf("Calculated eQTL effect size (Beta) to explain %.0f%% variance: %.4f\n", 
+            target_pve * 100, eqtl_effect_size))
+
+# ---------------------------------------------------------
+# 6. Finalize Gene Expression
+# ---------------------------------------------------------
+df_cells <- df_cells %>%
+  mutate(
+    eqtl_contribution = ifelse(
+      celltype_id == target_celltype, 
+      eqtl_effect_size * genotype, 
+      0
+    ),
+    noise = rnorm(n(), mean = 0, sd = sigma_noise),
+    expression = baseline_expr + donor_effect + mito_effect + eqtl_contribution + noise
+  ) %>%
+  select(cell_id, donor_id, celltype_id, genotype, mito_percent, expression)
+
+# ---------------------------------------------------------
+# 7. Validation Check
+# ---------------------------------------------------------
+# Check the mito percentage distribution
+cat(sprintf("\nProportion of cells with < 5%% mitochondria: %.1f%%\n", 
+            mean(df_cells$mito_percent < 5) * 100))
+
+# Check cell count ranges
+cat(sprintf("Min cells per group: %d | Max cells per group: %d\n", 
+            min(table(df_cells$donor_id, df_cells$celltype_id)), 
+            max(table(df_cells$donor_id, df_cells$celltype_id))))
+```
+
+```{r, echo=F}
+sumstats.lmm.cell <- summary(lmer(expression~ celltype_id:genotype + (1|donor_id), df_cells))$coefficients
+sumstats.lmm.cell[-1,]
+```
