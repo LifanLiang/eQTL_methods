@@ -161,7 +161,7 @@ Y_{ijk} \sim \mu +\sum X_{j}G_i\beta_j + u_i + \epsilon_{ijk}
 $$
 
 ```{r, echo=F}
-sumstats.lmm.cell <- summary(lmer(expression~ genotype+celltype_id:genotype + (1|donor_id), df_cells))$coefficients
+sumstats.lmm.cell <- summary(lmer(expression~ celltype_id:genotype + (1|donor_id), df_cells))$coefficients
 sumstats.lmm.cell[-1,]
 ```
 
