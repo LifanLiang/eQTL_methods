@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Lifan Liang" />
+
+<meta name="date" content="2026-04-22" />
+
+<title>celltype_specific_effect</title>
+
+<script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">eQTL_methods</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">celltype_specific_effect</h1>
+<h4 class="author">Lifan Liang</h4>
+<h4 class="date">2026-04-22</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2026-04-28
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>eQTL_methods/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.2). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250106code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250106)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250106code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250106)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedd0b4903ac609ce812fbfe13f21247390f7b8205targetblankdd0b490a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/dd0b4903ac609ce812fbfe13f21247390f7b8205" target="_blank">dd0b490</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreedd0b4903ac609ce812fbfe13f21247390f7b8205targetblankdd0b490a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/dd0b4903ac609ce812fbfe13f21247390f7b8205" target="_blank">dd0b490</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .RData
+    Ignored:    .Rhistory
+
+Untracked files:
+    Untracked:  VennDiagram.2026-02-23_11-42-42.log
+    Untracked:  VennDiagram.2026-02-23_11-43-23.log
+    Untracked:  VennDiagram.2026-02-23_11-44-14.log
+    Untracked:  VennDiagram.2026-02-23_11-44-32.log
+    Untracked:  VennDiagram.2026-02-23_11-44-41.log
+    Untracked:  VennDiagram.2026-02-23_11-49-28.log
+    Untracked:  VennDiagram.2026-02-23_12-24-58.log
+    Untracked:  VennDiagram.2026-02-23_12-28-38.log
+    Untracked:  VennDiagram.2026-02-23_12-29-28.log
+    Untracked:  VennDiagram.2026-02-23_12-36-53.log
+    Untracked:  VennDiagram.2026-02-23_12-37-03.log
+    Untracked:  VennDiagram.2026-02-23_12-38-05.log
+    Untracked:  VennDiagram.2026-02-23_12-38-06.log
+    Untracked:  VennDiagram.2026-02-23_13-23-35.log
+    Untracked:  VennDiagram.2026-02-23_13-23-36.log
+    Untracked:  VennDiagram.2026-02-25_14-31-44.log
+    Untracked:  VennDiagram.2026-03-02_17-30-44.log
+    Untracked:  VennDiagram.2026-03-02_17-31-00.log
+    Untracked:  VennDiagram.2026-03-02_17-31-05.log
+    Untracked:  VennDiagram.2026-03-02_17-31-33.log
+    Untracked:  VennDiagram.2026-03-03_14-09-34.log
+    Untracked:  VennDiagram.2026-03-03_14-48-03.log
+    Untracked:  VennDiagram.2026-03-03_14-48-04.log
+    Untracked:  VennDiagram.2026-03-18_15-13-06.log
+    Untracked:  VennDiagram.2026-03-18_15-13-38.log
+    Untracked:  VennDiagram.2026-03-18_15-48-12.log
+    Untracked:  VennDiagram.2026-03-18_16-31-23.log
+    Untracked:  VennDiagram.2026-03-23_15-34-05.log
+    Untracked:  VennDiagram.2026-03-23_15-34-22.log
+    Untracked:  VennDiagram.2026-03-30_14-58-05.log
+    Untracked:  VennDiagram.2026-03-30_14-58-07.log
+    Untracked:  VennDiagram.2026-03-31_14-19-07.log
+    Untracked:  VennDiagram.2026-03-31_14-19-08.log
+    Untracked:  VennDiagram.2026-04-06_12-40-44.log
+    Untracked:  VennDiagram.2026-04-06_12-40-46.log
+    Untracked:  VennDiagram.2026-04-13_14-24-42.log
+    Untracked:  VennDiagram.2026-04-13_14-24-44.log
+    Untracked:  VennDiagram.2026-04-13_15-23-37.log
+    Untracked:  VennDiagram.2026-04-13_15-23-39.log
+    Untracked:  data/23405_NMR_LDL_Cholesterol_GL_0218T174802Z_AZ_PheWAS_Portal.csv
+    Untracked:  data/23405_NMR_LDL_Cholesterol_VL_0209T222639Z_AZ_PheWAS_Portal.csv
+    Untracked:  data/REGENIE_mirage_res.RDS
+    Untracked:  data/REGENIE_params_03122026.RDS
+    Untracked:  data/REGENIE_post_gene_03122026.RDS
+    Untracked:  data/mirage_sim_params.pdf
+    Untracked:  data/neuron_stim_genotype_chr9_2e6-3e6.rds
+    Untracked:  data/neutrophil_params.RDS
+    Untracked:  data/neutrophil_pip.RDS
+    Untracked:  data/params_alpham.RDS
+    Untracked:  data/params_shared_mu_sigma.RDS
+    Untracked:  data/susie_code.R
+    Untracked:  data/susie_simulation.zip
+    Untracked:  data/three_type_LDL_risk_genes.RDS
+    Untracked:  test_matrixeqtl.R
+
+Unstaged changes:
+    Modified:   data/mixedmodel_res_phi0.02.csv
+    Modified:   data/mixedmodel_res_phi0.03.csv
+    Modified:   data/mixedmodel_res_phi0.04.csv
+    Modified:   data/mixedmodel_res_phi0.05.csv
+    Modified:   data/scalability_snp.csv
+    Modified:   data/twostep_res_phi0.02.csv
+    Modified:   data/twostep_res_phi0.03.csv
+    Modified:   data/twostep_res_phi0.04.csv
+    Modified:   data/twostep_res_phi0.05.csv
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown
+(<code>analysis/celltype_specific_effect.Rmd</code>) and HTML
+(<code>docs/celltype_specific_effect.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/dd0b4903ac609ce812fbfe13f21247390f7b8205/analysis/celltype_specific_effect.Rmd" target="_blank">dd0b490</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-04-28
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Given that there is donor random effect shared across all cell types,
+the eQTL only exists in one cell type in ground truth. This section
+validates the ability of different eQTL mapping approaches to detect
+this cell type specific eQTL for one gene-SNP pair. Simply, the dataset
+is generated from the follow linear mixed model:</p>
+<p><span class="math display">\[
+Y_{ijk} = \mu + G_i\beta_j + u_i + \epsilon_{ijk}
+\]</span></p>
+<p>Where</p>
+<ul>
+<li><span class="math inline">\(Y_{ijk}\)</span> is the gene expression
+for <span class="math inline">\(k\)</span>th cell in the <span
+class="math inline">\(j\)</span>th cell type and <span
+class="math inline">\(i\)</span>th donor</li>
+<li><span class="math inline">\(\mu\)</span> is the baseline gene
+expression</li>
+<li><span class="math inline">\(\beta_j\)</span> is the genetic effect
+in the <span class="math inline">\(j\)</span>th cell type, <span
+class="math inline">\(beta_j\)</span> is nonzero only the first cell
+type</li>
+<li><span class="math inline">\(G_i\)</span> is the genotype for the
+<span class="math inline">\(i\)</span>th donor</li>
+<li><span class="math inline">\(u_i\)</span> is the <span
+class="math inline">\(i\)</span>th donor effect</li>
+<li><span class="math inline">\(\epsilon\)</span> is the cell-level
+residual noise</li>
+</ul>
+</div>
+<div id="balanced-cell-counts-with-no-cell-level-covariates"
+class="section level2">
+<h2>Balanced cell counts with no cell-level covariates</h2>
+<p>In this setting, we have 100 donors, 10 cell types, and 100 cells per
+donor per cell type. PVE of eQTL was 2.5%.</p>
+<pre><code>
+Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    filter, lag</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    intersect, setdiff, setequal, union</code></pre>
+<pre><code>Loading required package: Matrix</code></pre>
+<div id="pseudobulk-fixed-effect" class="section level3">
+<h3>Pseudobulk fixed effect</h3>
+<p>We run eQTL mapping on the pseudobulk sample (average gene
+expression) for each cell type seperately:</p>
+<p><span class="math display">\[
+\bar Y_{ij} \sim \mu_j + G_i \beta_j + \epsilon_i
+\]</span></p>
+<pre class="r"><code>### Pseudo bulk eQTL mapping
+df_pseudobulk &lt;- df_cells %&gt;%
+  group_by(donor_id, celltype_id) %&gt;%
+  summarize(
+    mean_expression = mean(expression),
+    
+    # We also want to keep the genotype! 
+    # Since genotype is identical for all cells from the same donor, 
+    # we can just grab the first value.
+    genotype = first(genotype),
+    
+    # Optional: count how many cells went into this average
+    n_cells = n(),
+    
+    .groups = &quot;drop&quot; # Drops the grouping structure afterward
+  )
+
+sumstats &lt;- list()
+for(i in 1:n_celltypes) {
+  n &lt;- paste0(&quot;CellType_&quot;,i)
+  temp &lt;- df_pseudobulk[df_pseudobulk$celltype_id==n,]
+  sumstats[[n]] &lt;- summary(lm(mean_expression~genotype, temp))$coefficient[2,]
+}
+
+sumstats.ps &lt;- do.call(rbind, sumstats)
+sumstats.ps</code></pre>
+<pre><code>             Estimate Std. Error  t value    Pr(&gt;|t|)
+CellType_1  0.6056089  0.2027314 2.987248 0.003556711
+CellType_2  0.2255578  0.2042698 1.104216 0.272203514
+CellType_3  0.2393450  0.2019853 1.184962 0.238897949
+CellType_4  0.2118107  0.2013299 1.052058 0.295360124
+CellType_5  0.2296322  0.2022198 1.135558 0.258911251
+CellType_6  0.2146134  0.2026764 1.058897 0.292249715
+CellType_7  0.2229071  0.2022527 1.102121 0.273108200
+CellType_8  0.2261250  0.1997250 1.132182 0.260320592
+CellType_9  0.2118057  0.2030065 1.043344 0.299355695
+CellType_10 0.2085930  0.2015404 1.034994 0.303219096</code></pre>
+</div>
+<div id="joint-lmm-on-pseudobulk-samples" class="section level3">
+<h3>Joint LMM on pseudobulk samples</h3>
+<p>Running eQTL mapping across all cell types together with linear mixed
+model (LMM) to estimate genetic effects:</p>
+<p><span class="math display">\[
+\bar Y_{ij} \sim \mu_j + \sum X_{j}G_i\beta_j + u_i + \epsilon_i
+\]</span></p>
+<p>where <span class="math inline">\(X_j\)</span> is the binary
+indicator of the <span class="math inline">\(j\)</span>th cell type.</p>
+<pre><code>                                 Estimate Std. Error  t value
+celltype_idCellType_1:genotype  0.5985001  0.2020276 2.962467
+celltype_idCellType_10:genotype 0.2206431  0.2020276 1.092143
+celltype_idCellType_2:genotype  0.2299485  0.2020276 1.138204
+celltype_idCellType_3:genotype  0.2314420  0.2020276 1.145596
+celltype_idCellType_4:genotype  0.2205613  0.2020276 1.091739
+celltype_idCellType_5:genotype  0.2253503  0.2020276 1.115443
+celltype_idCellType_6:genotype  0.2155789  0.2020276 1.067077
+celltype_idCellType_7:genotype  0.2242712  0.2020276 1.110102
+celltype_idCellType_8:genotype  0.2182441  0.2020276 1.080269
+celltype_idCellType_9:genotype  0.2114593  0.2020276 1.046685</code></pre>
+</div>
+<div id="joint-lmm-on-single-cell-level" class="section level3">
+<h3>Joint LMM on single cell level</h3>
+<p>We fit the model below directly using the cell-level simulation data.
+And we did not observe power increase.</p>
+<p><span class="math display">\[
+Y_{ijk} \sim \mu +\sum X_{j}G_i\beta_j + u_i + \epsilon_{ijk}
+\]</span></p>
+<pre><code>                                  Estimate Std. Error    t value
+genotype                         0.5985001 0.20202695   2.962477
+genotype:celltype_idCellType_10 -0.3778570 0.01170822 -32.272804
+genotype:celltype_idCellType_2  -0.3685516 0.01170822 -31.478024
+genotype:celltype_idCellType_3  -0.3670581 0.01170822 -31.350464
+genotype:celltype_idCellType_4  -0.3779388 0.01170822 -32.279789
+genotype:celltype_idCellType_5  -0.3731499 0.01170822 -31.870763
+genotype:celltype_idCellType_6  -0.3829212 0.01170822 -32.705336
+genotype:celltype_idCellType_7  -0.3742289 0.01170822 -31.962924
+genotype:celltype_idCellType_8  -0.3802561 0.01170822 -32.477705
+genotype:celltype_idCellType_9  -0.3870408 0.01170822 -33.057193</code></pre>
+<p>The statistical power of detecting the genetic effect in the first
+cell type is basically the same across all the three models above. It is
+probably because calculating the standard error is quite similar between
+the two approaches.</p>
+<p>For the pseudobulk fixed effect approach, residual noise (<span
+class="math inline">\(\epsilon\)</span>) has effectively absorbed the
+random donor effects. Hence <span
+class="math inline">\(Var(\hat\beta)=\dfrac{Var(G)}{Var(\epsilon)+Var(u_i)}\)</span>.</p>
+<p>For the LMM approach, the variance of <span
+class="math inline">\(\beta_j\)</span> is derived as</p>
+<p><span class="math display">\[
+Var(\hat\beta_j) = (G&#39;V^{-1}G)^{-1}
+\]</span> <span class="math display">\[
+V = ZGZ&#39; + Var(\epsilon)I= Var(u_i)+Var(\epsilon)
+\]</span></p>
+<p>Therefore, <span class="math inline">\(Var(\hat\beta_j)\)</span> is
+also <span class="math inline">\(Var(u_i)+Var(\epsilon)\)</span>, same
+as that in the fixed effect model.</p>
+<p>However, if we included a main genetic effect in the model, then
+<span class="math inline">\(\beta_{ij}\)</span> in each cell type
+represents deviation from the <span class="math inline">\(j\)</span>th
+cell type.</p>
+</div>
+<div id="two-step-framework-diffqtl" class="section level3">
+<h3>Two-step framework (diffQTL)</h3>
+</div>
+</div>
+<div id="unbalanced-cell-count-and-cell-level-covariates"
+class="section level2">
+<h2>Unbalanced cell count and cell level covariates</h2>
+<p>The number of cells per donor per cell type varies in the range of
+<span class="math inline">\([50,500]\)</span>.</p>
+<pre class="r"><code># Load necessary libraries
+library(dplyr)
+library(tidyr)</code></pre>
+<pre><code>
+Attaching package: &#39;tidyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:Matrix&#39;:
+
+    expand, pack, unpack</code></pre>
+<pre class="r"><code># ---------------------------------------------------------
+# 1. Define Base Simulation Parameters
+# ---------------------------------------------------------
+set.seed(42) 
+n_donors &lt;- 100
+n_celltypes &lt;- 10
+target_celltype &lt;- &quot;CellType_1&quot;
+baseline_expr &lt;- 10.0
+
+# Variance parameters
+sigma_donor &lt;- 1.5    # Shared donor random effect
+sigma_noise &lt;- 0.8    # Cell-level residual noise
+maf &lt;- 0.3            # Minor Allele Frequency
+beta_mito &lt;- -0.1     # Linear effect of mito % on expression (e.g., higher mito = lower expr)
+
+# New Target PVE
+target_pve &lt;- 0.02    # 2% variance explained by eQTL
+
+# ---------------------------------------------------------
+# 2. Simulate Donor-Level Data
+# ---------------------------------------------------------
+donor_ids &lt;- paste0(&quot;Donor_&quot;, sprintf(&quot;%03d&quot;, 1:n_donors))
+celltype_ids &lt;- paste0(&quot;CellType_&quot;, 1:n_celltypes)
+
+df_donors &lt;- data.frame(
+  donor_id = donor_ids,
+  genotype = rbinom(n_donors, size = 2, prob = maf),
+  donor_effect = rnorm(n_donors, mean = 0, sd = sigma_donor)
+)
+
+# ---------------------------------------------------------
+# 3. Simulate Unbalanced Cell Counts &amp; Grid
+# ---------------------------------------------------------
+# Create the base grid of all donors and cell types
+df_grid &lt;- expand.grid(
+  donor_id = donor_ids, 
+  celltype_id = celltype_ids, 
+  stringsAsFactors = FALSE
+)
+
+# Randomly sample the number of cells (50 to 500) for each donor-celltype pair
+df_grid$n_cells &lt;- sample(50:500, size = nrow(df_grid), replace = TRUE)
+
+# Expand the grid into single cells
+df_cells &lt;- df_grid %&gt;%
+  uncount(n_cells) %&gt;%                           # Duplicates rows based on n_cells
+  group_by(donor_id, celltype_id) %&gt;%
+  mutate(cell_index = row_number()) %&gt;%          # Assign unique index within the cluster
+  ungroup() %&gt;%
+  left_join(df_donors, by = &quot;donor_id&quot;) %&gt;%
+  mutate(cell_id = paste(donor_id, celltype_id, cell_index, sep = &quot;_&quot;))
+
+# ---------------------------------------------------------
+# 4. Simulate Mitochondria Covariate (Mixture Distribution)
+# ---------------------------------------------------------
+n_total_cells &lt;- nrow(df_cells)
+
+# Create a boolean mask where 90% of cells are TRUE (low mito)
+is_low_mito &lt;- runif(n_total_cells) &lt; 0.90
+
+# Generate mito percentages: 
+# 90% drawn uniformly from 0 to 5%
+# 10% drawn uniformly from 5% to 25%
+df_cells$mito_percent &lt;- ifelse(
+  is_low_mito,
+  runif(n_total_cells, min = 0, max = 5),
+  runif(n_total_cells, min = 5, max = 25)
+)
+
+# Calculate the strict linear effect of mito on expression
+df_cells$mito_effect &lt;- df_cells$mito_percent * beta_mito
+
+# ---------------------------------------------------------
+# 5. Dynamically Calculate eQTL Effect Size
+# ---------------------------------------------------------
+# To hit exactly 2% PVE, we must account for the variance added by the mito effect
+# We calculate the empirical variance of the mito effect specifically in the target cell type
+target_mito_variance &lt;- var(df_cells$mito_effect[df_cells$celltype_id == target_celltype])
+
+var_genotype &lt;- 2 * maf * (1 - maf)
+var_other &lt;- (sigma_donor^2) + (sigma_noise^2) + target_mito_variance
+
+# Solve for Beta
+var_eqtl &lt;- (target_pve / (1 - target_pve)) * var_other
+eqtl_effect_size &lt;- sqrt(var_eqtl / var_genotype)
+
+cat(sprintf(&quot;Calculated eQTL effect size (Beta) to explain %.0f%% variance: %.4f\n&quot;, 
+            target_pve * 100, eqtl_effect_size))</code></pre>
+<pre><code>Calculated eQTL effect size (Beta) to explain 2% variance: 0.3872</code></pre>
+<pre class="r"><code># ---------------------------------------------------------
+# 6. Finalize Gene Expression
+# ---------------------------------------------------------
+df_cells &lt;- df_cells %&gt;%
+  mutate(
+    eqtl_contribution = ifelse(
+      celltype_id == target_celltype, 
+      eqtl_effect_size * genotype, 
+      0
+    ),
+    noise = rnorm(n(), mean = 0, sd = sigma_noise),
+    expression = baseline_expr + donor_effect + mito_effect + eqtl_contribution + noise
+  ) %&gt;%
+  select(cell_id, donor_id, celltype_id, genotype, mito_percent, expression)
+
+# ---------------------------------------------------------
+# 7. Validation Check
+# ---------------------------------------------------------
+# Check the mito percentage distribution
+cat(sprintf(&quot;\nProportion of cells with &lt; 5%% mitochondria: %.1f%%\n&quot;, 
+            mean(df_cells$mito_percent &lt; 5) * 100))</code></pre>
+<pre><code>
+Proportion of cells with &lt; 5% mitochondria: 90.0%</code></pre>
+<pre class="r"><code># Check cell count ranges
+cat(sprintf(&quot;Min cells per group: %d | Max cells per group: %d\n&quot;, 
+            min(table(df_cells$donor_id, df_cells$celltype_id)), 
+            max(table(df_cells$donor_id, df_cells$celltype_id))))</code></pre>
+<pre><code>Min cells per group: 50 | Max cells per group: 500</code></pre>
+<pre><code>                                 Estimate Std. Error  t value
+celltype_idCellType_1:genotype  0.6083429  0.2015959 3.017635
+celltype_idCellType_10:genotype 0.2229955  0.2016063 1.106094
+celltype_idCellType_2:genotype  0.2124416  0.2016111 1.053720
+celltype_idCellType_3:genotype  0.2310483  0.2016155 1.145985
+celltype_idCellType_4:genotype  0.2205487  0.2015965 1.094010
+celltype_idCellType_5:genotype  0.2199770  0.2016017 1.091146
+celltype_idCellType_6:genotype  0.2190152  0.2016051 1.086357
+celltype_idCellType_7:genotype  0.2186531  0.2016183 1.084490
+celltype_idCellType_8:genotype  0.2116649  0.2016205 1.049818
+celltype_idCellType_9:genotype  0.2170979  0.2016045 1.076850</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.2 (2021-11-01)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] tidyr_1.3.0     lme4_1.1-33     Matrix_1.3-4    dplyr_1.1.2    
+[5] workflowr_1.7.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.10       nloptr_2.0.3      compiler_4.1.2    pillar_1.11.1    
+ [5] bslib_0.3.1       later_1.3.1       git2r_0.32.0      jquerylib_0.1.4  
+ [9] tools_4.1.2       getPass_0.2-4     boot_1.3-32       digest_0.6.31    
+[13] nlme_3.1-162      lattice_0.22-7    jsonlite_2.0.0    evaluate_1.0.5   
+[17] lifecycle_1.0.4   tibble_3.3.0      pkgconfig_2.0.3   rlang_1.1.6      
+[21] cli_3.6.5         rstudioapi_0.17.1 yaml_2.3.11       xfun_0.54        
+[25] fastmap_1.1.1     withr_3.0.2       httr_1.4.7        stringr_1.6.0    
+[29] knitr_1.50        generics_0.1.4    fs_1.6.2          vctrs_0.6.5      
+[33] sass_0.4.6        grid_4.1.2        tidyselect_1.2.1  rprojroot_2.1.1  
+[37] glue_1.8.0        R6_2.6.1          processx_3.8.6    otel_0.2.0       
+[41] rmarkdown_2.30    minqa_1.2.5       purrr_1.2.0       callr_3.7.6      
+[45] magrittr_2.0.4    whisker_0.4.1     MASS_7.3-54       splines_4.1.2    
+[49] ps_1.9.1          promises_1.5.0    htmltools_0.5.9   httpuv_1.6.10    
+[53] stringi_1.7.12   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
