@@ -73,9 +73,9 @@ $$
 
 $$
 \epsilon_{indep} \sim Normal(0,   \begin{bmatrix}
-    w_{1} & & \\
+    \dfrac{1}{w_{1}^2} & & \\
     & \ddots & \\
-    & & w_{k}
+    & & \dfrac{1}{w_{k}^2}
   \end{bmatrix}
 )
 $$
