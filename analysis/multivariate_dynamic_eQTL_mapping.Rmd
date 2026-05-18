@@ -31,9 +31,9 @@ $$
 ...
 \end{bmatrix} G_d +
 \begin{bmatrix}
-\beta_1 \\
-\beta_2 \\
-\beta_3 \\
+\alpha_1 \\
+\alpha_2 \\
+\alpha_2 \\
 ...
 \end{bmatrix} +
 \begin{bmatrix}
@@ -41,7 +41,7 @@ w_1 \\
 w_2 \\
 w_3 \\
 ...
-\end{bmatrix} \epsilon
+\end{bmatrix} \mathcal{N}(0,1)
 $$
 
 where w is the inverse of the standard error from the first step of estimating $\delta$, $d$ denotes the index of donor. This is somewhat analogous to the fixed effect meta analysis by treating each donor as a cohort.
