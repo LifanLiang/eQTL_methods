@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Lifan Liang" />
 
+<meta name="date" content="2026-04-29" />
 
-<title>Single cell eQTL methods development</title>
+<title>context marginal eQTL association</title>
 
 <script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,6 +31,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -229,6 +234,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -236,6 +304,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -273,7 +351,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Single cell eQTL methods development</h1>
+<h1 class="title toc-ignore">context marginal eQTL association</h1>
+<h4 class="author">Lifan Liang</h4>
+<h4 class="date">2026-04-29</h4>
 
 </div>
 
@@ -306,7 +386,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 </p>
 <p>
 <strong>Checks:</strong> <span
-class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
 <span class="glyphicon glyphicon-exclamation-sign text-danger"
 aria-hidden="true"></span> 0
 </p>
@@ -343,6 +423,90 @@ class="panel-collapse collapse">
 <p>Great! Since the R Markdown file has been committed to the Git
 repository, you know the exact version of the code that produced these
 results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20250106code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20250106)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20250106code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20250106)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
 </div>
 </div>
 </div>
@@ -469,10 +633,12 @@ have uncommitted changes.
 
 <p>
 These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
-(<code>docs/index.html</code>) files. If you’ve configured a remote Git
-repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
-in the table below to view the files as they were in that past version.
+made to the R Markdown
+(<code>analysis/context_marginal_effects.Rmd</code>) and HTML
+(<code>docs/context_marginal_effects.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -501,7 +667,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/98a799e16e0b80673e52fa9ed94ab6b5afb3583f/analysis/index.Rmd" target="_blank">98a799e</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/98a799e16e0b80673e52fa9ed94ab6b5afb3583f/analysis/context_marginal_effects.Rmd" target="_blank">98a799e</a>
 </td>
 <td>
 Lifan Liang
@@ -513,329 +679,6 @@ Lifan Liang
 wflow_publish("analysis")
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/d02a056516b2c99db83ef29c77a2dbe4a6ce74f6/docs/index.html" target="_blank">d02a056</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/analysis/index.Rmd" target="_blank">9e94aea</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/docs/index.html" target="_blank">9e94aea</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/44e95609cfc6e189e261d890752da83f412fb8da/docs/index.html" target="_blank">44e9560</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/f8dba2438bef5a05ca47560f90b49210b469a74a/analysis/index.Rmd" target="_blank">f8dba24</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/dda8fcc8de5121736f7217e98ce082cf62a3b0a7/docs/index.html" target="_blank">dda8fcc</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/4827df877a2322c689f431761c2adec1641935b5/analysis/index.Rmd" target="_blank">4827df8</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b42d3741d22acf8eb259d1707be2ff119598bf3d/docs/index.html" target="_blank">b42d374</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/03517e0ba31a215595f83999605ab7f0408df75c/analysis/index.Rmd" target="_blank">03517e0</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/bac1cb198551c06114d496ac395ac5cde01f15d3/docs/index.html" target="_blank">bac1cb1</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/index.Rmd" target="_blank">b196d33</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b66cf934485dbf61280816b532131ea637318592/docs/index.html" target="_blank">b66cf93</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/a0f0980c85ae273282089aa243d5a48182f72b61/analysis/index.Rmd" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a0f0980c85ae273282089aa243d5a48182f72b61/docs/index.html" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/6bb4819a6e58c5ced1ce05262008a56dd5ae6e46/docs/index.html" target="_blank">6bb4819</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b62f35382521fcea5baaabdb6d860c2d668dd786/analysis/index.Rmd" target="_blank">b62f353</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fb9f866236c21db5e99d9367066f02fd0d40b647/docs/index.html" target="_blank">fb9f866</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/c1a2fa73c15fc9ec8223d438fdd2375c65375f6b/analysis/index.Rmd" target="_blank">c1a2fa7</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/e498299ee21bfc271e40450ad6af100276715a9f/analysis/index.Rmd" target="_blank">e498299</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-06
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -843,41 +686,181 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p><a href="dynamic_eqtl.html">Alternative approache to compute dynamic
-eQTL</a><br />
-<br />
-<a href="dynamic_vs_psbulk.html">Pseudo-bulk as a special case</a><br />
-<br />
-<a href="context_eqtl.html">eQTL mapping in the latent cellular
-context</a><br />
-<br />
-<a href="cate.html">eQTL mapping with nonlinear environmental
-effect</a><br />
-<br />
-<a href="factor_eqtl.html">eQTL mapping to the latent factors in gene
-expresison</a><br />
-<br />
-<a href="informative_prior.html">TWAS prediction model with informative
-prior</a><br />
-<br />
-<a href="deconvolution_eqtl.html">Borrowing power from bulk
-RNAseq</a><br />
-<br />
-<a href="epigenetic_eqtl.html">Borrowing power from egigenetic
-features</a><br />
-<br />
-<a href="mashR_extension.html">Extension to MASH</a><br />
-<br />
-<a href="MIRAGE_extension.html">Extension to MIRAGE</a><br />
-<br />
-<a href="MIRAGE_real_data.html">Updated S-MIRAGE real data
-analysis</a><br />
-<br />
-<a href="mirage_diag.html">Diagnostics of S-MIRAGE on real
-data</a><br />
-<br />
-<a href="multivariate_dynamic_eQTL_mapping.html">Multivariate dynamic
-eQTL mapping</a></p>
+<div id="simulation" class="section level2">
+<h2>Simulation</h2>
+<p>We directly simulated the pseudobulk samples where only one out of 10
+contexts has nonzero genetic effect:</p>
+<p><span class="math display">\[
+Y_{ij} = \mu + 0.5 \cdot X_1 G_i + \sum_{j=2}^{10}0\cdot X_jG_i + u_i +
+\epsilon_{ij}
+\]</span></p>
+<p>Where</p>
+<ul>
+<li><span class="math inline">\(Y_{ij}\)</span> is the averaged gene
+expression for the <span class="math inline">\(j\)</span>th context and
+<span class="math inline">\(i\)</span>th donor</li>
+<li><span class="math inline">\(\mu\)</span> is the baseline gene
+expression</li>
+<li><span class="math inline">\(G_i\)</span> is the genotype for the
+<span class="math inline">\(i\)</span>th donor</li>
+<li><span class="math inline">\(X_j\)</span> is the binary indicator for
+the <span class="math inline">\(j\)</span>th cell type, <span
+class="math inline">\(X_j=1\)</span> when <span
+class="math inline">\(Y_{ij}\)</span> is in the same cell type</li>
+<li><span class="math inline">\(u_i\)</span> is the <span
+class="math inline">\(i\)</span>th donor effect</li>
+<li><span class="math inline">\(\epsilon\)</span> is the residual noise
+for the <span class="math inline">\(j\)</span>th context and <span
+class="math inline">\(i\)</span>th donor</li>
+</ul>
+<pre class="r"><code>## Direct generation of pseudobulk
+library(dplyr)</code></pre>
+<pre><code>
+Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>The following objects are masked from &#39;package:stats&#39;:
+
+    filter, lag</code></pre>
+<pre><code>The following objects are masked from &#39;package:base&#39;:
+
+    intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(lme4)</code></pre>
+<pre><code>Loading required package: Matrix</code></pre>
+<pre class="r"><code>set.seed(45)
+n_donors &lt;- 500
+n_celltypes &lt;- 10
+target_celltype &lt;- &quot;CellType_1&quot;
+baseline_expr &lt;- 10.0
+
+# Variance parameters
+sigma_donor &lt;- 0.8    # Std dev of the shared donor random effect
+sigma_noise &lt;- 0.8    # Std dev of the cell-level residual noise
+maf &lt;- 0.3            # Minor Allele Frequency
+
+target_variance_explained &lt;- 0.05 # 5% PVE
+
+var_genotype &lt;- 2 * maf * (1 - maf)
+var_other &lt;- (sigma_donor^2) + (sigma_noise^2)
+
+# Solve for Beta (effect size)
+var_eqtl &lt;- (target_variance_explained / (1 - target_variance_explained)) * var_other
+eqtl_effect_size &lt;- sqrt(var_eqtl / var_genotype)
+
+#eqtl_effect_size &lt;- 0.5
+sim.dat &lt;- function(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size) {
+  donor_ids &lt;- paste0(&quot;Donor_&quot;, sprintf(&quot;%03d&quot;, 1:n_donors))
+  celltype_ids &lt;- paste0(&quot;CellType_&quot;, 1:n_celltypes)
+  
+  genotypes &lt;- rbinom(n_donors, size = 2, prob = maf)
+  donor_effects &lt;- rnorm(n_donors, mean = 0, sd = sigma_donor)
+  
+  df_donors &lt;- data.frame(
+    donor_id = donor_ids,
+    genotype = genotypes,
+    donor_effect = donor_effects
+  )
+  
+  df_bulk &lt;- expand.grid(
+    celltype_id = celltype_ids,
+    donor_id = donor_ids,
+    stringsAsFactors = FALSE
+  ) %&gt;%
+    left_join(df_donors, by = &quot;donor_id&quot;) %&gt;%
+    mutate(
+      # Apply the mathematically derived effect size ONLY to target cell type
+      eqtl_contribution = ifelse(
+        celltype_id == target_celltype, 
+        eqtl_effect_size * genotype, 
+        0
+      ),
+      
+      noise = rnorm(n(), mean = 0, sd = sigma_noise),
+      expression = baseline_expr + donor_effect + eqtl_contribution + noise
+    ) %&gt;%
+    select(donor_id, celltype_id, genotype, expression, donor_effect)
+}
+
+df_ps &lt;- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)</code></pre>
+</div>
+<div id="pseudobulk-eqtl-mapping" class="section level2">
+<h2>Pseudobulk eQTL mapping</h2>
+<pre class="r"><code>n_iter &lt;- 100
+ps_eqtl_df &lt;- matrix(nrow=n_iter, ncol=n_celltypes)
+for(iter in 1:n_iter) {
+  df_ps &lt;- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+  sumstats &lt;- list()
+  for(i in 1:n_celltypes) {
+    n &lt;- paste0(&quot;CellType_&quot;,i)
+    temp &lt;- df_ps[df_ps$celltype_id==n,]
+    sumstats[[n]] &lt;- summary(lm(expression~genotype, temp))$coefficient[2,]
+  }
+  
+  sumstats.ps &lt;- do.call(rbind, sumstats)
+  ps_eqtl_df[iter,] &lt;- sumstats.ps[,1]
+}
+boxplot(ps_eqtl_df, main=&quot;Effect size distribution for 10 contexts&quot;)
+lines(c(0.2,1.7), rep(eqtl_effect_size,2), col=&quot;red&quot;, lwd=2)
+lines(c(1.5,12), rep(0,2), col=&quot;blue&quot;, lwd=2)</code></pre>
+<p><img src="figure/context_marginal_effects.Rmd/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="lmm-eqtl-mapping" class="section level2">
+<h2>LMM eQTL mapping</h2>
+<pre class="r"><code>set.seed(42)
+n_iter &lt;- 100
+lmm_eqtl_df &lt;- matrix(nrow=n_iter, ncol=3)
+colnames(lmm_eqtl_df) &lt;- c(&quot;no_main_eff&quot;, &quot;besides_main_eff&quot;, &quot;plus_main_eff&quot;)
+for(iter in 1:n_iter) {
+  df_ps &lt;- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+  df_ps$target_geno &lt;- 0
+  df_ps$target_geno[df_ps$celltype_id==&quot;CellType_1&quot;] &lt;- 1
+  temp &lt;- summary(lmer(expression~genotype+target_geno+(1|donor_id), df_ps))$coefficient
+  lmm_eqtl_df[iter,2] &lt;- temp[3,1]
+  lmm_eqtl_df[iter,1] &lt;- summary(lmer(expression~target_geno+(1|donor_id), df_ps))$coefficient[2,1]
+  lmm_eqtl_df[iter,3] &lt;- temp[3,1] + temp[2,1]
+}
+boxplot(lmm_eqtl_df)</code></pre>
+<p><img src="figure/context_marginal_effects.Rmd/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.1.2 (2021-11-01)
+Platform: x86_64-apple-darwin17.0 (64-bit)
+Running under: macOS Big Sur 10.16
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.1/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] lme4_1.1-33     Matrix_1.3-4    dplyr_1.1.2     workflowr_1.7.2
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.10       nloptr_2.0.3      compiler_4.1.2    pillar_1.11.1    
+ [5] bslib_0.3.1       later_1.3.1       git2r_0.32.0      jquerylib_0.1.4  
+ [9] tools_4.1.2       getPass_0.2-4     boot_1.3-32       digest_0.6.31    
+[13] nlme_3.1-162      lattice_0.22-7    jsonlite_2.0.0    evaluate_1.0.5   
+[17] lifecycle_1.0.4   tibble_3.3.0      pkgconfig_2.0.3   rlang_1.1.6      
+[21] cli_3.6.5         rstudioapi_0.17.1 yaml_2.3.11       xfun_0.54        
+[25] fastmap_1.1.1     withr_3.0.2       httr_1.4.7        stringr_1.6.0    
+[29] knitr_1.50        generics_0.1.4    fs_1.6.2          vctrs_0.6.5      
+[33] sass_0.4.6        grid_4.1.2        tidyselect_1.2.1  rprojroot_2.1.1  
+[37] glue_1.8.0        R6_2.6.1          processx_3.8.6    otel_0.2.0       
+[41] rmarkdown_2.30    minqa_1.2.5       callr_3.7.6       magrittr_2.0.4   
+[45] whisker_0.4.1     MASS_7.3-54       splines_4.1.2     ps_1.9.1         
+[49] promises_1.5.0    htmltools_0.5.9   httpuv_1.6.10     stringi_1.7.12   </code></pre>
+</div>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -895,6 +878,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -927,6 +912,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

@@ -9,9 +9,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Lifan Liang" />
 
+<meta name="date" content="2026-05-18" />
 
-<title>Single cell eQTL methods development</title>
+<title>multivariate dynamic eQTL mapping</title>
 
 <script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,6 +31,9 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -229,6 +234,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -236,6 +304,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -273,7 +351,9 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Single cell eQTL methods development</h1>
+<h1 class="title toc-ignore">multivariate dynamic eQTL mapping</h1>
+<h4 class="author">Lifan Liang</h4>
+<h4 class="date">2026-05-18</h4>
 
 </div>
 
@@ -469,10 +549,12 @@ have uncommitted changes.
 
 <p>
 These are the previous versions of the repository in which changes were
-made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML
-(<code>docs/index.html</code>) files. If you’ve configured a remote Git
-repository (see <code>?wflow_git_remote</code>), click on the hyperlinks
-in the table below to view the files as they were in that past version.
+made to the R Markdown
+(<code>analysis/multivariate_dynamic_eQTL_mapping.Rmd</code>) and HTML
+(<code>docs/multivariate_dynamic_eQTL_mapping.html</code>) files. If
+you’ve configured a remote Git repository (see
+<code>?wflow_git_remote</code>), click on the hyperlinks in the table
+below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -501,7 +583,7 @@ Message
 Rmd
 </td>
 <td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/98a799e16e0b80673e52fa9ed94ab6b5afb3583f/analysis/index.Rmd" target="_blank">98a799e</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/98a799e16e0b80673e52fa9ed94ab6b5afb3583f/analysis/multivariate_dynamic_eQTL_mapping.Rmd" target="_blank">98a799e</a>
 </td>
 <td>
 Lifan Liang
@@ -513,329 +595,6 @@ Lifan Liang
 wflow_publish("analysis")
 </td>
 </tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/d02a056516b2c99db83ef29c77a2dbe4a6ce74f6/docs/index.html" target="_blank">d02a056</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/analysis/index.Rmd" target="_blank">9e94aea</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/9e94aeaed91d1a7104e8e0e1657b3db760cdd4e1/docs/index.html" target="_blank">9e94aea</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-04-13
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/44e95609cfc6e189e261d890752da83f412fb8da/docs/index.html" target="_blank">44e9560</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/f8dba2438bef5a05ca47560f90b49210b469a74a/analysis/index.Rmd" target="_blank">f8dba24</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-03-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/dda8fcc8de5121736f7217e98ce082cf62a3b0a7/docs/index.html" target="_blank">dda8fcc</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/4827df877a2322c689f431761c2adec1641935b5/analysis/index.Rmd" target="_blank">4827df8</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-02-11
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b42d3741d22acf8eb259d1707be2ff119598bf3d/docs/index.html" target="_blank">b42d374</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/03517e0ba31a215595f83999605ab7f0408df75c/analysis/index.Rmd" target="_blank">03517e0</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2026-01-21
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/bac1cb198551c06114d496ac395ac5cde01f15d3/docs/index.html" target="_blank">bac1cb1</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b196d33a49bff2c830bfea0c00728f09b4820b62/analysis/index.Rmd" target="_blank">b196d33</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-05-12
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/b66cf934485dbf61280816b532131ea637318592/docs/index.html" target="_blank">b66cf93</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/a0f0980c85ae273282089aa243d5a48182f72b61/analysis/index.Rmd" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/a0f0980c85ae273282089aa243d5a48182f72b61/docs/index.html" target="_blank">a0f0980</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-04-24
-</td>
-<td>
-wflow_publish(c("analysis", "docs"))
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/6bb4819a6e58c5ced1ce05262008a56dd5ae6e46/docs/index.html" target="_blank">6bb4819</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/b62f35382521fcea5baaabdb6d860c2d668dd786/analysis/index.Rmd" target="_blank">b62f353</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-02-18
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-html
-</td>
-<td>
-<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/fb9f866236c21db5e99d9367066f02fd0d40b647/docs/index.html" target="_blank">fb9f866</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-Build site.
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/c1a2fa73c15fc9ec8223d438fdd2375c65375f6b/analysis/index.Rmd" target="_blank">c1a2fa7</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-14
-</td>
-<td>
-wflow_publish("analysis")
-</td>
-</tr>
-<tr>
-<td>
-Rmd
-</td>
-<td>
-<a href="https://github.com/LifanLiang/eQTL_methods/blob/e498299ee21bfc271e40450ad6af100276715a9f/analysis/index.Rmd" target="_blank">e498299</a>
-</td>
-<td>
-Lifan Liang
-</td>
-<td>
-2025-01-06
-</td>
-<td>
-Start workflowr project.
-</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -843,41 +602,118 @@ Start workflowr project.
 </div>
 </div>
 </div>
-<p><a href="dynamic_eqtl.html">Alternative approache to compute dynamic
-eQTL</a><br />
-<br />
-<a href="dynamic_vs_psbulk.html">Pseudo-bulk as a special case</a><br />
-<br />
-<a href="context_eqtl.html">eQTL mapping in the latent cellular
-context</a><br />
-<br />
-<a href="cate.html">eQTL mapping with nonlinear environmental
-effect</a><br />
-<br />
-<a href="factor_eqtl.html">eQTL mapping to the latent factors in gene
-expresison</a><br />
-<br />
-<a href="informative_prior.html">TWAS prediction model with informative
-prior</a><br />
-<br />
-<a href="deconvolution_eqtl.html">Borrowing power from bulk
-RNAseq</a><br />
-<br />
-<a href="epigenetic_eqtl.html">Borrowing power from egigenetic
-features</a><br />
-<br />
-<a href="mashR_extension.html">Extension to MASH</a><br />
-<br />
-<a href="MIRAGE_extension.html">Extension to MIRAGE</a><br />
-<br />
-<a href="MIRAGE_real_data.html">Updated S-MIRAGE real data
-analysis</a><br />
-<br />
-<a href="mirage_diag.html">Diagnostics of S-MIRAGE on real
-data</a><br />
-<br />
-<a href="multivariate_dynamic_eQTL_mapping.html">Multivariate dynamic
-eQTL mapping</a></p>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>Recall the two-step dynamic eQTL mapping framework (<a
+href="dynamic_eqtl.html">dynamic eQTL</a>) that basically approximate
+the single-cell level interaction effect model:</p>
+<p><span class="math display">\[
+    y_i = \mu + \alpha X_i + \beta G_d + \gamma X_i G_d + u_d +
+\epsilon_i,
+\]</span></p>
+<p>Suppose there are <span class="math inline">\(K\)</span> contexts
+instead of one, and we estimated <span
+class="math inline">\(\Delta_k\)</span> for each context seperately in
+the first step. Then we can write the second step as:</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+\Delta_1 \\
+\Delta_2 \\
+\Delta_3 \\
+...
+\end{bmatrix}_d =
+\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+\gamma_3 \\
+...
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\beta_1 \\
+\beta_2 \\
+\beta_3 \\
+...
+\end{bmatrix} +
+\begin{bmatrix}
+w_1 \\
+w_2 \\
+w_3 \\
+...
+\end{bmatrix} \epsilon
+\]</span></p>
+<p>where w is the inverse of the standard error from the first step of
+estimating <span class="math inline">\(\delta\)</span>, <span
+class="math inline">\(d\)</span> denotes the index of donor. This is
+somewhat analogous to the fixed effect meta analysis by treating each
+donor as a cohort.</p>
+<p>To further improve power, we can further investigate the sharing of
+the noise. For example, gene expression in a certain cell type may be
+correlated with another cell type, disregarding the genetic effects. To
+model this, we can extend this model to become somewhat analogous to the
+random effect meta analysis by treating each context as the sharing
+cohort:</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+\Delta_1 \\
+\Delta_2 \\
+\Delta_3 \\
+...
+\end{bmatrix}_d =
+\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+\gamma_3 \\
+...
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\beta_1 \\
+\beta_2 \\
+\beta_3 \\
+...
+\end{bmatrix} +
+\epsilon_{shared} +
+\epsilon_{indep}
+\]</span></p>
+<p><span class="math display">\[
+\epsilon_{indep} \sim Normal(0,   \begin{bmatrix}
+    w_{1} &amp; &amp; \\
+    &amp; \ddots &amp; \\
+    &amp; &amp; w_{k}
+  \end{bmatrix}
+)
+\]</span></p>
+<p><span class="math display">\[
+\epsilon_{shared} \sim Normal(0,\Sigma)
+\]</span></p>
+<p>where <span class="math inline">\(\Sigma\)</span> is a <span
+class="math inline">\(K \times K\)</span> matrix represent the
+covariance of the gene expression residual.</p>
+<p>Compared with the previous model where each <span
+class="math inline">\(\Delta\)</span> was estimated seperately, this
+model improves power by borrowing information across contexts. If
+context B has large standard error but also large covariance of context
+A, which has much smaller estimation error, the model will automatically
+shrinks the noise of B towards the noise of A.</p>
+</div>
+<div id="the-inference-procedure" class="section level2">
+<h2>The inference procedure</h2>
+<p>The model above is actually a type of seemingly unrelated regression
+(SUR) and can be estimated with feasible generalized least square
+(FGLS):</p>
+<ol style="list-style-type: decimal">
+<li>Fit the model with OLS (or weighted least square in our case).</li>
+<li>Use the residual of OLS to estimate the <span
+class="math inline">\(\Sigma\)</span>.</li>
+<li>Estimate <span class="math inline">\(\gamma\)</span> with
+generalized least square.</li>
+</ol>
+<p>Compared to the precedure for the seperate estimation, we only need
+to estimate <span class="math inline">\(\Sigma\)</span> and transform
+<span class="math inline">\(Y\)</span> and covariates accordingly,
+instead of simply multiplying both <span
+class="math inline">\(Y\)</span> and covariates$ by the <span
+class="math inline">\(w\)</span>.</p>
+</div>
 
 
 <!-- Adjust MathJax settings so that all math formulae are shown using
@@ -895,6 +731,8 @@ footer is added to webpages before the MathJax javascript. -->
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -927,6 +765,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
