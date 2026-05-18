@@ -1,5 +1,5 @@
 ---
-title: "celltype_specific_effect"
+title: "Context specific effect"
 author: "Lifan Liang"
 date: "2026-04-22"
 output: workflowr::wflow_html
@@ -33,7 +33,7 @@ In this setting, we have 100 donors, 10 cell types, and 100 cells per donor per 
 library(dplyr)
 library(lme4)
 
-set.seed(42)
+set.seed(44)
 n_donors <- 100
 n_celltypes <- 10
 n_cells_per_donor_ct <- 100
@@ -41,7 +41,7 @@ target_celltype <- "CellType_1"
 baseline_expr <- 10.0
 
 # Variance parameters
-sigma_donor <- 1.5    # Std dev of the shared donor random effect
+sigma_donor <- 0.5    # Std dev of the shared donor random effect
 sigma_noise <- 0.8    # Std dev of the cell-level residual noise
 maf <- 0.3            # Minor Allele Frequency
 
@@ -54,6 +54,7 @@ var_other <- (sigma_donor^2) + (sigma_noise^2)
 var_eqtl <- (target_variance_explained / (1 - target_variance_explained)) * var_other
 eqtl_effect_size <- sqrt(var_eqtl / var_genotype)
 
+#eqtl_effect_size <- 0.2
 
 sim.dat <- function(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size) {
   donor_ids <- paste0("Donor_", sprintf("%03d", 1:n_donors))
@@ -135,6 +136,13 @@ sumstats.ps <- do.call(rbind, sumstats)
 sumstats.ps
 ```
 
+
+```{r}
+
+```
+
+
+
 ### Joint LMM on pseudobulk samples
 
 Running eQTL mapping across all cell types together with linear mixed model (LMM) to estimate genetic effects:
@@ -168,7 +176,7 @@ sumstats.lmm.cell[-1,]
 
 The statistical power of detecting the genetic effect in the first cell type is basically the same across all the three models above. It is probably because calculating the standard error is quite similar between the two approaches.
 
-For the pseudobulk fixed effect approach, residual noise ($\epsilon$) has effectively absorbed the random donor effects. Hence $Var(\hat\beta)=\dfrac{Var(G)}{Var(\epsilon)+Var(u_i)}$.
+For the pseudobulk fixed effect approach, residual noise ($\epsilon$) has effectively absorbed the random donor effects. Hence $Var(\hat\beta)=\dfrac{Var(\epsilon)+Var(u_i)}{Var(G)}$.
 
 For the LMM approach, the variance of $\beta_j$ is derived as
 

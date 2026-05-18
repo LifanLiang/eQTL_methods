@@ -1,0 +1,131 @@
+---
+title: "context marginal eQTL association"
+author: "Lifan Liang"
+date: "2026-04-29"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Simulation
+
+We directly simulated the pseudobulk samples where only one out of 10 contexts has nonzero genetic effect:
+
+$$
+Y_{ij} = \mu + 0.5 \cdot X_1 G_i + \sum_{j=2}^{10}0\cdot X_jG_i + u_i + \epsilon_{ij}
+$$
+
+Where
+
+* $Y_{ij}$ is the averaged gene expression for the $j$th context and $i$th donor
+* $\mu$ is the baseline gene expression
+* $G_i$ is the genotype for the $i$th donor
+* $X_j$ is the binary indicator for the $j$th cell type, $X_j=1$ when $Y_{ij}$ is in the same cell type
+* $u_i$ is the $i$th donor effect
+* $\epsilon$ is the residual noise for the $j$th context and $i$th donor
+
+
+```{r}
+## Direct generation of pseudobulk
+library(dplyr)
+library(lme4)
+
+set.seed(45)
+n_donors <- 500
+n_celltypes <- 10
+target_celltype <- "CellType_1"
+baseline_expr <- 10.0
+
+# Variance parameters
+sigma_donor <- 0.8    # Std dev of the shared donor random effect
+sigma_noise <- 0.8    # Std dev of the cell-level residual noise
+maf <- 0.3            # Minor Allele Frequency
+
+target_variance_explained <- 0.05 # 5% PVE
+
+var_genotype <- 2 * maf * (1 - maf)
+var_other <- (sigma_donor^2) + (sigma_noise^2)
+
+# Solve for Beta (effect size)
+var_eqtl <- (target_variance_explained / (1 - target_variance_explained)) * var_other
+eqtl_effect_size <- sqrt(var_eqtl / var_genotype)
+
+#eqtl_effect_size <- 0.5
+sim.dat <- function(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size) {
+  donor_ids <- paste0("Donor_", sprintf("%03d", 1:n_donors))
+  celltype_ids <- paste0("CellType_", 1:n_celltypes)
+  
+  genotypes <- rbinom(n_donors, size = 2, prob = maf)
+  donor_effects <- rnorm(n_donors, mean = 0, sd = sigma_donor)
+  
+  df_donors <- data.frame(
+    donor_id = donor_ids,
+    genotype = genotypes,
+    donor_effect = donor_effects
+  )
+  
+  df_bulk <- expand.grid(
+    celltype_id = celltype_ids,
+    donor_id = donor_ids,
+    stringsAsFactors = FALSE
+  ) %>%
+    left_join(df_donors, by = "donor_id") %>%
+    mutate(
+      # Apply the mathematically derived effect size ONLY to target cell type
+      eqtl_contribution = ifelse(
+        celltype_id == target_celltype, 
+        eqtl_effect_size * genotype, 
+        0
+      ),
+      
+      noise = rnorm(n(), mean = 0, sd = sigma_noise),
+      expression = baseline_expr + donor_effect + eqtl_contribution + noise
+    ) %>%
+    select(donor_id, celltype_id, genotype, expression, donor_effect)
+}
+
+df_ps <- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+```
+
+
+## Pseudobulk eQTL mapping
+
+```{r}
+n_iter <- 100
+ps_eqtl_df <- matrix(nrow=n_iter, ncol=n_celltypes)
+for(iter in 1:n_iter) {
+  df_ps <- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+  sumstats <- list()
+  for(i in 1:n_celltypes) {
+    n <- paste0("CellType_",i)
+    temp <- df_ps[df_ps$celltype_id==n,]
+    sumstats[[n]] <- summary(lm(expression~genotype, temp))$coefficient[2,]
+  }
+  
+  sumstats.ps <- do.call(rbind, sumstats)
+  ps_eqtl_df[iter,] <- sumstats.ps[,1]
+}
+boxplot(ps_eqtl_df, main="Effect size distribution for 10 contexts")
+lines(c(0.2,1.7), rep(eqtl_effect_size,2), col="red", lwd=2)
+lines(c(1.5,12), rep(0,2), col="blue", lwd=2)
+```
+
+## LMM eQTL mapping
+
+```{r}
+set.seed(42)
+n_iter <- 100
+lmm_eqtl_df <- matrix(nrow=n_iter, ncol=3)
+colnames(lmm_eqtl_df) <- c("no_main_eff", "besides_main_eff", "plus_main_eff")
+for(iter in 1:n_iter) {
+  df_ps <- sim.dat(n_donor, n_celltypes, n_cells_per_donor_ct, maf, sigma_donor, sigma_noise, eqtl_effect_size)
+  df_ps$target_geno <- 0
+  df_ps$target_geno[df_ps$celltype_id=="CellType_1"] <- 1
+  temp <- summary(lmer(expression~genotype+target_geno+(1|donor_id), df_ps))$coefficient
+  lmm_eqtl_df[iter,2] <- temp[3,1]
+  lmm_eqtl_df[iter,1] <- summary(lmer(expression~target_geno+(1|donor_id), df_ps))$coefficient[2,1]
+  lmm_eqtl_df[iter,3] <- temp[3,1] + temp[2,1]
+}
+boxplot(lmm_eqtl_df)
+```
+

@@ -42,4 +42,6 @@ editor_options:
 \
 \
 [Diagnostics of S-MIRAGE on real data](mirage_diag.html)
-
+\
+\
+[Multivariate dynamic eQTL mapping](multivariate_dynamic_eQTL_mapping.html)

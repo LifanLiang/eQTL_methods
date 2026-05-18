@@ -1,0 +1,102 @@
+---
+title: "multivariate dynamic eQTL mapping"
+author: "Lifan Liang"
+date: "2026-05-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+Recall the two-step dynamic eQTL mapping framework ([dynamic eQTL](dynamic_eqtl.html)) that basically approximate the single-cell level interaction effect model: 
+
+$$
+    y_i = \mu + \alpha X_i + \beta G_d + \gamma X_i G_d + u_d + \epsilon_i,
+$$
+
+Suppose there are $K$ contexts instead of one, and we estimated $\Delta_k$ for each context seperately in the first step. Then we can write the second step as:
+
+$$
+\begin{bmatrix} 
+\Delta_1 \\
+\Delta_2 \\
+\Delta_3 \\
+... 
+\end{bmatrix}_d = 
+\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+\gamma_3 \\
+...
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\beta_1 \\
+\beta_2 \\
+\beta_3 \\
+...
+\end{bmatrix} +
+\begin{bmatrix}
+w_1 \\
+w_2 \\
+w_3 \\
+...
+\end{bmatrix} \epsilon
+$$
+
+where w is the inverse of the standard error from the first step of estimating $\delta$, $d$ denotes the index of donor. This is somewhat analogous to the fixed effect meta analysis by treating each donor as a cohort.
+
+To further improve power, we can further investigate the sharing of the noise. For example, gene expression in a certain cell type may be correlated with another cell type, disregarding the genetic effects. To model this, we can extend this model to become somewhat analogous to the random effect meta analysis by treating each context as the sharing cohort:
+
+$$
+\begin{bmatrix} 
+\Delta_1 \\
+\Delta_2 \\
+\Delta_3 \\
+... 
+\end{bmatrix}_d = 
+\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+\gamma_3 \\
+...
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\beta_1 \\
+\beta_2 \\
+\beta_3 \\
+...
+\end{bmatrix} +
+\epsilon_{shared} +
+\epsilon_{indep}
+$$
+
+$$
+\epsilon_{indep} \sim Normal(0,   \begin{bmatrix}
+    w_{1} & & \\
+    & \ddots & \\
+    & & w_{k}
+  \end{bmatrix}
+)
+$$
+
+$$
+\epsilon_{shared} \sim Normal(0,\Sigma)
+$$
+
+where $\Sigma$ is a $K \times K$ matrix represent the covariance of the gene expression residual.
+
+Compared with the previous model where each $\Delta$ was estimated seperately, this model improves power by borrowing information across contexts. If context B has large standard error but also large covariance of context A, which has much smaller estimation error, the model will automatically shrinks the noise of B towards the noise of A.
+
+
+## The inference procedure
+
+The model above is actually a type of seemingly unrelated regression (SUR) and can be estimated with feasible generalized least square (FGLS):
+
+1. Fit the model with OLS (or weighted least square in our case).
+2. Use the residual of OLS to estimate the $\Sigma$.
+3. Estimate $\gamma$ with generalized least square.
+
+Compared to the precedure for the seperate estimation, we only need to estimate $\Sigma$ and transform $Y$ and covariates accordingly, instead of simply multiplying both $Y$ and covariates$ by the $w$.
+
+
