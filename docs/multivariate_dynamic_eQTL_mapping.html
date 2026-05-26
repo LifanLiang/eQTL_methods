@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree418857964acc5d7c44e83bd694623baa3e680d1ctargetblank4188579a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeecb0f88776729b9c87790850049959379e38f867targetblankecb0f88a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/418857964acc5d7c44e83bd694623baa3e680d1c" target="_blank">4188579</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/ecb0f88776729b9c87790850049959379e38f867" target="_blank">ecb0f88</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree418857964acc5d7c44e83bd694623baa3e680d1ctargetblank4188579a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeecb0f88776729b9c87790850049959379e38f867targetblankecb0f88a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/418857964acc5d7c44e83bd694623baa3e680d1c" target="_blank">4188579</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/ecb0f88776729b9c87790850049959379e38f867" target="_blank">ecb0f88</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -663,6 +663,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/ecb0f88776729b9c87790850049959379e38f867/analysis/multivariate_dynamic_eQTL_mapping.Rmd" target="_blank">ecb0f88</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-05-26
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/327334843b93d8c445600574efd5292f7fb0a6e1/docs/multivariate_dynamic_eQTL_mapping.html" target="_blank">3273348</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-05-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -839,13 +873,13 @@ class="math inline">\(X^TX\)</span>). This in insufficient to capture
 the complex gene-specific biological sharing across contexts. For
 example, if a cell is in Context A (e.g., early differentiation) and
 another is in Context B (e.g., late differentiation/mature state), their
-global dot product in contexts, <span class="math inline">\(X\)</span>,
-might be near zero. The model assumes they share no random effects.
-However, if the eQTL in question is driven by a ubiquitous transcription
-factor (TF) that happens to bind the exact same enhancer in both early
-and late stages, there is true biological sharing that the global
-correlation matrix (<span class="math inline">\(X^TX\)</span>) is blind
-to.</p>
+global dot product in contexts, <span class="math inline">\(X^T
+X\)</span>, might be near zero. The model assumes they share no random
+effects. However, if the eQTL in question is driven by a ubiquitous
+transcription factor (TF) that happens to bind the exact same enhancer
+in both early and late stages, there is true biological sharing that the
+global correlation matrix (<span class="math inline">\(X^TX\)</span>) is
+blind to.</p>
 <p>In our model, we will empirically estimate the sharing across
 contextual effects for each gene (<span
 class="math inline">\(\bar\Theta^T\bar\Theta\)</span>, where <span
@@ -939,15 +973,14 @@ the residual of the 846 samples into a cell line by context matrix. Then
 we estimated a <span class="math inline">\(9\times 9\)</span>
 correlation matrix and ran the Bartlett’s test of sphecity to check if
 there are still correlation among the 9 contexts. 3309 of genes have
-passed the significance threshold of FDR &lt; 5%. These 9492 genes have
-significant main gene effects at FDR&lt;10%.</p>
+passed the significance threshold of FDR &lt; 5%.</p>
 <p>We also run the R package, flashier, to directly perform factor
 analysis on the cell line by context matrix. We chose the “greedy”
 option for selecting the factors. The empirical Bayes matrix
 factorization developed in the package will evaluate the ELBO for adding
-a factor or stopped adding one. The sparsity of constraint imposed by
-the variational approximation is more conservative than the likelihood
-function based on the original paper.</p>
+a factor or stopped adding one. The sparsity constraint imposed by the
+variational approximation is more conservative than the likelihood
+function, according to the original paper.</p>
 <p>The distribution of the number of factors for the 9492 genes.</p>
 <pre><code>
    0    1    2    3    4    5    6 
@@ -958,11 +991,11 @@ function based on the original paper.</p>
 <h2>The inference procedure</h2>
 <p>The model is similar to the previous model and can be treated in two
 stages.</p>
-<p>The first stage is identical, we regress gene expression against
-context variables at single-cell level for each donor and each
-context:</p>
+<p>The first stage is identical to the previous model. We regress gene
+expression against context variables at single-cell level for each donor
+and each context:</p>
 <p><span class="math display">\[
-y_i = X_i \theta + \phi
+y_i = X_i \theta_{dj} + \phi
 \]</span></p>
 <p>We obtained the estimate of contextual effect, <span
 class="math inline">\(\theta_{dj}\)</span> per donor per context and the
@@ -970,14 +1003,18 @@ corresponding standard error, <span
 class="math inline">\(\sigma_{dj}\)</span>.</p>
 <p>However, at the second stage, we need to infer the model below:</p>
 <p><span class="math display">\[
-\theta_{d} \sim \mathcal{MVN}(\gamma G_d + \psi C + \alpha, \Sigma)
+\boldsymbol{\theta}_{d.} \sim \mathcal{MVN}(\gamma G_d + \psi C +
+\alpha, \Sigma)
 \]</span></p>
 <p><span class="math display">\[
-\hat\theta_{dj} \sim \mathcal{N}(\theta_{d}, \sigma_{dj}^2)
+\hat\theta_{dj} \sim \mathcal{N}(\theta_{dj}, \sigma_{dj}^2)
 \]</span></p>
 <p>where <span class="math inline">\(C\)</span> are additional
 donor-level covaraites that may have interaction with the cellular
-contexts, such as the genotype PCs.</p>
+contexts, such as the genotype PCs, and <span
+class="math inline">\(\boldsymbol{\theta}_{d.}\)</span> is a vector of
+<span class="math inline">\(J\)</span> context for the <span
+class="math inline">\(d\)</span>th donor.</p>
 <p>After integrating out the true parameter, <span
 class="math inline">\(\theta_{dj}\)</span>, the marginalized model
 becomes:</p>
@@ -989,10 +1026,10 @@ becomes:</p>
 S_d = \text{diag}(\sigma_{d1}^2, \sigma_{d2}^2, \dots, \sigma_{dJ}^2)
 \]</span></p>
 <p>If we know the biological covariance of contextual effects, <span
-class="math inline">\(\Sigma\)</span>, estimation of <span
+class="math inline">\(\Sigma\)</span>, then the estimation of <span
 class="math inline">\(\hat\gamma\)</span> is relatively straight
-forward, assuming geontypes and all other covariates have been
-standardized:</p>
+forward, assuming geontypes have been standardized and we ignored other
+covariates:</p>
 <p><span class="math display">\[
 \hat{\mathbf{\gamma}} = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d
 \mathbf{G}_d \right)^{-1} \left( \sum_{d=1}^N \mathbf{G}_d^T
@@ -1011,14 +1048,14 @@ S_d)^{-1}\]</span></p>
 effects, <span class="math inline">\(\Sigma\)</span>. Considering the
 computational efficiency, we ignore the genotype of all the cis-SNPs
 when estimating <span class="math inline">\(\Sigma\)</span>. The PVE of
-genotypes for <span class="math inline">\(\tehta\)</span> should small.
-<span class="math inline">\(\Sigma\)</span> was estimated via feasible
-generalized least square (FGLS) or EM algorithm.</p>
+genotypes for <span class="math inline">\(\theta\)</span> should be
+small. <span class="math inline">\(\Sigma\)</span> was estimated via
+feasible generalized least square (FGLS) or EM algorithm.</p>
 <ol style="list-style-type: decimal">
 <li><p>Initialize: Fit an Ordinary Least Squares (OLS) regression of
 <span class="math inline">\(\hat\theta_{dj}\)</span> on <span
 class="math inline">\(C_d\)</span> to get initial estimates for <span
-class="math inline">\(\gamma\)</span> and <span
+class="math inline">\(\psi\)</span> and <span
 class="math inline">\(\alpha\)</span>.</p></li>
 <li><p>Compute Residuals: For each <span
 class="math inline">\(d\)</span>, calculate the <span
@@ -1046,8 +1083,9 @@ class="math inline">\(\hat{\gamma}\)</span> using the GLS formula with
 class="math inline">\(\hat\gamma\)</span> in the cis-region for the
 target gene.</p>
 </div>
-<div id="simulation-experiment" class="section level2">
-<h2>Simulation experiment</h2>
+<div id="simulation-experiment"
+class="section level2 hidden unlisted unnumbered">
+<h2 class="hidden unlisted unnumbered">Simulation experiment</h2>
 <p>We generated dataset according to full model with random slopes for
 covariates except we ignore the mean gene expression. More specifically,
 we synthesize three cell types. The first cell type has ~200 cells per
