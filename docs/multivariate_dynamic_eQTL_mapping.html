@@ -513,15 +513,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeecb0f88776729b9c87790850049959379e38f867targetblankecb0f88a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7e06e3e808813c25f04bd684798678e5f99f6580targetblank7e06e3ea">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/ecb0f88776729b9c87790850049959379e38f867" target="_blank">ecb0f88</a>
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7e06e3e808813c25f04bd684798678e5f99f6580" target="_blank">7e06e3e</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstreeecb0f88776729b9c87790850049959379e38f867targetblankecb0f88a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomLifanLiangeQTLmethodstree7e06e3e808813c25f04bd684798678e5f99f6580targetblank7e06e3ea"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -531,7 +531,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/LifanLiang/eQTL_methods/tree/ecb0f88776729b9c87790850049959379e38f867" target="_blank">ecb0f88</a>.
+<a href="https://github.com/LifanLiang/eQTL_methods/tree/7e06e3e808813c25f04bd684798678e5f99f6580" target="_blank">7e06e3e</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -663,6 +663,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/LifanLiang/eQTL_methods/blob/7e06e3e808813c25f04bd684798678e5f99f6580/analysis/multivariate_dynamic_eQTL_mapping.Rmd" target="_blank">7e06e3e</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-05-26
+</td>
+<td>
+wflow_publish("analysis")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/LifanLiang/eQTL_methods/26b321248b27ee7f57ebbb10dad45e0701ccb8f2/docs/multivariate_dynamic_eQTL_mapping.html" target="_blank">26b3212</a>
+</td>
+<td>
+Lifan Liang
+</td>
+<td>
+2026-05-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -882,11 +916,11 @@ global correlation matrix (<span class="math inline">\(X^TX\)</span>) is
 blind to.</p>
 <p>In our model, we will empirically estimate the sharing across
 contextual effects for each gene (<span
-class="math inline">\(\bar\Theta^T\bar\Theta\)</span>, where <span
-class="math inline">\(\bar\Theta\)</span> is the residual of donor by
-context matrix containing <span
-class="math inline">\(\theta_{dk}\)</span>). In principle, <span
-class="math inline">\(\bar\Theta^T\bar\Theta\)</span> would account for
+class="math inline">\(\mathbf{e}^T\mathbf{e}\)</span>, where <span
+class="math inline">\(\mathbf{e}\)</span> is the residual of the donor
+by context matrix of <span class="math inline">\(\theta_{dk}\)</span>).
+In principle, <span
+class="math inline">\(\mathbf{e}^T\mathbf{e}\)</span> would account for
 both the global correlation and gene-specific biological sharing.
 Meanwhile, our model remain computationally efficient and allows
 genome-wide scan for dynamic eQTL mapping. First of all, we model that
@@ -966,8 +1000,9 @@ cross-context sharing.</p>
 effect, age, sex, disease status, 5 genotype PCs, and 20 gene expression
 PCs against the gene expression of 846 samples (94 cell lines by 9
 contexts). We used the genotypes of the top eQTL for each gene in the
-bulk eQTL mapping. Expression PCs were derived from the gene by
-context.</p>
+bulk eQTL mapping. Expression PCs were derived from the pseudobulk
+matrix of shape <span class="math inline">\(9492 \times
+846\)</span>.</p>
 <p>For the residual pseudo-bulk expression of the 9492 genes, we reshape
 the residual of the 846 samples into a cell line by context matrix. Then
 we estimated a <span class="math inline">\(9\times 9\)</span>
@@ -995,19 +1030,19 @@ stages.</p>
 expression against context variables at single-cell level for each donor
 and each context:</p>
 <p><span class="math display">\[
-y_i = X_i \theta_{dj} + \phi
+y_i = X_i \theta_{dk} + \phi
 \]</span></p>
 <p>We obtained the estimate of contextual effect, <span
-class="math inline">\(\theta_{dj}\)</span> per donor per context and the
+class="math inline">\(\theta_{dk}\)</span> per donor per context and the
 corresponding standard error, <span
-class="math inline">\(\sigma_{dj}\)</span>.</p>
+class="math inline">\(\sigma_{dk}\)</span>.</p>
 <p>However, at the second stage, we need to infer the model below:</p>
 <p><span class="math display">\[
 \boldsymbol{\theta}_{d.} \sim \mathcal{MVN}(\gamma G_d + \psi C +
 \alpha, \Sigma)
 \]</span></p>
 <p><span class="math display">\[
-\hat\theta_{dj} \sim \mathcal{N}(\theta_{dj}, \sigma_{dj}^2)
+\hat\theta_{dk} \sim \mathcal{N}(\theta_{dk}, \sigma_{dk}^2)
 \]</span></p>
 <p>where <span class="math inline">\(C\)</span> are additional
 donor-level covaraites that may have interaction with the cellular
@@ -1016,14 +1051,14 @@ class="math inline">\(\boldsymbol{\theta}_{d.}\)</span> is a vector of
 <span class="math inline">\(J\)</span> context for the <span
 class="math inline">\(d\)</span>th donor.</p>
 <p>After integrating out the true parameter, <span
-class="math inline">\(\theta_{dj}\)</span>, the marginalized model
+class="math inline">\(\theta_{dk}\)</span>, the marginalized model
 becomes:</p>
 <p><span class="math display">\[
 \hat{\boldsymbol{\theta}}_d \sim \mathcal{MVN}(\boldsymbol{\gamma} G_d +
 \psi C +\boldsymbol{\alpha}, \Sigma + S_d)
 \]</span></p>
 <p><span class="math display">\[
-S_d = \text{diag}(\sigma_{d1}^2, \sigma_{d2}^2, \dots, \sigma_{dJ}^2)
+S_d = \text{diag}(\sigma_{d1}^2, \sigma_{d2}^2, \dots, \sigma_{dK}^2)
 \]</span></p>
 <p>If we know the biological covariance of contextual effects, <span
 class="math inline">\(\Sigma\)</span>, then the estimation of <span
@@ -1053,7 +1088,7 @@ small. <span class="math inline">\(\Sigma\)</span> was estimated via
 feasible generalized least square (FGLS) or EM algorithm.</p>
 <ol style="list-style-type: decimal">
 <li><p>Initialize: Fit an Ordinary Least Squares (OLS) regression of
-<span class="math inline">\(\hat\theta_{dj}\)</span> on <span
+<span class="math inline">\(\hat\theta_{dk}\)</span> on <span
 class="math inline">\(C_d\)</span> to get initial estimates for <span
 class="math inline">\(\psi\)</span> and <span
 class="math inline">\(\alpha\)</span>.</p></li>
