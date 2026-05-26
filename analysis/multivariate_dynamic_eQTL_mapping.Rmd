@@ -35,7 +35,7 @@ A major change is the inclusion of the donor-specific covariate effect, the rand
 
 However, in these two methods, the sharing across covariates ($\Sigma$) was estimated _a priori_ as the correlation across multiple covariates ($X^TX$). This in insufficient to capture the complex gene-specific biological sharing across contexts. For example, if a cell is in Context A (e.g., early differentiation) and another is in Context B (e.g., late differentiation/mature state), their global dot product in contexts, $X^T X$, might be near zero. The model assumes they share no random effects. However, if the eQTL in question is driven by a ubiquitous transcription factor (TF) that happens to bind the exact same enhancer in both early and late stages, there is true biological sharing that the global correlation matrix ($X^TX$) is blind to. 
 
-In our model, we will empirically estimate the sharing across contextual effects for each gene ($\bar\Theta^T\bar\Theta$, where $\bar\Theta$ is the residual of donor by context matrix containing $\theta_{dk}$). In principle, $\bar\Theta^T\bar\Theta$ would account for both the global correlation and gene-specific biological sharing. Meanwhile, our model remain computationally efficient and allows genome-wide scan for dynamic eQTL mapping. First of all, we model that $u_{dk}$ follow a $K$ dimensional multivariate Normal:
+In our model, we will empirically estimate the sharing across contextual effects for each gene ($\mathbf{e}^T\mathbf{e}$, where $\mathbf{e}$ is the residual of the donor by context matrix of $\theta_{dk}$). In principle, $\mathbf{e}^T\mathbf{e}$ would account for both the global correlation and gene-specific biological sharing. Meanwhile, our model remain computationally efficient and allows genome-wide scan for dynamic eQTL mapping. First of all, we model that $u_{dk}$ follow a $K$ dimensional multivariate Normal:
 
 $$
 \begin{bmatrix} 
@@ -96,7 +96,7 @@ where $\epsilon_{dk}$ is the measurement error of $\theta_{dk}$, sampled from $\
 
 We looked into the residual correlation of the pseudo bulk samples of the nine cellular contexts of our neuron stimulation dataset. The nine contexts have no cell overlaps ($X^TX=0$). If there is any residual correlation for nine contexts, that shows the potential of modeling the cross-context sharing.
 
-After pseudobulk and normalization, we regressed the main genetic effect, age, sex, disease status, 5 genotype PCs, and 20 gene expression PCs against the gene expression of 846 samples (94 cell lines by 9 contexts). We used the genotypes of the top eQTL for each gene in the bulk eQTL mapping. Expression PCs were derived from the gene by context.
+After pseudobulk and normalization, we regressed the main genetic effect, age, sex, disease status, 5 genotype PCs, and 20 gene expression PCs against the gene expression of 846 samples (94 cell lines by 9 contexts). We used the genotypes of the top eQTL for each gene in the bulk eQTL mapping. Expression PCs were derived from the pseudobulk matrix of shape $9492 \times 846$.
 
 For the residual pseudo-bulk expression of the 9492 genes, we reshape the residual of the 846 samples into a cell line by context matrix. Then we estimated a $9\times 9$ correlation matrix and ran the Bartlett's test of sphecity to check if there are still correlation among the 9 contexts. 3309 of genes have passed the significance threshold of FDR < 5%. 
 
@@ -119,11 +119,11 @@ The model is similar to the previous model and can be treated in two stages.
 The first stage is identical to the previous model. We regress gene expression against context variables at single-cell level for each donor and each context:
 
 $$
-y_i = X_i \theta_{dj} + \phi
+y_i = X_i \theta_{dk} + \phi
 $$
 
 
-We obtained the estimate of contextual effect, $\theta_{dj}$ per donor per context and the corresponding standard error, $\sigma_{dj}$.
+We obtained the estimate of contextual effect, $\theta_{dk}$ per donor per context and the corresponding standard error, $\sigma_{dk}$.
 
 However, at the second stage, we need to infer the model below:
 
@@ -132,19 +132,19 @@ $$
 $$
 
 $$
-\hat\theta_{dj} \sim \mathcal{N}(\theta_{dj}, \sigma_{dj}^2)
+\hat\theta_{dk} \sim \mathcal{N}(\theta_{dk}, \sigma_{dk}^2)
 $$
 
 where $C$ are additional donor-level covaraites that may have interaction with the cellular contexts, such as the genotype PCs, and $\boldsymbol{\theta}_{d.}$ is a vector of $J$ context for the $d$th donor.
 
-After integrating out the true parameter, $\theta_{dj}$, the marginalized model becomes:
+After integrating out the true parameter, $\theta_{dk}$, the marginalized model becomes:
 
 $$
 \hat{\boldsymbol{\theta}}_d \sim \mathcal{MVN}(\boldsymbol{\gamma} G_d + \psi C +\boldsymbol{\alpha}, \Sigma + S_d)
 $$
 
 $$
-S_d = \text{diag}(\sigma_{d1}^2, \sigma_{d2}^2, \dots, \sigma_{dJ}^2)
+S_d = \text{diag}(\sigma_{d1}^2, \sigma_{d2}^2, \dots, \sigma_{dK}^2)
 $$
 
 If we know the biological covariance of contextual effects, $\Sigma$, then the estimation of $\hat\gamma$ is relatively straight forward, assuming geontypes have been standardized and we ignored other covariates:
@@ -161,7 +161,7 @@ $$Var(\hat{\gamma}) = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}
 
 However, we need to estimate the biological covariance of contextual effects, $\Sigma$. Considering the computational efficiency, we ignore the genotype of all the cis-SNPs when estimating $\Sigma$. The PVE of genotypes for $\theta$ should be small. $\Sigma$ was estimated via feasible generalized least square (FGLS) or EM algorithm.
 
-1. Initialize: Fit an Ordinary Least Squares (OLS) regression of $\hat\theta_{dj}$ on $C_d$ to get initial estimates for $\psi$ and $\alpha$.
+1. Initialize: Fit an Ordinary Least Squares (OLS) regression of $\hat\theta_{dk}$ on $C_d$ to get initial estimates for $\psi$ and $\alpha$.
 
 2. Compute Residuals: For each $d$, calculate the $J \times 1$ residual vector:
 $$
