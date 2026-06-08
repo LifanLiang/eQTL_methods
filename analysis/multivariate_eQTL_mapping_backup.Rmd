@@ -1,0 +1,246 @@
+---
+title: "Context-specific eQTL mapping"
+author: "Lifan Liang"
+date: "2026-05-18"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Joint model of multiple cellular contexts
+
+At single-cell resolution, we assume the causal model of single-cell gene expression is:
+
+$$
+y_i = \mu + \beta G_d + \sum_{k=1}^K \alpha_{ik} X_{ik} + \sum_{k=1}^K \gamma_k X_{ik} G_d + \sum_{k=1}^K \psi_k X_{ik} C_d + Z_i\xi + H_d\eta + u_d + \epsilon_i
+$$
+
+* $y_i$: the expression level of the $i$th cell for the target gene
+* $\mu$: the grand mean gene expression
+* $X_{ik}$: the $k$th context value for the $i$th cell
+* $\alpha{ik}$: The effect of $X{ik}$
+* $G_i$: the genotype of the $i$th cell
+* $\gamma_k$: the interaction effect between the genotype and the covariates
+* $Z$: the cell level covariates matrix to control for (e.g. log library size, mitochondria read percentage)
+* $H$: the donor level covariates matrix to control for (e.g. age, sex, genotype PC, gene expression PC). Note that expression PCs should be derived from the donor by gene matrix of pseudobulk expression.
+* $C$: the donor level covariates that may interact with $X$, such as genotype PCs.
+* $u_d$: the random effect for the $d$th donor that the $i$th cell belongs to
+* $\epsilon_i$: the noise for the $i$th cell; It was iid sampled from $\mathcal{N}(0,\tau^2)$ for each cell
+
+
+A critical addition to this model is $\alpha_{ik}$, the donor-specific random slope for the $k$th covariate. This term captures how non-genetic environmental exposures and trans-genetic effects drive variation in contextual responses between donors. Existing methods, such as CellRegMap and GASPACHO, include similar "context-specific donor random effects." However, these methods estimate the sharing across covariates ($\Sigma$) *a priori* using the global dot product of the contexts ($X^T X$). 
+
+Relying strictly on $X^T X$ is insufficient to capture complex, gene-specific biological pleiotropy. For example, if Context A (early differentiation) and Context B (late maturation) are mutually exclusive cells, their dot product $X^T X$ is zero. A global correlation model assumes they share no random effects. However, if the target gene is regulated by a ubiquitous transcription factor binding the same enhancer in both states, there is true biological sharing that $X^T X$ is entirely blind to.
+
+
+
+## The two-stage model
+
+Directly running this joint model at single cell resolution for millions of gene-SNP pairs has daunting computational cost. To address this, we bypass the full mixed-effect model by a two-stage framework. In the first stage, we estimate the total contextual effects ($\Delta_k$) and the intercept ($\phi$) for all the cells within each donor $d$:
+
+$$
+y_{i} = \sum_K X_{ik} \Delta_{dk} + \phi_d + Z_i\xi + \epsilon_{i}
+$$
+
+$$
+\epsilon_{i} \sim \mathcal(0, \sigma^2)
+$$
+
+By focusing on donor $d$, all the donor-level covariates including main genetic effect, donor random effects, and donor-level covariates, will be absorbed by the intercept. And all the covariates regarding the $k$th context will be absorbed by $\Delta_{dk}$. Namely:
+
+$$
+\phi_d = \beta G_d + H_d\eta + u_d
+$$
+
+$$
+\Delta_{dk} = \alpha_{ik} + G_d \gamma_k + C_d \psi_k
+$$
+
+Clearly, if we expand the first stage model by the two equations above, we can recover the full model. Therefore, to estimate dynamic genetic effect ($\gamma_k$) and the main genetic effect ($\beta$) in the full model, we need to jointly estimate $K+1$ regressions to model their correlated residual:
+
+$$
+\begin{bmatrix} 
+\Delta_{d1} \\
+\Delta_{d2} \\
+... \\
+\Delta_{dK} \\
+\phi_{D}
+\end{bmatrix} = 
+\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+... \\
+\gamma_K \\
+\beta
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\alpha_{d1} \\
+\alpha_{d2} \\
+... \\
+\alpha_{dK} \\
+u_d 
+\end{bmatrix} +
+\begin{bmatrix} 
+\zeta_{d1} \\
+\zeta_{d2} \\
+... \\
+\zeta_{dK} \\
+\zeta_{dK+1}
+\end{bmatrix} +
+\begin{bmatrix} 
+0 \\
+0 \\
+... \\
+0 \\
+\eta
+\end{bmatrix}H_d
+$$
+
+$$
+\boldsymbol{\zeta}_d \sim \mathcal{MVN}(0, \sigma_d^2 (X_d'^TX_d')^{-1})
+$$
+
+where $\sigma_d^2$ is the residual variance of the multiple regression for each donor at the first stage, and $X_d'$ is the matrix with $K$ context columns, adding one last column of all ones ($X'=[X,\mathbf{1}]$) each row representing the context values for a cell in donor $d$. For convenience, we denote the measurement error covariance per donor as:
+
+$$
+V_d = \sigma^2 (X'^TX')^{-1}
+$$
+
+Critically, we model the biological random slopes as a multivariate normal distribution:
+
+$$
+[\boldsymbol{\alpha}_d, u_d]^T \sim \mathcal{MVN}(\boldsymbol{\omega}, \Sigma)
+$$
+
+where $\boldsymbol{\omega}$ represents the fixed covariate effects shared across the population, and $\Sigma$ is the unstructured biological variance-covariance matrix. Our framework empirically estimates $\Sigma$ directly from the residual correlation of $\hat{\theta}_{dk}$. Focusing on the second stage, we can present the generative process as:
+
+$$
+\mathbf{\Delta} = \begin{bmatrix} 
+\Delta_{d1} \\
+\Delta_{d2} \\
+... \\
+\Delta_{dK} \\
+\phi_{D}
+\end{bmatrix} \sim \mathcal{MVN}(\begin{bmatrix}
+\gamma_1 \\
+\gamma_2 \\
+... \\
+\gamma_K \\
+\beta
+\end{bmatrix} G_d +
+\begin{bmatrix}
+\omega_{d1} \\
+\omega_{d2} \\
+... \\
+\omega_{dK} \\
+\omega_{dK+1}
+\end{bmatrix} +
+\begin{bmatrix} 
+\psi_1 \\
+\psi_2 \\
+... \\
+\psi_K \\
+0 
+\end{bmatrix}H_d +
+\begin{bmatrix} 
+0 \\
+0 \\
+... \\
+0 \\
+\eta 
+\end{bmatrix}C_d, \Sigma)
+
+$$
+
+$$
+\hat{\mathbf{\Delta}}_d \sim \mathcal{MVN}(\mathbf\Delta, V_d)
+$$
+
+For convience, we denote the different covariates used in dynamic effect and main together as:
+$$
+\begin{bmatrix} 
+\psi_1 \\
+\psi_2 \\
+... \\
+\psi_K \\
+0 
+\end{bmatrix}H_d +
+\begin{bmatrix} 
+0 \\
+0 \\
+... \\
+0 \\
+\eta 
+\end{bmatrix}C_d = \mathcal{\theta}P_d
+$$
+
+## The Inference Procedure
+
+The inference procedure is executed in two highly optimized stages.
+
+*Stage 1:* We ran the multiple linear regression for each donor $d$:
+
+$$
+y_{i} = \sum_K X_{ik} \Delta_{dk} + \phi_d + \epsilon_{i}
+$$
+
+yielding the estimate (dynamic genetic effect $\hat{\Delta}_{dk}$ and main genetic effect $\hat\beta$) and the corresponding variance covariance matrix, $V_d$, of shape $(K+1) \times (K+1)$.
+
+*Stage 2:* We integrate out the true parameter $\boldsymbol{\Delta}_{dk}$ to form the marginalized multivariate model:
+
+$$[\hat{\boldsymbol{\Delta}}_d, \phi_d]^T \sim \mathcal{MVN}(\boldsymbol{\gamma} G_d + [\boldsymbol{\omega},0]^T + \mathcal{\theta}P, \Sigma + V_d)$$
+
+where $C_d$ represents donor-level covariates (e.g., genotype PCs). If the biological covariance $\Sigma$ is known, estimating the joint eQTL effects ($[\hat{\boldsymbol{\Delta}}_d, \phi_d]^T$) is a straightforward Generalized Least Squares (GLS) projection:
+
+$$
+[\hat{\boldsymbol{\gamma}},\hat\phi]^T = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}_d \right)^{-1} \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \hat{\boldsymbol{\theta}}_d \right)
+$$
+
+where $\mathbf{W}_d = (\Sigma + V_d)^{-1}$ is the donor-specific precision weight matrix, and the variance of the estimator is:
+
+$$
+Var([\hat{\boldsymbol{\gamma}},\hat\phi]^T) = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}_d \right)^{-1}
+$$
+
+### Estimating $\Sigma$ (The Null Lock):
+
+To ensure genome-wide computational efficiency, we bypass estimating a SNP-specific $\Sigma$. Since the proportion of variance explained (PVE) by a single cis-SNP is negligible relative to global noise, we estimate $\Sigma$ exclusively under the null model via an iterative FGLS/EM algorithm:
+
+1. *Initialize:* Fit standard Ordinary Least Squares (OLS) of $\hat{\boldsymbol{\Delta}}_d$ against $P_d$ to initialize the fixed covariate effects ($\boldsymbol{\theta}$ and $\alpha$).
+
+2. *Compute Residuals:* Extract the $(K+1) \times 1$ residual vector for each donor:
+
+$$\mathbf{e}_d = \hat{\boldsymbol{\Delta}}_d - (\hat{\theta} P_d + \hat{\alpha})$$
+
+3. *Update $\Sigma$ (Maximization):* Estimate the biological covariance by subtracting the known measurement error from the empirical residual covariance:
+
+$$\hat{\Sigma} = \frac{1}{N} \sum_{d=1}^N (\mathbf{e}_d \mathbf{e}_d^T - V_d)$$
+
+4. *Update Weights:* Recompute $\mathbf{W}_d = (\hat{\Sigma} + V_d)^{-1}$ for all donors.
+
+5. *Refit Null Model:* Update $\boldsymbol{\theta}$ and $\alpha$ using GLS with the new $\mathbf{W}_d$.
+
+We iterate steps 2–5 until convergence of $\Sigma$. Finally, we lock the converged $\mathbf{W}_d$ matrices and execute the GLS formula (above) to screen for $[\hat{\boldsymbol{\Delta}}_d, \phi_d]^T$ across all candidate SNPs in the cis-region.
+
+
+## Advantages and application of the joint model
+
+In principle, by modeling genetic effects from multiple contexts jointly, we can capture the shared non-genetic component of variance much better. As a result, uncertainty of genetic effects estimation will be greatly reduced and statistical power will increase. The power gain can be demonstrated in the two tasks below:
+
+1. **Testing for context-specificity**: Sometimes we need to test the difference of genetic effects to answer certain biological questions (e.g. different QTL effects in T cell than B cells). The difference of genetic effect between the $j$th context and the $k$th context would be $\gamma_j - \gamma_k$. And the variance is:
+
+$$
+Var(\gamma_j - \gamma_k) = Var(\gamma_j) + Var(\gamma_k) - 2Cov(\gamma_j, \gamma_k)
+$$
+
+where $Cov(\gamma_j, \gamma_k)$ can be easily obtained from the sum of cell-level correlation and biological sharing. Since biological sharing often leads to positive correlation of genetic effects, estimating the biological sharing (\Sigma) could improve power for the comparison.
+
+
+2. **Marginal genetic effects for a context**: $\gamma_k$ is not immediately interpretable because it represents *the deviation from the main genetic effect*. To obtain the marginal genetic effects for a certain contexts at cell-level, the estimate should be $\beta + \gamma_{k}X_{ik}$. For example, if $\beta \approx -\gamma_{k}X_{ik}$ is true for some cells, then the $k$th context has no genetic effect at these cells. But if we only look at $\gamma_{k}X_{ik}$, we may conclude that the $k$th context show unique genetic effects within these cells. The uncertainty of the marginal genetic effect is:
+
+$$
+Var(\hat\beta + \hat\gamma_{k} X_{ik}) = Var(\hat\beta) + X_{ik}^2 Var(\hat\gamma_k) + 2X_{ik}^2Cov(\hat\beta, \hat\gamma_k)
+$$
+
+The estimate of $\beta$ involve random variation of baseline gene expression across donors, which is probably much larger than the context-specific, within subject estimate of $\gamma$. Hence the uncertainty would be dominated by Var(\hat\beta). Still, by controlling various single-cell level variation from multiple contexts, our approach should have a much better power for the main genetic effect than the standard pseudobulk approach that simply aggregate all contexts together.
+

@@ -22,39 +22,25 @@ $$
 * $G_i$: the genotype of the $i$th cell
 * $\gamma$: the interaction effect between the genotype and the covariate
 * $u_d$: the random effect for the $d$th donor that the $i$th cell belongs to
-* $\epsilon_i$: the noise for the $i$th cell
+* $\epsilon_i$: the noise for the $i$th cell; It was iid sampled from $\mathcal{N}(0,\tau^2)$ for each cell
 
 Here, we extended this model into mapping dynamic eQTLs for $K$ different covariates together:
 
 $$
-y_i = \mu + \beta G_i + \sum_k \alpha X_{ik} + \sum_k u_{dk} X_{ik} + \sum_k \gamma_k X_{ik} G_i + u_d + \epsilon_i
+y_i = \mu + \beta G_d + \sum_k \alpha_{dk} X_{ik} + \sum_k \gamma_k X_{ik} G_d + u_d + \epsilon_i
 $$
 
+A major change is the inclusion of the donor-specific covariate effect, the random slope of the $k$th covariate ($\alpha_{dk}$). This variable suggest that the non-genetic effect of covariates vary from donor to donor. This is a reasonable modeling approach since different donors may have different environmental exposures and different trans-genetic effects, which leads to the variation of covariat effect. In fact, both CellRegMap and GASPACHO have included this term as the "context-specific donor random effect". 
 
-A major change is the inclusion of the donor-specific covariate effect, the random slope of the $k$th covariate ($u_{dk}$). This variable suggest that the non-genetic effect of covariates vary from donor to donor. This is a reasonable modeling approach since different donors may have different environmental exposures and different trans-genetic effects, which leads to the variation of covariat effect. In fact, both CellRegMap and GASPACHO have included this term as the "context-specific donor random effect". 
+However, in these two methods, the sharing across covariates ($\Sigma$) was estimated _a priori_ as the correlation across multiple covariates ($X^TX$). This is insufficient to capture the complex gene-specific biological sharing across contexts. For example, if a cell is in Context A (e.g., early differentiation) and another is in Context B (e.g., late differentiation/mature state), their global dot product in contexts, $X^T X$, might be near zero. The model assumes they share no random effects. However, if the eQTL in question is driven by a ubiquitous transcription factor (TF) that happens to bind the exact same enhancer in both early and late stages, there is true biological sharing that the global correlation matrix ($X^TX$) is blind to. 
 
-However, in these two methods, the sharing across covariates ($\Sigma$) was estimated _a priori_ as the correlation across multiple covariates ($X^TX$). This in insufficient to capture the complex gene-specific biological sharing across contexts. For example, if a cell is in Context A (e.g., early differentiation) and another is in Context B (e.g., late differentiation/mature state), their global dot product in contexts, $X^T X$, might be near zero. The model assumes they share no random effects. However, if the eQTL in question is driven by a ubiquitous transcription factor (TF) that happens to bind the exact same enhancer in both early and late stages, there is true biological sharing that the global correlation matrix ($X^TX$) is blind to. 
-
-In our model, we will empirically estimate the sharing across contextual effects for each gene ($\mathbf{e}^T\mathbf{e}$, where $\mathbf{e}$ is the residual of the donor by context matrix of $\theta_{dk}$). In principle, $\mathbf{e}^T\mathbf{e}$ would account for both the global correlation and gene-specific biological sharing. Meanwhile, our model remain computationally efficient and allows genome-wide scan for dynamic eQTL mapping. First of all, we model that $u_{dk}$ follow a $K$ dimensional multivariate Normal:
-
-$$
-\begin{bmatrix} 
-u_{d1} \\
-u_{d2} \\
-... \\
-u_{dk}
-\end{bmatrix} \sim MVN(0,\Sigma)
-$$
-
-The variance-covariance matrix, $\Sigma$, encodes the effect sharing across contexts. Suppose we follow the same first step in the previous two-step model. Specifically, we estimated the marginal covariate effects with an intercept for each donor:
+Instead of directly modeling the multiple interaction terms together, we continue to estimate the total effects of $X_k$ one at a time. In this case, the first step of our model remains the same. More specifically, we estimated the total covariate effects with an intercept for each donor:
 
 $$
-Y_{id} = X_k \theta_{kd} + \phi
+Y_{id} = X_k \theta_{kd} + \phi_d
 $$
 
-From the first step, we obtained $\hat\theta_{dk}$ and the corresponding standard error $\sigma_{dk}$.
-
-In the second step, we need to jointly estimate the genetic component of $\Delta$ for modeling $u_{dk}$:
+From the first step, we obtained $\hat\theta_{dk}$ and the corresponding standard error $\hat\sigma_{dk}$. The intercept term, $\phi_d$, absorbs donor random effect ($u_d$) and the main genetic effect ($\beta G_i$). In the second step, we need to jointly model $\theta_{kd}$ across different covariates, namely:
 
 $$
 \begin{bmatrix} 
@@ -70,26 +56,52 @@ $$
 \gamma_K
 \end{bmatrix} G_d +
 \begin{bmatrix}
-\alpha_1 \\
-\alpha_2 \\
+\alpha_{d1} \\
+\alpha_{d2} \\
 ... \\
-\alpha_K
+\alpha_{dK}
 \end{bmatrix} +
 \begin{bmatrix} 
-u_{d1} \\
-u_{d2} \\
+\zeta_{d1} \\
+\zeta_{d2} \\
 ... \\
-u_{dK}
-\end{bmatrix} + 
-\begin{bmatrix} 
-\epsilon_{d1} \\
-\epsilon_{d2} \\
-... \\
-\epsilon_{dK}
+\zeta_{dK}
 \end{bmatrix} 
 $$
 
-where $\epsilon_{dk}$ is the measurement error of $\theta_{dk}$, sampled from $\mathcal{N}(0,\sigma_{dk})$.
+where $\zeta_{dk}$ is the measurement error of $\theta_{dk}$. In the previous model, we assumed $\zeta_{dk}$ was i.i.d sampled from $\mathcal{N}(0,\sigma_{dk})$. Due to the correlation between different covariates, the measurement error will be correlated as well:
+
+$$
+\begin{bmatrix} 
+\zeta_{d1} \\
+\zeta_{d2} \\
+... \\
+\zeta_{dK}
+\end{bmatrix} \sim \mathcal{MVN}(0, 
+S_dRS_d)
+$$
+
+where $S_d = \text{diag}(\sigma_{d1}, \sigma_{d2}, \dots, \sigma_{dK})$, and $R$ is the correlation matrix of the covariates, $X$.
+
+In our model, we will empirically estimate the sharing across contextual effects for each gene ($\mathbf{e}^T\mathbf{e}$, where $\mathbf{e}$ is the residual of the donor by context matrix of $\theta_{dk}$). In principle, $\mathbf{e}^T\mathbf{e}$ would account for both the global correlation and gene-specific biological sharing. Meanwhile, our model remain computationally efficient and allows genome-wide scan for dynamic eQTL mapping. First of all, we model that $\alpha_{dk}$ follow a $K$ dimensional multivariate Normal:
+
+$$
+\begin{bmatrix} 
+\alpha_{d1} \\
+\alpha_{d2} \\
+... \\
+\alpha_{dK}
+\end{bmatrix} \sim MVN(\begin{bmatrix} 
+\omega_{1} \\
+\omega_{2} \\
+... \\
+\omega_{K}
+\end{bmatrix},\Sigma)
+$$
+
+where the $K$-dimensional vector, $\omega$, is shared across all donors and represents the fixed covariate effect. The variance-covariance matrix, $\Sigma$, encodes the effect sharing across covariates. Suppose we follow the same first step in the previous two-step model. In the second step, we need to jointly estimate the genetic component of $\Delta$ for modeling $u_{dk}$:
+
+
 
 
 ## Empirical investigation of the need for unstructured sharing across contexts
@@ -109,7 +121,7 @@ res <- readRDS("data/residual_effect_share.RDS")
 table(res$flash_rank)
 ```
 
-These results showed that there is a need for 
+These results showed that there is a need for factor analysis for around a third of the genes.
 
 
 ## The inference procedure
@@ -155,7 +167,7 @@ $$
 
 where $\hat{\mathbf{\gamma}}$ is a vector of the interaction effects across the $J$ contexts, $\mathbf{W}$ is the $J\times J$ precision weight matrix as:
 
-$$\mathbf{W}_d = (\Sigma + S_d)^{-1}$$
+$$\mathbf{W}_d = (\Sigma + S_dRS_d)^{-1}$$
 
 $$Var(\hat{\gamma}) = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}_d \right)^{-1}$$
 
@@ -170,7 +182,7 @@ $$
 
 3. Update $\Sigma$ (Maximization): Estimate the biological covariance by subtracting the known measurement error from the empirical residual covariance:
 $$
-\hat{\Sigma} = \frac{1}{N} \sum_{d=1}^N (\mathbf{e}_d \mathbf{e}_d^T - S_d)
+\hat{\Sigma} = \frac{1}{N} \sum_{d=1}^N (\mathbf{e}_d \mathbf{e}_d^T - S_dRS_d)
 $$
 
 4. Update Weights: Recompute $\mathbf{W}_d = (\hat{\Sigma} + S_d)^{-1}$ for all donors.

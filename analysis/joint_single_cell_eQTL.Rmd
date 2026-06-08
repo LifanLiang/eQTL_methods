@@ -1,0 +1,133 @@
+---
+title: "joint_single_cell_eQTL"
+author: "Lifan Liang"
+date: "2026-06-07"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Notation Summary
+
+* $i$: Index for a single cell.$d$: Index for a specific donor.
+* $k$: Index for a specific cellular context.
+* $K$: Total number of cellular contexts modeled.
+* $y_i$: Expression level of the target gene in cell $i$.
+* $G_d$: Genotype dosage for donor $d$.
+* $X_{ik}$: Continuous or discrete value of the $k$-th context for cell $i$.
+* $\mathbf{Z}_i$: Vector of cell-level covariates (e.g., log library size, mitochondrial percentage).
+* $\mathbf{H}_d$: Vector of donor-level covariates for the main genetic effect (e.g., pseudobulk expression PCs, age, sex).
+* $\mathbf{C}_d$: Vector of donor-level covariates for the dynamic genetic effects (e.g., genotype PCs).
+* $\beta$: Global main genetic effect.
+* $\gamma_k$: Dynamic context-specific genetic effect (interaction) for context $k$.
+* $\boldsymbol{\xi}$: Fixed effects for the cell-level covariates.
+* $\boldsymbol{\eta}$: Fixed effects for the donor-level main covariates.
+* $\boldsymbol{\psi}_k$: Fixed effects for the donor-level dynamic covariates interacting with context $k$.
+* $\phi_d$: Donor-specific intercept estimated in Stage 1.
+* $\Delta_{dk}$: Total contextual effect estimated for donor $d$ in context $k$ in Stage 1.
+* $u_d$: Donor-specific random intercept (non-genetic baseline variance).
+* $\alpha_{dk}$: Donor-specific random slope for context $k$ (non-genetic contextual variance).
+* $\boldsymbol{\omega}$: Vector of fixed, population-level intercepts for the context slopes.
+* $\Sigma$: The $(K+1) \times (K+1)$ unstructured biological variance-covariance matrix.
+* $V_d$: The $(K+1) \times (K+1)$ measurement error covariance matrix for donor $d$.
+
+## Joint Model of Multiple Cellular Contexts
+
+At single-cell resolution, we assume the causal model of single-cell gene expression is:
+
+$$
+y_i = \mu + \beta G_d + \sum_{k=1}^K \alpha_{dk} X_{ik} + \sum_{k=1}^K \gamma_k X_{ik} G_d + \sum_{k=1}^K (\boldsymbol{\psi}_k \mathbf{C}_d) X_{ik} + \mathbf{Z}_i \boldsymbol{\xi} + \mathbf{H}_d \boldsymbol{\eta} + u_d + \epsilon_i
+$$
+
+This joint approach allows modeling $\alpha_{dk}$, the donor-specific random slope for the $k$-th covariate. This term captures how non-genetic environmental exposures and trans-genetic effects drive variation in contextual responses between donors. Existing methods, such as CellRegMap and GASPACHO, include similar "context-specific donor random effects." However, these methods estimate the sharing across contexts ($\Sigma$) a priori using the global dot product of the contexts ($X^T X$).
+
+Relying strictly on $X^T X$ is insufficient to capture complex, gene-specific biological pleiotropy. For example, if Context A (early differentiation) and Context B (late maturation) are mutually exclusive states, their dot product $X^T X$ is zero. A global correlation model inherently assumes they share no random effects. However, if the target gene is regulated by a ubiquitous transcription factor binding the same enhancer in both states, there is true biological sharing that $X^T X$ is entirely blind to.
+
+## The Two-Stage Model
+
+Directly running this joint model at single-cell resolution for millions of gene-SNP pairs incurs a prohibitive computational cost. To address this, we bypass the full mixed-effect model using a two-stage framework.
+
+### Stage 1: Donor-Level Extraction
+
+In the first stage, we estimate the total contextual effects ($\Delta_{dk}$) and the intercept ($\phi_d$) simultaneously for all cells within each donor $d$:
+
+$$
+y_i = \sum_{k=1}^K X_{ik} \Delta_{dk} + \phi_d + \mathbf{Z}_i \boldsymbol{\xi} + \epsilon_i
+$$
+
+$$
+\epsilon_i \sim \mathcal{N}(0, \sigma^2)
+$$
+
+By fitting this strictly within donor $d$, all donor-level terms are mathematically absorbed into the Stage 1 parameters. The intercept ($\phi_d$) absorbs the baseline terms, while the slope ($\Delta_{dk}$) absorbs the interaction terms:
+
+$$
+\phi_d = \beta G_d + \mathbf{H}_d \boldsymbol{\eta} + u_d
+$$
+$$
+\Delta_{dk} = \gamma_k G_d + \mathbf{C}_d \boldsymbol{\psi}_k + \alpha_{dk}
+$$
+
+For each donor, this multiple regression yields a $(K+1)$-dimensional vector of estimates, $\hat{\boldsymbol{\Theta}}_d = [\hat{\Delta}_{d1}, \dots, \hat{\Delta}_{dK}, \hat{\phi}_d]^T$, alongside its corresponding $(K+1) \times (K+1)$ measurement error covariance matrix:$$V_d = \sigma_d^2 (\mathbf{X}_d^T \mathbf{X}_d)^{-1}$$where $\mathbf{X}_d$ is the design matrix for donor $d$ containing the $K$ contexts and a column of ones for the intercept.
+
+### Stage 2: Marginalized Multivariate Distribution
+
+To prioritize the discovery of context-specific genetic effects ($\gamma_k$) while accurately controlling for the baseline main effect ($\beta$), we jointly model the $K+1$ extracted parameters. We model the biological random effects as a multivariate normal distribution:
+
+$$
+[\alpha_{d1}, \dots, \alpha_{dK}, u_d]^T \sim \mathcal{MVN}(\boldsymbol{\omega}, \Sigma)
+$$
+
+where $\boldsymbol{\omega}$ represents the population-mean baseline effects for the slopes, and $\Sigma$ is the unstructured biological covariance matrix.By defining the combined vector of genetic effects as $\boldsymbol{\Gamma} = [\gamma_1, \dots, \gamma_K, \beta]^T$ and formatting the donor-specific covariates into a combined vector $\boldsymbol{\Omega}_d = [\mathbf{C}_d \boldsymbol{\psi}_1, \dots, \mathbf{C}_d \boldsymbol{\psi}_K, \mathbf{H}_d \boldsymbol{\eta}]^T$, the generative process for the estimated Stage 1 parameters follows the marginalized multivariate distribution:
+
+$$
+\hat{\boldsymbol{\Theta}}_d \sim \mathcal{MVN}(\mathbf{G}_d \boldsymbol{\Gamma} + \boldsymbol{\Omega}_d + \boldsymbol{\omega}, \Sigma + V_d)
+$$
+
+## The Inference Procedure
+
+If the biological covariance $\Sigma$ is known, estimating the joint eQTL effects ($\boldsymbol{\Gamma}$) is a mathematically exact Generalized Least Squares (GLS) projection:
+
+$$
+\hat{\boldsymbol{\Gamma}} = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}_d \right)^{-1} \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d (\hat{\boldsymbol{\Theta}}_d - \boldsymbol{\Omega}_d - \boldsymbol{\omega}) \right)
+$$
+
+where $\mathbf{W}_d = (\Sigma + V_d)^{-1}$ is the donor-specific precision weight matrix. The variance of the estimator is:
+
+$$
+Var(\hat{\boldsymbol{\Gamma}}) = \left( \sum_{d=1}^N \mathbf{G}_d^T \mathbf{W}_d \mathbf{G}_d \right)^{-1}
+$$
+
+### Estimating $\Sigma$ (The Null Lock)
+
+To ensure genome-wide computational efficiency, we bypass estimating a SNP-specific $\Sigma$. We estimate $\Sigma$ exclusively under the null model via an iterative FGLS/EM algorithm:
+
+1. Initialize: Fit standard Ordinary Least Squares (OLS) of $\hat{\boldsymbol{\Theta}}_d$ against the respective covariate matrices ($\mathbf{C}_d$ and $\mathbf{H}_d$) to initialize the fixed covariate effects.
+
+2. Compute Residuals: Extract the $(K+1) \times 1$ residual vector ($\mathbf{e}_d$) for each donor by subtracting the expected covariate effects from $\hat{\boldsymbol{\Theta}}_d$.
+
+3. Update $\Sigma$ (Maximization): Estimate the biological covariance by subtracting the known measurement error from the empirical residual covariance:
+
+$$
+\hat{\Sigma} = \frac{1}{N} \sum_{d=1}^N (\mathbf{e}_d \mathbf{e}_d^T - V_d)
+$$
+
+4. Update Weights: Recompute $\mathbf{W}_d = (\hat{\Sigma} + V_d)^{-1}$ for all donors.
+
+5. Refit Null Model: Update the covariate effects using GLS with the new $\mathbf{W}_d$. 
+
+We iterate steps 2–5 until $\Sigma$ converges. Finally, we lock the converged $\mathbf{W}_d$ matrices and execute the GLS projection to screen for $\boldsymbol{\Gamma}$ across all candidate SNPs in the cis-region.
+
+## Advantages and Application of the Joint Model
+
+By modeling the main genetic effect alongside the multiple contexts jointly, the framework effectively handles structural noise, allowing us to prioritize and cleanly isolate the true context-specific regulatory architecture.
+
+*1. Testing for Context-Specificity*
+
+Our primary objective is to evaluate whether a genetic effect operates specifically within certain biological states (e.g., an eQTL active in T cells but not B cells). The difference in the dynamic genetic effect between the $j$-th and $k$-th context is $\gamma_j - \gamma_k$. The variance of this contrast is:$$Var(\gamma_j - \gamma_k) = Var(\gamma_j) + Var(\gamma_k) - 2Cov(\gamma_j, \gamma_k)$$Because $Cov(\gamma_j, \gamma_k)$ incorporates the empirically estimated biological sharing ($\Sigma$), and biological sharing typically induces positive correlation among genetic effects, our joint estimation mathematically shrinks the variance of the difference. This dramatically improves statistical power for detecting highly specific contextual regulatory shifts.
+
+*2. Calculating the Total Contextual Effect* 
+
+The parameter $\gamma_k$ isolates the context-specific deviation, but to interpret the absolute regulatory impact within a given cell, it must be summed with the main effect. The total marginal genetic effect for context $k$ at specific cell coordinates is $\beta + \gamma_k X_{ik}$.
+
+While the uncertainty of this total effect, $Var(\hat{\beta} + \hat{\gamma}_k X_{ik})$, is heavily influenced by $Var(\hat{\beta})$ (which captures broad baseline expression variance across donors), integrating both parameters into the unified Stage 2 FGLS ensures that their covariance is properly modeled. This allows for valid confidence intervals when assessing whether an interaction effectively "shuts off" a baseline eQTL or amplifies it.
