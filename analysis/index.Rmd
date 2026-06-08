@@ -44,4 +44,4 @@ editor_options:
 [Diagnostics of S-MIRAGE on real data](mirage_diag.html)
 \
 \
-[Multivariate dynamic eQTL mapping](multivariate_dynamic_eQTL_mapping.html)
+[Joint modeling of multiple cellular contexts for eQTL mapping](joint_single_cell_eQTL.html)
